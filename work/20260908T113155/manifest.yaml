@@ -2,8 +2,8 @@ id: 20260908T113155
 created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
-  version: 0.2.0
-artifact_schema_version: 0.2.0
+  version: 0.3.0
+artifact_schema_version: 0.3.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
@@ -20,7 +20,20 @@ definitions: []
 compatibility:
   baselines: []
   affected_consumers: []
-scope: []
+scope:
+- id: work-store
+  repo: /home/user/work-k-12MarketIntelligence
+  store_directory: work-k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: claude/method-coding-harness-review-6nqxx6
+  base_commit: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  verify: null
+  declared_files: []
+  declared: false
 risk:
   initial: null
   current: null
