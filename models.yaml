@@ -1,8 +1,60 @@
+# Model registry for k-12MarketIntelligence.
+#
+# The method names tiers and roles; it never names a model. Swapping market picks is an
+# edit here, not a method change. Re-baseline when a `last_verified` date is stale, when
+# quota_exhausted or model_unavailable appears, or when the SOTA envelope visibly shifts.
+#
+# context_window is REQUIRED for the pre-flight headroom guard (states.md §4). Until it is
+# set from the provider's documentation, prepare_dispatch.py refuses to dispatch on that
+# tier and records a capture gap — it will not assume the work fits.
+#
+# Prices are list prices, frozen into each attempt record at capture time so that history
+# stays interpretable after the market moves. Record them even for subscription billing.
+
 executor_ladder:
-  - {tier: T0, provider: openrouter, model: "poolside/laguna-s-2.1:free",    last_verified: "2026-09-08"}
-  - {tier: T1, provider: openrouter, model: "z-ai/glm-5.3-flash",   last_verified: "2026-09-08"}
-  - {tier: T2, provider: openai, model: "gpt-5.6-luna", last_verified: "2026-09-08"}
+  - tier: T0
+    provider: openrouter
+    model: "poolside/laguna-s-2.1:free"
+    model_class: executor
+    billing: api
+    context_window: null          # TODO: set from the provider's documentation
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    last_verified: "2026-09-08"
+  - tier: T1
+    provider: openrouter
+    model: "z-ai/glm-5.3-flash"
+    model_class: executor
+    billing: api
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+  - tier: T2
+    provider: openai
+    model: "gpt-5.6-luna"
+    model_class: executor
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+
 roles:
-  planner:  {provider: openai, model: "gpt-5.6-sol"}
-  critic:   {provider: anthropic, model: "opus-4-8"}
-  verifier: {provider: openai, model: "gpt-5.6-sol"}
+  planner:
+    provider: openai
+    model: "gpt-5.6-sol"
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+  critic:
+    provider: anthropic
+    model: "opus-4-8"
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+  verifier:
+    provider: openai
+    model: "gpt-5.6-sol"
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"

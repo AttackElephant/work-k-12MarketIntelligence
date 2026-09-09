@@ -1,0 +1,11 @@
+# Where each in-scope repository lives on THIS machine.
+#
+# Work items name repositories by their scope id, never by an absolute path, so the
+# evidence store can be committed, cloned and verified anywhere. This file is the local
+# mapping; a reviewer edits it, or overrides one entry with HARNESS_REPO_<ID>.
+#
+# Resolution order: HARNESS_REPO_<ID> → this file → a sibling of the work store →
+# the path recorded in the manifest.
+repos:
+  k-12Harness: ../k-12Harness
+  k-12DataDiscovery: ../k-12DataDiscovery
