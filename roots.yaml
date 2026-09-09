@@ -6,6 +6,11 @@
 #
 # Resolution order: HARNESS_REPO_<ID> → this file → a sibling of the work store →
 # the path recorded in the manifest.
+#
+# Relative paths are resolved from the work store root, which is this directory. The
+# operator's layout is ~/Projects/work/<product> for the store and ~/Projects/<component>
+# for each component, so a component is two levels up. Check with:
+#   python3 "$METHOD_DIR/scripts/controller.py" <WI_DIR> state
 repos:
-  k-12Harness: ../k-12Harness
-  k-12DataDiscovery: ../k-12DataDiscovery
+  k-12Harness: ../../k-12Harness
+  k-12DataDiscovery: ../../k-12DataDiscovery
