@@ -1,0 +1,8 @@
+executor_ladder:
+  - {tier: T0, provider: openrouter, model: "poolside/laguna-s-2.1:free",    last_verified: "2026-09-08"}
+  - {tier: T1, provider: openrouter, model: "z-ai/glm-5.3-flash",   last_verified: "2026-09-08"}
+  - {tier: T2, provider: openai, model: "gpt-5.6-luna", last_verified: "2026-09-08"}
+roles:
+  planner:  {provider: openai, model: "gpt-5.6-sol"}
+  critic:   {provider: anthropic, model: "opus-4-8"}
+  verifier: {provider: openai, model: "gpt-5.6-sol"}

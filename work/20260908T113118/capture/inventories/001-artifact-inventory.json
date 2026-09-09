@@ -1,0 +1,23 @@
+{
+  "captured_at": "2026-09-08T13:28:29Z",
+  "changes": {
+    "added": [
+      "planning/001-plan.md",
+      "request.md"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489",
+      "size": 12222
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93",
+      "size": 265
+    }
+  }
+}

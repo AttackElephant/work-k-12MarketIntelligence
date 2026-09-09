@@ -1,0 +1,1 @@
+{"at": "2026-09-08T11:32:53Z", "data": {"request_artifact": "request.md", "request_sha256": "d1058b867ce6ccc7ed6076f54413564b029bd0651971df2f14f264e8d9c63f80", "tool_version": "0.1.0", "work_item": "20260908T113253"}, "previous_sha256": null, "seq": 1, "sha256": "3818788b3de6c65370b43ad1cbb2f42d63fd2586f65b1211d627f9848417ce68", "type": "capture.initialized"}

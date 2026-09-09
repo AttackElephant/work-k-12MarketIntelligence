@@ -1,0 +1,173 @@
+id: "20260908T113118"
+created: "2026-09-08T11:31:18Z"
+method:
+  id: coding-harness
+  version: 0.1.0
+artifact_schema_version: 0.1.0
+
+request: "Make harness/planner.py deterministically derive required inputs, resolve schools\n  safely, normalize requested metrics, construct exact evidence requests, and surface planner-\n  generated bad requests as failures rather than unsupported user questions."
+narrative: null
+class: null
+state: draft
+parent: null
+children: []
+transitions: []
+
+size_estimate:
+  files: null
+  subsystems: []
+  scale: null
+
+definitions:
+  - ref: "contract/PINNED.json"
+    authority: null
+    revision: "sha256:d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc"
+    sha256: "d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc"
+  - ref: "contract/POC_CONTRACT_V0.3_SPEC.md"
+    authority: null
+    revision: "sha256:065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57"
+    sha256: "065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57"
+  - ref: "contract/POC_EVIDENCE_CONTRACT.md"
+    authority: null
+    revision: "sha256:956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199"
+    sha256: "956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199"
+  - ref: "contract/poc_evidence_error.v0.3.0.schema.json"
+    authority: null
+    revision: "sha256:88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5"
+    sha256: "88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5"
+  - ref: "contract/poc_input_catalog.v0.3.0.schema.json"
+    authority: null
+    revision: "sha256:41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2"
+    sha256: "41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2"
+  - ref: "contract/poc_question_registry.v0.3.0.json"
+    authority: null
+    revision: "sha256:3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb"
+    sha256: "3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb"
+  - ref: "contract/poc_school_directory.v0.3.0.schema.json"
+    authority: null
+    revision: "sha256:b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29"
+    sha256: "b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29"
+  - ref: "contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json"
+    authority: null
+    revision: "sha256:67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11"
+    sha256: "67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11"
+  - ref: "contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json"
+    authority: null
+    revision: "sha256:680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3"
+    sha256: "680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3"
+  - ref: "contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json"
+    authority: null
+    revision: "sha256:f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2"
+    sha256: "f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2"
+  - ref: "contract/question_schemas/v0.3.0/_index.json"
+    authority: null
+    revision: "sha256:e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d"
+    sha256: "e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d"
+  - ref: "docs/decisions.md"
+    authority: null
+    revision: "sha256:18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918"
+    sha256: "18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918"
+  - ref: "evals/cases/golden_cases.json"
+    authority: null
+    revision: "sha256:10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92"
+    sha256: "10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92"
+  - ref: "prompts/input_catalog.snapshot.json"
+    authority: null
+    revision: "sha256:a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10"
+    sha256: "a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10"
+  - ref: "prompts/rules.md"
+    authority: null
+    revision: "sha256:6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28"
+    sha256: "6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28"
+compatibility:
+  baselines: []
+  affected_consumers: []
+
+scope:
+  - repo: "/Users/shane/Projects/k-12Harness"
+    role: "execution"
+    branch: "wi/20260908T113118"
+    base_commit: "9495079fd3a2caf5adb95fea631681341e6b67df"
+    dirty: false
+    dirty_explanation: null
+    head_at_dispatch: "9495079fd3a2caf5adb95fea631681341e6b67df"
+    verify: ".venv/bin/python -m pytest tests/ -q"
+    declared_files: []
+risk:
+  initial: high
+  current: high
+  maximum: high
+  rationale: "This is the first run; risk is high because there is no prior evidence."
+  obligations: [planning, contract, challenge, reconciliation, deterministic, semantic]
+  escalations: []
+  deescalations: []
+
+contract:
+  current: 2
+  versions:
+    - version: 1
+      path: acceptance/001-contract.yaml
+      artifact: A1
+      sha256: 702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19
+      status: superseded
+    - version: 2
+      path: acceptance/002-contract.yaml
+      artifact: A2
+      sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+      status: current
+decisions: []
+constraints: []
+concerns: []
+artifacts: [{"id":"A0","type":"request","path":"request.md","version":1,"sha256":"85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93","created_at":"2026-09-08T11:31:18Z","produced_by_attempt":null,"status":"current","supersedes":null},{"id":"A1","type":"acceptance_contract","path":"acceptance/001-contract.yaml","version":1,"sha256":"702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19","produced_by_attempt":3,"status":"superseded","supersedes":null},{"id":"A2","type":"acceptance_contract","path":"acceptance/002-contract.yaml","version":2,"sha256":"081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c","produced_by_attempt":5,"status":"current","supersedes":null}]
+attempts: []
+
+routing:
+  executor_ladder: [T0, T1, T2]
+  current_tier: null
+  decisions: []
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+
+stage_outcomes:
+  challenge:
+    performed: false
+    changed_plan: false
+    changed_contract: false
+    evidence: []
+  reconciliation:
+    performed: false
+    changed_plan: false
+    evidence: []
+  semantic_verification:
+    performed: false
+    material_finding: false
+    evidence: []
+
+effort:
+  controller_commands: 0
+  model_sessions_launched: 0
+
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+
+lock:
+  owner: null
+  acquired_at: null
+  released_at: null
+
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []

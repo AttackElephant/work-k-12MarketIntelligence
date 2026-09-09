@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-09-08T23:55:40Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19",
+      "size": 10886
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489",
+      "size": 12222
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93",
+      "size": 265
+    }
+  }
+}
