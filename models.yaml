@@ -12,6 +12,11 @@
 # stays interpretable after the market moves. Record them even for subscription billing.
 
 executor_ladder:
+  # timeout_seconds bounds one provider turn; deadline_seconds bounds the whole
+  # invocation; transient_retries is how many times run_executor.py re-runs this
+  # tier (fresh budget each time) after a transient/timeout failure before it
+  # gives up on the tier. A slow free pool earns more transient retries; a paid
+  # tier earns fewer. These are the knobs the executor loop reads per tier.
   - tier: T0
     provider: openrouter
     model: "poolside/laguna-s-2.1:free"
@@ -20,6 +25,9 @@ executor_ladder:
     context_window: null          # TODO: set from the provider's documentation
     input_price_per_mtok: 0.0
     output_price_per_mtok: 0.0
+    timeout_seconds: 300
+    deadline_seconds: 360
+    transient_retries: 3
     last_verified: "2026-09-08"
   - tier: T1
     provider: openrouter
@@ -27,6 +35,9 @@ executor_ladder:
     model_class: executor
     billing: api
     context_window: null          # TODO
+    timeout_seconds: 240
+    deadline_seconds: 300
+    transient_retries: 2
     last_verified: "2026-09-08"
   - tier: T2
     provider: openai
@@ -34,6 +45,9 @@ executor_ladder:
     model_class: executor
     billing: subscription
     context_window: null          # TODO
+    timeout_seconds: 300
+    deadline_seconds: 400
+    transient_retries: 1
     last_verified: "2026-09-08"
 
 roles:
@@ -44,9 +58,15 @@ roles:
     billing: subscription
     context_window: null          # TODO
     last_verified: "2026-09-08"
+    timeout_seconds: 360
+    deadline_seconds: 1200
   critic:
     provider: anthropic
-    model: "opus-4-8"
+    model: "claude-opus-4-8"
+    effort: high
+    timeout_seconds: 360
+    deadline_seconds: 600
+    streaming: on
     model_class: frontier
     billing: subscription
     context_window: null          # TODO
