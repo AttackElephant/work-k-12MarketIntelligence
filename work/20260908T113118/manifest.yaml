@@ -9,7 +9,7 @@ request: "Make harness/planner.py deterministically derive required inputs, reso
   \ bad requests as failures rather than unsupported user questions."
 narrative: null
 class: null
-state: verified_sem
+state: accepted
 parent: null
 children: []
 transitions:
@@ -564,6 +564,22 @@ transitions:
     evidence: semantic review is an obligation
   - guard: semantic_review_recorded
     evidence: semantic review outcome 'pass'
+- at: '2026-09-18T12:22:41Z'
+  transition: T12
+  event: accept
+  from: verified_sem
+  to: accepted
+  by: shane
+  reason: Operator authorizes acceptance after fresh deterministic and formal semantic verification passed.
+  guards:
+  - guard: semantic_outcome_pass
+    evidence: semantic outcome is pass
+  - guard: compatibility_satisfied
+    evidence: 0 affected consumer(s) recorded and escalated
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: human_authorisation
+    evidence: authorised by shane
 size_estimate:
   files: 3
   subsystems:
@@ -2976,7 +2992,7 @@ stage_outcomes:
     evidence:
     - verification/008-semantic-review-r2.json
 effort:
-  controller_commands: 42
+  controller_commands: 43
   model_sessions_launched: 39
 checkpoints:
 - at: '2026-09-18T11:36:21Z'
@@ -3004,9 +3020,13 @@ checkpoints:
     branch: wi/20260908T113118
     commit: 8641a060749ae41668f293c1115110b06784b134
 acceptance:
-  state: pending
-  at: null
-  gates_satisfied: []
+  state: accepted
+  at: '2026-09-18T12:22:41Z'
+  gates_satisfied:
+  - semantic_outcome_pass
+  - compatibility_satisfied
+  - no_open_blocking_concerns
+  - human_authorisation
 escapes: []
 lock:
   owner: shane@Mimir.local
