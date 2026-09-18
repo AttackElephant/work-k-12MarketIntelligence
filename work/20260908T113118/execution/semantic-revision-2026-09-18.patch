@@ -1,0 +1,70 @@
+diff --git a/harness/planner.py b/harness/planner.py
+index 14d96b7..eed498a 100644
+--- a/harness/planner.py
++++ b/harness/planner.py
+@@ -997,6 +997,8 @@ async def plan_and_execute(
+                 f"{question_id}: multiple resolved schools cannot form the schema's "
+                 "single acara_sml_id request"
+             )
++        if _requires_two_distinct_ids(entry) and len(resolved_ids) < 2:
++            return _insufficient_schools_clarification(question_id)
+         if identity_from_caller:
+             explicit_ids = _explicit_id_values(request, school_required)
+             if sorted(resolved_ids) != sorted(explicit_ids):
+@@ -1004,15 +1006,16 @@ async def plan_and_execute(
+                     f"{question_id}: explicit school identities {explicit_ids} conflict "
+                     f"with directory-resolved identities {resolved_ids}"
+                 )
+-            deps.searched = True
++            if "acara_sml_ids" in school_required:
++                request["acara_sml_ids"] = list(resolved_ids)
++            else:
++                request["acara_sml_id"] = resolved_ids[0]
+         else:
+-            if _requires_two_distinct_ids(entry) and len(resolved_ids) < 2:
+-                return _insufficient_schools_clarification(question_id)
+-            for school_id in resolved_ids:
+-                if school_id not in deps.resolved_school_ids:
+-                    deps.resolved_school_ids.append(school_id)
+-            deps.searched = True
+             _attach_school_ids(request, school_required, resolved_ids)
++        for school_id in resolved_ids:
++            if school_id not in deps.resolved_school_ids:
++                deps.resolved_school_ids.append(school_id)
++        deps.searched = True
+     elif school_required and identity_from_caller and "acara_sml_ids" in school_required:
+         explicit_ids = _explicit_id_values(request, school_required)
+         raw_ids = request.get("acara_sml_ids")
+diff --git a/tests/unit/test_planner.py b/tests/unit/test_planner.py
+index ae2a897..84ecc49 100644
+--- a/tests/unit/test_planner.py
++++ b/tests/unit/test_planner.py
+@@ -572,6 +572,28 @@ def test_conflicting_explicit_and_resolved_identities_fail_without_mutation():
+     assert deps.searched is False
+ 
+ 
++def test_matching_explicit_and_resolved_identities_commit_in_mention_order():
++    client = _DirectoryClient(
++        {
++            "Beta": [{"acara_sml_id": 202}],
++            "Alpha": [{"acara_sml_id": 101}],
++        }
++    )
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-04",
++        school_mentions=["Beta", "Alpha"],
++        filters={"acara_sml_ids": [101, 202]},
++    )
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.searches == ["Beta", "Alpha"]
++    assert deps.resolved_school_ids == [202, 101]
++    assert deps.searched is True
++    assert client.fetched[0]["request"]["acara_sml_ids"] == [202, 101]
++
++
+ def test_duplicate_ids_leave_comparison_with_too_few_schools():
+     client = _DirectoryClient({"Alpha": [{"acara_sml_id": 101}]})
+     deps = Deps(client=client)

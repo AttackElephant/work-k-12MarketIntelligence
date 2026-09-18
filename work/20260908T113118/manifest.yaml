@@ -465,6 +465,80 @@ transitions:
   guards:
   - guard: deterministic_criteria_pass
     evidence: 3 deterministic criteria pass against contract v3
+- at: '2026-09-18T11:36:26Z'
+  transition: T10
+  event: checkpoint
+  from: verified_det
+  to: checkpointed
+  by: shane
+  reason: Operator accepted the historical mismatch and approved the known-good commits.
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: checkpoint_recorded
+    evidence: checkpoint at 2026-09-18T11:36:21Z across 2 repository scope(s)
+- at: '2026-09-18T12:08:02Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane@Mimir.local
+  reason: Formal semantic verifier completed with one bounded implementation finding.
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'revise'
+- at: '2026-09-18T12:08:03Z'
+  transition: F14
+  event: revise-implementation
+  from: verified_sem
+  to: executing
+  by: shane@Mimir.local
+  reason: Commit matching name-resolved school identities transactionally and add focused regression coverage.
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (100 characters)
+  - guard: attempt_budget_remains
+    evidence: attempt 2 of 2 at tier T1 (2 of 6 total)
+  - guard: frontier_execution_authorised
+    evidence: tier T1 is within the automatic ladder
+  - guard: lock_available
+    evidence: lock is available
+- at: '2026-09-18T12:09:48Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: Bounded semantic revision implemented with focused regression coverage and captured execution
+    evidence.
+  guards:
+  - guard: attempt_closed
+    evidence: 44 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v3 intact (2b7a5d5eecf2)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 5 file(s) within 5 declared'
+  - guard: contracted_outputs_exist
+    evidence: 5 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 009-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+- at: '2026-09-18T12:10:56Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: Revised candidate passed all contract-defined deterministic criteria, including the new regression
+    through full and affected suites.
+  guards:
+  - guard: deterministic_criteria_pass
+    evidence: 3 deterministic criteria pass against contract v3
 size_estimate:
   files: 3
   subsystems:
@@ -2789,7 +2863,61 @@ verification:
       failure_reasons: []
       log: verification/003-focused-nonvacuous-acceptance.log
     expectations_not_evaluated: []
-  semantic_reviews: []
+  - at: '2026-09-18T12:10:56Z'
+    contract: acceptance/003-contract.yaml
+    contract_version: 3
+    contract_sha256: 2b7a5d5eecf211e61e3b45e11f2addf1fa58f159c1e9cda86960dc73863139df
+    results:
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The complete deterministic suite exits zero with no failures and no unexpected passes.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/005-full-test-suite-r2.log
+    - id: affected-modules
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_planner.py tests/unit/test_intent_boundary.py
+        tests/unit/test_run_cli.py -q
+      expected: All affected test modules collect and pass.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/006-affected-modules-r2.log
+    - id: focused-nonvacuous-acceptance
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest -q tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_model_hint
+        tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch
+        tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios
+        tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filter
+        tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal
+        tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifies tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported
+        tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default
+      expected: Every named acceptance test exists, collects, and passes; a missing or renamed test makes
+        the command fail.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/007-focused-nonvacuous-acceptance-r2.log
+    expectations_not_evaluated: []
+  semantic_reviews:
+  - at: '2026-09-18T12:07:54Z'
+    outcome: revise
+    artifact: verification/004-semantic-review.json
+    sha256: e510168666eb797d26b3f93717e3f79d03fb4d8bfde6a90efb00cc3dc3f53adf
+    material_finding: true
+    provider: openai
+    model: gpt-5.6-sol
+    transport: codex
+    finding_ids:
+    - matching-explicit-and-resolved-identities-not-committed
 stage_outcomes:
   challenge:
     performed: true
@@ -2808,13 +2936,26 @@ stage_outcomes:
     current_for_context: false
     consumed_by_transition: 113
   semantic_verification:
-    performed: false
-    material_finding: false
-    evidence: []
+    performed: true
+    material_finding: true
+    evidence:
+    - verification/004-semantic-review.json
 effort:
-  controller_commands: 35
+  controller_commands: 40
   model_sessions_launched: 39
-checkpoints: []
+checkpoints:
+- at: '2026-09-18T11:36:21Z'
+  message: Deterministic verification passed; historical challenge hash mismatch accepted by operator;
+    checkpoint authorised.
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: claude/method-coding-harness-review-6nqxx6
+    commit: 330e1eca27ade1c2e7c1049d4de2647602e9907b
+    uncommitted: []
+  - repo: k-12Harness
+    branch: wi/20260908T113118
+    commit: 3864d8ea3bf6190396abfb6ab16bac8f5e585391
 acceptance:
   state: pending
   at: null
