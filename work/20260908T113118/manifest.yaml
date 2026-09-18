@@ -9,7 +9,7 @@ request: "Make harness/planner.py deterministically derive required inputs, reso
   \ bad requests as failures rather than unsupported user questions."
 narrative: null
 class: null
-state: verified_det
+state: verified_sem
 parent: null
 children: []
 transitions:
@@ -539,6 +539,31 @@ transitions:
   guards:
   - guard: deterministic_criteria_pass
     evidence: 3 deterministic criteria pass against contract v3
+- at: '2026-09-18T12:11:33Z'
+  transition: T10
+  event: checkpoint
+  from: verified_det
+  to: checkpointed
+  by: shane
+  reason: Operator-authorised checkpoint recorded for the semantically revised and deterministically verified
+    candidate.
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: checkpoint_recorded
+    evidence: checkpoint at 2026-09-18T12:11:26Z across 2 repository scope(s)
+- at: '2026-09-18T12:16:44Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane@Mimir.local
+  reason: Fresh formal semantic verification passed against checkpointed component commit 8641a060749a.
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'pass'
 size_estimate:
   files: 3
   subsystems:
@@ -2918,6 +2943,16 @@ verification:
     transport: codex
     finding_ids:
     - matching-explicit-and-resolved-identities-not-committed
+  - at: '2026-09-18T12:16:43Z'
+    outcome: pass
+    artifact: verification/008-semantic-review-r2.json
+    sha256: e02f9ce1cf6cc53c0bae030f91b4f1bf63d8c6ff282c34a291f836d11b5ab5ad
+    material_finding: false
+    provider: openai
+    model: gpt-5.6-sol
+    transport: codex
+    checkpoint_component_commit: 8641a060749ae41668f293c1115110b06784b134
+    supersedes_outcome: revise
 stage_outcomes:
   challenge:
     performed: true
@@ -2937,11 +2972,11 @@ stage_outcomes:
     consumed_by_transition: 113
   semantic_verification:
     performed: true
-    material_finding: true
+    material_finding: false
     evidence:
-    - verification/004-semantic-review.json
+    - verification/008-semantic-review-r2.json
 effort:
-  controller_commands: 40
+  controller_commands: 42
   model_sessions_launched: 39
 checkpoints:
 - at: '2026-09-18T11:36:21Z'
@@ -2956,6 +2991,18 @@ checkpoints:
   - repo: k-12Harness
     branch: wi/20260908T113118
     commit: 3864d8ea3bf6190396abfb6ab16bac8f5e585391
+- at: '2026-09-18T12:11:26Z'
+  message: Revised candidate passed focused, affected, and full deterministic verification; checkpoint
+    authorised.
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: claude/method-coding-harness-review-6nqxx6
+    commit: bfff1586bf4e709874a9646d6c58b66b10d005f3
+    uncommitted: []
+  - repo: k-12Harness
+    branch: wi/20260908T113118
+    commit: 8641a060749ae41668f293c1115110b06784b134
 acceptance:
   state: pending
   at: null
