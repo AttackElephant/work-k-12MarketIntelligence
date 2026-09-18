@@ -9,7 +9,7 @@ request: "Make harness/planner.py deterministically derive required inputs, reso
   \ bad requests as failures rather than unsupported user questions."
 narrative: null
 class: null
-state: verified_det
+state: executed
 parent: null
 children: []
 transitions:
@@ -407,64 +407,6 @@ transitions:
     evidence: 'artifact inventory 006-artifact-inventory.json: append-only'
   - guard: lock_released
     evidence: lock released
-- at: '2026-09-16T07:42:08Z'
-  transition: ADOPT
-  event: adopt
-  from: executed
-  to: executing
-  by: shane
-  reason: 'Phase-0 repair: attempt 42 reported success without component changes; clean base verified;
-    preserve all evidence and resume with corrected Aider routing.'
-  guards: []
-- at: '2026-09-16T09:24:26Z'
-  transition: F11
-  event: escalate-tier
-  from: executing
-  to: executing
-  by: shane@Mimir.local
-  reason: 'run_executor: editor failed at T0; fallback T1'
-  guards:
-  - guard: failure_reason_recorded
-    evidence: attempt 43 failure_reason=capability
-  - guard: capability_failure_only
-    evidence: failure_reason is capability
-  - guard: next_tier_available
-    evidence: next tier T1
-  - guard: attempt_closed
-    evidence: 43 attempt(s), all closed
-- at: '2026-09-16T09:47:03Z'
-  transition: T8
-  event: complete
-  from: executing
-  to: executed
-  by: shane@Mimir.local
-  reason: 'run_executor: executor returned'
-  guards:
-  - guard: attempt_closed
-    evidence: 44 attempt(s), all closed
-  - guard: execution_artifact_exists
-    evidence: execution artifact recorded
-  - guard: contract_hash_unchanged
-    evidence: contract v3 intact (2b7a5d5eecf2)
-  - guard: changes_within_declared_scope
-    evidence: 'k-12Harness: 1 file(s) within 5 declared'
-  - guard: contracted_outputs_exist
-    evidence: 5 contracted output(s) present
-  - guard: work_item_artifacts_unchanged
-    evidence: 'artifact inventory 007-artifact-inventory.json: append-only'
-  - guard: lock_released
-    evidence: lock released
-- at: '2026-09-18T09:58:13Z'
-  transition: T9
-  event: verify
-  from: executed
-  to: verified_det
-  by: shane@Mimir.local
-  reason: All three deterministic criteria in current contract 003 passed against the separately recorded
-    manual Phase-0 continuation candidate.
-  guards:
-  - guard: deterministic_criteria_pass
-    evidence: 3 deterministic criteria pass against contract v3
 size_estimate:
   files: 3
   subsystems:
@@ -2555,69 +2497,12 @@ attempts:
   elapsed_seconds: 977.3999414999271
   read_context_files: 17
   native_log_bytes: 1223069
-- attempt: 43
-  role: executor
-  state: executing
-  tier: T0
-  status: closed
-  opened_at: '2026-09-16T09:20:34Z'
-  provider: openrouter
-  model: nvidia/nemotron-3-ultra-550b-a55b:free
-  transport: aider
-  selector: tier:T0
-  input_price_per_mtok: 0.0
-  output_price_per_mtok: 0.0
-  billing: api
-  model_class: executor
-  last_verified: '2026-09-08'
-  timeout_seconds: 1800.0
-  deadline_seconds: 1860.0
-  transient_retries: 3
-  editor_model: openai/gpt-4o-mini
-  editor_edit_format: diff
-  editor_fallback_tier: T1
-  streaming: auto
-  exit_code: 8
-  closed_at: '2026-09-16T09:24:25Z'
-  failure_kind: edit_format
-  failure_reason: capability
-  prompt_path: capture/prompts/043-executor.md
-  prompt_sha256: 02b011c85f112c2fe226bad7b0b211daf276c5408400bc1f4b63cde3c4a6dbaa
-  transport_attempts: 1
-  elapsed_seconds: 231.6794435000047
-  read_context_files: 17
-  native_log_bytes: 346578
-- attempt: 44
-  role: executor
-  state: executing
-  tier: T1
-  status: closed
-  opened_at: '2026-09-16T09:24:26Z'
-  provider: openrouter
-  model: z-ai/glm-5.3-flash
-  transport: aider
-  selector: tier:T1
-  billing: api
-  model_class: executor
-  last_verified: '2026-09-08'
-  timeout_seconds: 1800.0
-  deadline_seconds: 1860.0
-  transient_retries: 2
-  streaming: auto
-  exit_code: 0
-  closed_at: '2026-09-16T09:47:02Z'
-  prompt_path: capture/prompts/044-executor.md
-  prompt_sha256: 02b011c85f112c2fe226bad7b0b211daf276c5408400bc1f4b63cde3c4a6dbaa
-  transport_attempts: 1
-  elapsed_seconds: 1356.28689704102
-  read_context_files: 17
-  native_log_bytes: 3637335
 routing:
   executor_ladder:
   - T0
   - T1
   - T2
-  current_tier: T1
+  current_tier: T0
   decisions:
   - at: '2026-09-14T06:41:01Z'
     tier: T0
@@ -2724,71 +2609,13 @@ routing:
     deadline_seconds: 360.0
     transient_retries: 3
     streaming: auto
-  - at: '2026-09-16T09:24:26Z'
-    tier: T1
-    reason: editor fallback from T0
-    provider: openrouter
-    model: z-ai/glm-5.3-flash
-    transport: aider
-    selector: tier:T1
-    billing: api
-    model_class: executor
-    last_verified: '2026-09-08'
-    timeout_seconds: 1800.0
-    deadline_seconds: 1860.0
-    transient_retries: 2
-    streaming: auto
   frontier_execution:
     authorised: false
     authorised_by: null
     after_replan: null
     rationale: null
 verification:
-  deterministic_runs:
-  - at: '2026-09-18T09:57:55Z'
-    contract: acceptance/003-contract.yaml
-    contract_version: 3
-    contract_sha256: 2b7a5d5eecf211e61e3b45e11f2addf1fa58f159c1e9cda86960dc73863139df
-    results:
-    - id: full-test-suite
-      repo: k-12Harness
-      command: .venv/bin/python -m pytest tests/ -q
-      expected: The complete deterministic suite exits zero with no failures and no unexpected passes.
-      expectation_source: contract
-      expectation_evaluated: true
-      exit_code: 0
-      passed: true
-      failure_reasons: []
-      log: verification/001-full-test-suite.log
-    - id: affected-modules
-      repo: k-12Harness
-      command: .venv/bin/python -m pytest tests/unit/test_planner.py tests/unit/test_intent_boundary.py
-        tests/unit/test_run_cli.py -q
-      expected: All affected test modules collect and pass.
-      expectation_source: contract
-      expectation_evaluated: true
-      exit_code: 0
-      passed: true
-      failure_reasons: []
-      log: verification/002-affected-modules.log
-    - id: focused-nonvacuous-acceptance
-      repo: k-12Harness
-      command: .venv/bin/python -m pytest -q tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_model_hint
-        tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch
-        tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios
-        tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filter
-        tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal
-        tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifies tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported
-        tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default
-      expected: Every named acceptance test exists, collects, and passes; a missing or renamed test makes
-        the command fail.
-      expectation_source: contract
-      expectation_evaluated: true
-      exit_code: 0
-      passed: true
-      failure_reasons: []
-      log: verification/003-focused-nonvacuous-acceptance.log
-    expectations_not_evaluated: []
+  deterministic_runs: []
   semantic_reviews: []
 stage_outcomes:
   challenge:
@@ -2812,8 +2639,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 35
-  model_sessions_launched: 39
+  controller_commands: 31
+  model_sessions_launched: 37
 checkpoints: []
 acceptance:
   state: pending
@@ -2822,9 +2649,9 @@ acceptance:
 escapes: []
 lock:
   owner: shane@Mimir.local
-  acquired_at: '2026-09-16T09:24:26Z'
-  released_at: '2026-09-16T09:47:02Z'
-  attempt: 44
+  acquired_at: '2026-09-16T03:39:14Z'
+  released_at: '2026-09-16T03:55:31Z'
+  attempt: 42
 capture:
   event_log: capture/events.jsonl
   sessions: []

@@ -1,0 +1,147 @@
+{
+  "captured_at": "2026-09-15T13:59:22Z",
+  "changes": {
+    "added": [
+      "acceptance/003-contract-review.md",
+      "execution/041-executor.md",
+      "observations/002-surprise.md",
+      "replanning/delta-a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25.json",
+      "replanning/delta_acceptance-d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb.json",
+      "replanning/scope_recovery-65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157.json"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19",
+      "size": 10886
+    },
+    "acceptance/002-contract-review.md": {
+      "kind": "file",
+      "sha256": "ce6c3ff0836f507eb6137a8b0b023d0048e2defd4a7ddbbd2a56f7dd633f1ea6",
+      "size": 14994
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c",
+      "size": 15627
+    },
+    "acceptance/003-contract-review.md": {
+      "kind": "file",
+      "sha256": "72574c3aed8af13d62fb8401c50aedb1c9ba02f0a6e3803ebad7f49041358113",
+      "size": 15353
+    },
+    "acceptance/003-contract.yaml": {
+      "kind": "file",
+      "sha256": "2b7a5d5eecf211e61e3b45e11f2addf1fa58f159c1e9cda86960dc73863139df",
+      "size": 16421
+    },
+    "challenge/001-problem-analysis.md": {
+      "kind": "file",
+      "sha256": "ff7681d4d52a44fdc46be2eb8c78868404f78e5e15cfe5cb5cd80e0041adcb41",
+      "size": 11631
+    },
+    "challenge/002-plan-review.md": {
+      "kind": "file",
+      "sha256": "ced8c09d1ea72071208ed7b47d6d945e9c8d4bf7f8febf05953fa66757c111d6",
+      "size": 7020
+    },
+    "challenge/003-problem-framing-v2.md": {
+      "kind": "file",
+      "sha256": "baa1cf3b87323f9f1bdf849fbd8e4c689d62cccefb79c1bac1bb719c847fc481",
+      "size": 10938
+    },
+    "challenge/005-problem-analysis-v3.md": {
+      "kind": "file",
+      "sha256": "c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f",
+      "size": 12693
+    },
+    "challenge/005-problem-framing-v3.md": {
+      "kind": "file",
+      "sha256": "df229763fa5c666b916b026154fb12f442615d5c92c09239c08387a37719381f",
+      "size": 13171
+    },
+    "challenge/006-plan-review-v3.md": {
+      "kind": "file",
+      "sha256": "a6ad0a90a6bd3a4df26ce63f54cb2ddd72eb5ca581c19824ebf8ebf7a1f93379",
+      "size": 342
+    },
+    "challenge/007-problem-framing-v4.md": {
+      "kind": "file",
+      "sha256": "f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095",
+      "size": 13494
+    },
+    "execution/041-executor.md": {
+      "kind": "file",
+      "sha256": "8a3c37f585cf5b3311dbc59d3f81becc4753d3828ae835196f6d28a49840fb16",
+      "size": 4773
+    },
+    "observations/001-trust.md": {
+      "kind": "file",
+      "sha256": "4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241",
+      "size": 922
+    },
+    "observations/002-surprise.md": {
+      "kind": "file",
+      "sha256": "49e7ff61710f00cf6d3c70576a8ec5552bb55518c7663f3c8843558bf3d643b2",
+      "size": 616
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489",
+      "size": 12222
+    },
+    "planning/002-plan.md": {
+      "kind": "file",
+      "sha256": "c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159",
+      "size": 27243
+    },
+    "replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json": {
+      "kind": "file",
+      "sha256": "e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf",
+      "size": 10541
+    },
+    "replanning/delta-a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25.json": {
+      "kind": "file",
+      "sha256": "a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25",
+      "size": 74063
+    },
+    "replanning/delta_acceptance-d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb.json": {
+      "kind": "file",
+      "sha256": "d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb",
+      "size": 827
+    },
+    "replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt": {
+      "kind": "file",
+      "sha256": "4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241",
+      "size": 922
+    },
+    "replanning/planner_output-51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a.json": {
+      "kind": "file",
+      "sha256": "51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a",
+      "size": 18614
+    },
+    "replanning/proposal-c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701.json": {
+      "kind": "file",
+      "sha256": "c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701",
+      "size": 5078
+    },
+    "replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md": {
+      "kind": "file",
+      "sha256": "bbb0aa721327be170bcf2aba8dc8efe19989b82db16131b367a47c765b531003",
+      "size": 34085
+    },
+    "replanning/scope_recovery-65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157.json": {
+      "kind": "file",
+      "sha256": "65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157",
+      "size": 1136
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93",
+      "size": 265
+    }
+  }
+}

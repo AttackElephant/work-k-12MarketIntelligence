@@ -1,0 +1,9 @@
+{"attempt": 1, "route": {"billing": "subscription", "last_verified": "2026-09-08", "model": "gpt-5.6-sol", "model_class": "frontier", "provider": "openai", "selector": "role:planner", "streaming": "auto", "transport": "codex"}}
+{"type":"thread.started","thread_id":"01a09d6a-1b39-7740-ac3a-5185e7e05798"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"tool_name\":\"read_files\",\"arguments_json\":\"{\\\"paths\\\":[\\\"root0:run.py\\\",\\\"root0:harness/agent.py\\\",\\\"root0:harness/planner.py\\\",\\\"root0:harness/contract.py\\\",\\\"root0:harness/intent.py\\\",\\\"root0:harness/tools.py\\\",\\\"root0:harness/evidence.py\\\",\\\"root0:harness/outputs.py\\\",\\\"root0:tests/unit/test_planner.py\\\",\\\"root0:tests/unit/test_intent_boundary.py\\\",\\\"root0:tests/unit/test_agent_loop.py\\\",\\\"root0:contract/question_schemas/v0.3.0/VC-POC-09.request.schema.json\\\",\\\"root0:contract/question_schemas/v0.3.0/VC-POC-10.request.schema.json\\\"]}\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":168818,"cached_input_tokens":84096,"cache_write_input_tokens":0,"output_tokens":324,"reasoning_output_tokens":124}}
+{"attempt": 1, "route": {"billing": "subscription", "last_verified": "2026-09-08", "model": "gpt-5.6-sol", "model_class": "frontier", "provider": "openai", "selector": "role:planner", "streaming": "auto", "transport": "codex"}}
+{"type":"thread.started","thread_id":"01a09d6a-56f2-7d03-b670-8c63158ff4a2"}
+{"type":"turn.started"}
+

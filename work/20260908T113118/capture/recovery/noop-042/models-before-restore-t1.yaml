@@ -15,15 +15,14 @@ executor_ladder:
   editor_edit_format: diff
   editor_fallback_tier: T1
 - tier: T1
+  provider: openrouter
+  model: openai/gpt-4o-mini
+  model_class: executor
+  billing: api
   timeout_seconds: 1800
   deadline_seconds: 1860
   transient_retries: 2
-  model: z-ai/glm-5.3-flash
-  provider: openrouter
-  model_class: executor
-  billing: api
-  context_window: null
-  last_verified: '2026-09-08'
+  transport: aider
 - tier: T2
   provider: openai
   model: gpt-5.6-luna

@@ -1,0 +1,19 @@
+{
+  "base": "9495079fd3a2caf5adb95fea631681341e6b67df",
+  "branch": "wi/20260908T113118",
+  "captured_at": "2026-09-15T04:48:04Z",
+  "head": "9495079fd3a2caf5adb95fea631681341e6b67df",
+  "label": "failed-attempt-035",
+  "repo": "/Users/shane/Projects/k-12Harness",
+  "status_porcelain": [
+    "?? .aider.tags.cache.v4/cache.db",
+    "?? .aider.tags.cache.v4/cache.db-shm",
+    "?? .aider.tags.cache.v4/cache.db-wal"
+  ],
+  "tracked_changes_from_base": [],
+  "untracked": [
+    ".aider.tags.cache.v4/cache.db",
+    ".aider.tags.cache.v4/cache.db-shm",
+    ".aider.tags.cache.v4/cache.db-wal"
+  ]
+}

@@ -1,0 +1,22 @@
+{"attempt": 1, "route": {"billing": "api", "deadline_seconds": 360.0, "input_price_per_mtok": 0.0, "last_verified": "2026-09-08", "model": "nvidia/nemotron-3-ultra-550b-a55b:free", "model_class": "executor", "output_price_per_mtok": 0.0, "provider": "openrouter", "selector": "tier:T0", "streaming": "auto", "timeout_seconds": 300.0, "transient_retries": 3, "transport": "aider"}}
+
+Aider v0.86.2
+Model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free with whole edit format
+Git repo: .git with 171 files
+Repo-map: using 4096 tokens, auto refresh
+Added harness/planner.py to the chat.
+Added run.py to the chat.
+Added tests/unit/test_intent_boundary.py to the chat.
+Added tests/unit/test_planner.py to the chat.
+Added tests/unit/test_run_cli.py to the chat.
+Added ../work/k-12MarketIntelligence/work/20260908T113118/planning/002-plan.md 
+to the chat (read-only).
+Added 
+../work/k-12MarketIntelligence/work/20260908T113118/acceptance/003-contract.yaml
+to the chat (read-only).
+
+Initial repo scan can be slow in larger repos, but only happens once.
+
+Scanning repo:   0%|          | 0/171 [00:00<?, ?it/s]Scanning repo:  35%|███▌      | 60/171 [00:00<00:00, 598.92it/s]Scanning repo:  70%|███████   | 120/171 [00:00<00:00, 463.96it/s]Scanning repo: 100%|██████████| 171/171 [00:00<00:00, 498.84it/s]
+/Users/shane/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,0 +1,88 @@
+# Model registry for k-12MarketIntelligence.
+#
+# The method names tiers and roles; it never names a model. Swapping market picks is an
+# edit here, not a method change. Re-baseline when a `last_verified` date is stale, when
+# quota_exhausted or model_unavailable appears, or when the SOTA envelope visibly shifts.
+#
+# context_window is REQUIRED for the pre-flight headroom guard (states.md §4). Until it is
+# set from the provider's documentation, prepare_dispatch.py refuses to dispatch on that
+# tier and records a capture gap — it will not assume the work fits.
+#
+# Prices are list prices, frozen into each attempt record at capture time so that history
+# stays interpretable after the market moves. Record them even for subscription billing.
+
+executor_ladder:
+  # timeout_seconds is the hard wall-clock kill on one gateway invocation; for the
+  # Aider edit path that is the WHOLE session (repo scan + context load + every
+  # internal LLM round-trip + edit generation), not a single turn. It is capped by
+  # deadline_seconds (effective = min(timeout, deadline)), so deadline must be >=
+  # timeout or the timeout bump does nothing. transient_retries is how many times
+  # run_executor.py re-runs a tier (fresh budget) after a transient/timeout failure
+  # before escalating. Generous 1800s budget while we learn per-model return times;
+  # reduce once the elapsed_seconds evidence shows what each model actually needs.
+  - tier: T0
+    provider: openrouter
+    model: "nvidia/nemotron-3-ultra-550b-a55b:free"
+    model_class: executor
+    billing: api
+    context_window: null          # TODO: set from the provider's documentation
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    timeout_seconds: 1800
+    deadline_seconds: 1860
+    transient_retries: 3
+    # Architect mode: the capable tier model reasons in free form; gpt-4o-mini
+    # (a reliable edit-block producer) applies the changes. Lets a capable model
+    # that does not follow Aider's edit format still be used as an executor.
+    editor_model: "openai/gpt-4o-mini"
+    last_verified: "2026-09-08"
+  - tier: T1
+    provider: openrouter
+    model: "z-ai/glm-5.3-flash"
+    model_class: executor
+    billing: api
+    context_window: null          # TODO
+    timeout_seconds: 1800
+    deadline_seconds: 1860
+    transient_retries: 2
+    editor_model: "openai/gpt-4o-mini"
+    last_verified: "2026-09-08"
+  - tier: T2
+    provider: openai
+    model: "gpt-5.6-luna"
+    model_class: executor
+    billing: subscription
+    context_window: null          # TODO
+    timeout_seconds: 1800
+    deadline_seconds: 1860
+    transient_retries: 1
+    last_verified: "2026-09-08"
+
+roles:
+  planner:
+    provider: openai
+    model: "gpt-5.6-sol"
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+    timeout_seconds: 360
+    deadline_seconds: 1200
+  critic:
+    provider: anthropic
+    model: "claude-opus-4-8"
+    effort: high
+    timeout_seconds: 360
+    deadline_seconds: 600
+    streaming: on
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"
+  verifier:
+    provider: openai
+    model: "gpt-5.6-sol"
+    model_class: frontier
+    billing: subscription
+    context_window: null          # TODO
+    last_verified: "2026-09-08"

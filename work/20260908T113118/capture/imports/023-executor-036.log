@@ -1,0 +1,487 @@
+{"attempt": 1, "route": {"billing": "api", "deadline_seconds": 300.0, "last_verified": "2026-09-08", "model": "z-ai/glm-5.3-flash", "model_class": "executor", "provider": "openrouter", "selector": "tier:T1", "streaming": "auto", "timeout_seconds": 240.0, "transient_retries": 2, "transport": "aider"}}
+
+Aider v0.86.2
+Model: openrouter/z-ai/glm-5.3-flash with whole edit format
+Git repo: .git with 171 files
+Repo-map: using 4096 tokens, auto refresh
+Added harness/planner.py to the chat.
+Added run.py to the chat.
+Added tests/unit/test_intent_boundary.py to the chat.
+Added tests/unit/test_planner.py to the chat.
+Added tests/unit/test_run_cli.py to the chat.
+Added 
+../work/k-12MarketIntelligence/work/20260908T113118/acceptance/003-contract.yaml
+to the chat (read-only).
+Added ../work/k-12MarketIntelligence/work/20260908T113118/planning/002-plan.md 
+to the chat (read-only).
+
+Initial repo scan can be slow in larger repos, but only happens once.
+litellm.APIConnectionError: APIConnectionError: OpenrouterException - Invalid 
+response object Traceback (most recent call last):
+  File 
+"/Users/shane/.local/share/uv/tools/aider-chat/lib/python3.11/site-packages/lite
+llm/litellm_core_utils/llm_response_utils/convert_dict_to_response.py", line 
+609, in convert_to_model_response_object
+    choice = Choices(
+             ^^^^^^^^
+  File 
+"/Users/shane/.local/share/uv/tools/aider-chat/lib/python3.11/site-packages/lite
+llm/types/utils.py", line 1310, in __init__
+    super(Choices, self).__init__(**params)
+  File 
+"/Users/shane/.local/share/uv/tools/aider-chat/lib/python3.11/site-packages/pyda
+ntic/main.py", line 250, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, 
+self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for Choices
+finish_reason
+  Input should be 'stop', 'content_filter', 'function_call', 'tool_calls', 
+'length', 'guardrail_intervened', 'eos', 'finish_reason_unspecified' or 
+'malformed_function_call' [type=literal_error, input_value='error', 
+input_type=str]
+    For further information visit 
+https://errors.pydantic.dev/2.12/v/literal_error
+
+
+received_args={'response_object': {'id': 'gen-1789447687-Et12opbyehcdn0m6NJv1', 
+'object': 'chat.completion', 'created': 1789447687, 'model': 
+'z-ai/glm-5.3-flash', 'provider': 'Parasail', 'system_fingerprint': None, 
+'service_tier': None, 'choices': [{'index': 0, 'logprobs': None, 
+'finish_reason': 'error', 'native_finish_reason': None, 'error': {'code': 502, 
+'message': 'Upstream error from Parasail: EngineCore encountered an issue. See 
+stack trace (above) for the root cause.', 'metadata': {'error_type': 
+'provider_unavailable'}}, 'message': {'role': 'assistant', 'content': None, 
+'refusal': None, 'reasoning': 'Let me carefully analyze this task.\n\nThe task 
+is to implement a bounded change per `planning/002-plan.md` and 
+`acceptance/003-contract.yaml`. The authorized edit set is exactly:\n- 
+`harness/planner.py`\n- `run.py`\n- `tests/unit/test_intent_boundary.py`\n- 
+`tests/unit/test_planner.py`\n- `tests/unit/test_run_cli.py`\n\nI have the 
+current contents of all five files in the chat (they were added as editable). I 
+have the plan and contract as read-only authority.\n\nLet me work through the 
+requirements:\n\n### From the contract (003-contract.yaml):\n\n**Observable 
+behaviours:**\n1. `planner-derived-inputs`: The deterministic planner derives 
+absent required, material, and applicable conditional-material inputs from the 
+pinned question policy and assembled request, independently of 
+`StructuredIntent.missing_material_inputs`.\n2. `conditional-distance`: For 
+VC-POC-05, VC-POC-06, VC-POC-07, `distance_km` is required only when 
+`market_definition` is `distance`.\n3. `safe-transactional-school-resolution`: 
+Each named school must resolve to exactly one directory record; IDs staged in 
+mention order, deduplicated without reordering, committed to Deps only after all
+mentions resolve.\n4. `exact-selector-shapes`: Single-school questions submit 
+one `acara_sml_id`; multi-school questions submit ordered unique 
+`acara_sml_ids`; VC-POC-04 requires at least two distinct IDs.\n5. 
+`metric-normalization-routing`: Requested selectors are Unicode-safe case-folded
+and separator-normalized, canonical values and pinned aliases accepted, 
+order-preserving dedup, routed to question-specific field and static 
+vocabulary.\n6. `smallest-schema-valid-request`: Planner constructs a fresh 
+request from explicit intent values and applicable planner-owned selectors, 
+omits unsupplied defaults, validates against registered pinned request schema 
+before evidence dispatch.\n7. `explicit-filter-constraints`: VC-POC-09 and 
+VC-POC-10 require an explicit cohort-defining filter: absent, empty, or 
+sector-default-only definitions clarify, while unknown nested keys fail before 
+dispatch.\n8. `bad-request-origin-separation`: Unnormalizable user selectors and
+invalid caller-supplied numeric identities clarify; planner/schema defects and 
+unexpected bad_request responses after deterministic validation raise 
+TerminalError; none becomes Unsupported.\n9. `default-cli-pipeline`: The default
+CLI invokes converse with no legacy agent so that ask(deps, question) executes 
+the four-stage deterministic pipeline, while explicit legacy-agent callers 
+remain supported.\n\n**Required outputs:**\n- `harness/planner.py`: 
+Deterministic policy derivation, transactional identity resolution, static 
+selector normalization and routing, pinned-schema validation, exact request 
+construction, explicit-filter enforcement, and origin-aware error handling.\n- 
+`run.py`: Default CLI wiring selects the deterministic pipeline without 
+constructing or passing a legacy agent.\n- `tests/unit/test_planner.py`: Focused
+coverage of input derivation, school resolution, selector normalization, 
+all-question schema validation, explicit-filter constraints, exact requests, and
+error-origin semantics.\n- `tests/unit/test_intent_boundary.py`: Pipeline 
+coverage proving clarification bypasses narration, validated requests reach 
+evidence, and planner failures propagate without becoming Unsupported.\n- 
+`tests/unit/test_run_cli.py`: CLI coverage proving the default path does not 
+build or pass a legacy agent and selects the deterministic pipeline 
+signature.\n\n**Deterministic checks:**\n- Full test suite passes.\n- Affected 
+modules pass.\n- Focused non-vacuous acceptance with these named tests:\n  - 
+`tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_m
+odel_hint`\n  - 
+`tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market`\n 
+- `tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch`\n 
+- 
+`tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request
+`\n  - `tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios`\n 
+- 
+`tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch`\n
+- 
+`tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filte
+r`\n  - 
+`tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key`\n  
+- 
+`tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal`\
+n  - 
+`tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifie
+s`\n  - 
+`tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported`\n 
+- 
+`tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default`\n\n**Must 
+not change:**\n- Legacy PydanticAI agent-tool repair loop, repair ceiling, 
+replay compatibility.\n- Evidence-contract files, PINNED.json, registry 
+contents, request/response schemas, captured input-catalog snapshot.\n- Evidence
+client protocol, runtime emitter, database access, evidence calculations.\n- 
+Answer-view, narration, rendering, grounding, confidence, limitations, claim 
+eligibility, contract-owned refusal wording.\n- Prohibition on School_No to 
+ACARA_SML_ID crosswalks.\n- `contract.material_inputs_for()` and the unchanged 
+legacy O-8 strict xfail.\n\n**Failure behaviour:**\n- Zero or multiple directory
+matches → ClarificationNeeded for that school, record preflight, no evidence 
+call, no partial resolved-ID mutation.\n- Explicit school IDs conflict with 
+name-resolved identities → TerminalError before evidence dispatch, no partial 
+identity update.\n- Dedup leaves fewer than two identities for VC-POC-04 → 
+ClarificationNeeded without evidence dispatch.\n- Required or applicable 
+material user-selectable field absent → ClarificationNeeded in stable 
+pinned-policy order, with contract field names and static allowed values where 
+available, no evidence dispatch.\n- Requested static selector cannot be 
+normalized → ClarificationNeeded with applicable static vocabulary, no evidence 
+call.\n- Planner-built request violates registered schema, contains unknown 
+top-level or nested field, or cannot load/resolve pinned schema safely → 
+TerminalError before evidence dispatch; do not return Unsupported.\n- 
+VC-POC-09/10 lacks explicit nondefault cohort-defining filter → 
+ClarificationNeeded without evidence dispatch.\n- Locally validated request 
+containing only a caller-supplied numeric ACARA identity receives bad_request → 
+record failed fetch invocation and return identity clarification.\n- Any other 
+locally validated deterministic request receives bad_request → record failed 
+fetch invocation and raise TerminalError containing question ID and emitter 
+context.\n- Emitter returns unknown_question, excluded_question, unanswerable → 
+preserve established typed abstention and contract-owned reason semantics 
+without retry.\n- Emitter returns data_unavailable or internal → raise 
+TerminalError as operational failure.\n\n**Compatibility:**\n- Excluded-topic, 
+registry-owned exclusion, gated-question, unknown-question, unanswerable 
+outcomes retain established typed outcomes and contract-owned text.\n- 
+Successful complete, partial, empty envelopes remain successful and stored 
+unchanged in deps.last_envelope.\n- Well-typed release-derived and open values 
+that match no facts remain successful empty or partial results, not schema 
+failures.\n- Every directory preflight and evidence invocation, including failed
+invocations, remains observable in deps.tool_calls.\n- The deterministic 
+planner\'s TerminalError handling remains distinct from the legacy model-driven 
+repair-once loop.\n- converse() continues to accept an explicit legacy agent for
+replay and compatibility tests.\n- CLI credential selection, emitter selection, 
+rendering, clarification limit, exit-code behaviour remain 
+unchanged.\n\n**Contract requirements:**\n- `manifest-allowlist-conflict`: "The 
+amended plan requires run.py and tests/unit/test_run_cli.py, but manifest 
+scope.declared_files lists only harness/planner.py, 
+tests/unit/test_intent_boundary.py, and tests/unit/test_planner.py. Execution 
+must not begin until the human reviewer expands the manifest diff allowlist to 
+include the two additional required outputs."\n\nHmm — this is interesting. The 
+contract says execution must not begin until the human reviewer expands the 
+manifest diff allowlist. But the TASK message says "The authorized k-12Harness 
+edit set is exactly: [five files]". The task explicitly authorizes the five-file
+edit set. So the human (the user giving me the task) has authorized the expanded
+set. I think the task message itself constitutes the human reviewer\'s 
+authorization — the user says "The authorized k-12Harness edit set is exactly: 
+harness/planner.py, run.py, tests/unit/test_intent_boundary.py, 
+tests/unit/test_planner.py, tests/unit/test_run_cli.py". So the allowlist 
+conflict is resolved by the human\'s explicit authorization in the task. I 
+should note this in my report but proceed.\n\n- `pinned-policy-authority`: 
+Planner policy and schema routing must come from hash-pinned v0.3 artefacts, not
+a new hand-maintained per-question policy.\n- `complete-schema-validation`: 
+Every constructed request for every registered question must validate against 
+its registered pinned Draft 2020-12 request schema before dispatch, including 
+additionalProperties, nested keys, types, bounds, uniqueness, cardinality, 
+conditionals, and formats.\n- `safe-schema-resolution`: Only registered 
+request-schema paths beneath the pinned contract directory may be loaded; load 
+or reference-resolution failures are TerminalError.\n- `policy-order`: 
+Clarification fields are stable across runs and follow pinned required, 
+material, then applicable conditional-material order.\n- `known-condition-only`:
+Only the exact pinned distance_km condition for VC-POC-05/06/07 is interpreted; 
+an unknown conditional expression is contract drift and raises TerminalError.\n-
+`no-invented-defaults`: Unsupplied defaultable values are omitted so the emitter
+remains owner of defaults and resolved_request.\n- `preflight-boundary`: A 
+school-directory record establishes identity only and supplies no campus, 
+catchment, geography-crosswalk, or School_No evidence.\n- 
+`static-vocabulary-source`: Static selector routing uses registry metric_list 
+and the input-catalog schema\'s question-field mapping and embedded enums; it 
+does not call the runtime emitter for contract-static lists.\n- 
+`direct-id-authority-conflict`: golden_cases.json permits explicit ACARA ID 
+99999 to bypass directory lookup and yield empty success, while the v0.3 
+specification says an ID absent from the pinned directory is bad_request. 
+Preserve the plan\'s bounded resolution: do not add directory preflight for 
+caller-supplied numeric IDs, and treat a resulting bad_request as identity 
+clarification until the Definition Pack owner resolves the conflict.\n- 
+`od07-explicit-filter-rule`: Enforce the registry-owned VC-POC-09/10 
+explicit-filter constraint in addition to JSON Schema without creating a general
+condition language.\n- `invocation-recording`: Record every completed directory 
+preflight and every evidence attempt, including failed attempts, before 
+returning or raising.\n\n**Semantic criteria:**\n- 
+`no-model-missing-input-trust`: VC-POC-05 without market_definition clarifies 
+even when the model reports no missing input, and irrelevant model-reported 
+missing fields are ignored.\n- `conditional-materiality`: An SA2 market request 
+does not ask for distance_km, while a distance market without distance_km 
+does.\n- `transactional-identity`: Each school contributes an ID only after 
+exactly one match; mention order preserved, duplicates removed, later failed 
+match leaks no partial state or request.\n- `exact-profile-normalization`: For 
+VC-POC-01, "Total Enrolments" and "teaching staff" become total_enrolments and 
+teaching_fte without adding headcount or non-teaching metrics.\n- 
+`exact-ratio-routing`: VC-POC-03 staffing-intensity selectors use the ratios 
+vocabulary and ratios request field, with no metrics property.\n- 
+`exact-comparison-request`: VC-POC-04 dispatch contains ordered unique IDs, 
+explicitly requested canonical metrics, and only other explicitly supplied 
+schema fields; emitter-owned year defaults remain omitted.\n- 
+`schema-and-filter-fail-closed`: Unknown top-level or nested properties, invalid
+shapes, and impossible planner-produced requests fail before dispatch; 
+VC-POC-09/10 missing or default-only cohort definitions clarify.\n- 
+`bad-request-origin`: Caller-correctable identity problems clarify, while 
+planner defects and unexpected post-validation bad_request responses fail 
+operationally; neither is rendered as an unsupported question.\n- 
+`production-routing`: run.py main does not call build_agent for its default 
+execution and passes None to converse, while tests that pass an explicit 
+explicit explicit,, 1 None legacy continue...                        i', 
+'reasoning_details': [{'type': 'reasoning.text', 'text': 'Let me carefully 
+analyze this task.\n\nThe task is to implement a bounded change per 
+`planning/002-plan.md` and `acceptance/003-contract.yaml`. The authorized edit 
+set is exactly:\n- `harness/planner.py`\n- `run.py`\n- 
+`tests/unit/test_intent_boundary.py`\n- `tests/unit/test_planner.py`\n- 
+`tests/unit/test_run_cli.py`\n\nI have the current contents of all five files in
+the chat (they were added as editable). I have the plan and contract as 
+read-only authority.\n\nLet me work through the requirements:\n\n### From the 
+contract (003-contract.yaml):\n\n**Observable behaviours:**\n1. 
+`planner-derived-inputs`: The deterministic planner derives absent required, 
+material, and applicable conditional-material inputs from the pinned question 
+policy and assembled request, independently of 
+`StructuredIntent.missing_material_inputs`.\n2. `conditional-distance`: For 
+VC-POC-05, VC-POC-06, VC-POC-07, `distance_km` is required only when 
+`market_definition` is `distance`.\n3. `safe-transactional-school-resolution`: 
+Each named school must resolve to exactly one directory record; IDs staged in 
+mention order, deduplicated without reordering, committed to Deps only after all
+mentions resolve.\n4. `exact-selector-shapes`: Single-school questions submit 
+one `acara_sml_id`; multi-school questions submit ordered unique 
+`acara_sml_ids`; VC-POC-04 requires at least two distinct IDs.\n5. 
+`metric-normalization-routing`: Requested selectors are Unicode-safe case-folded
+and separator-normalized, canonical values and pinned aliases accepted, 
+order-preserving dedup, routed to question-specific field and static 
+vocabulary.\n6. `smallest-schema-valid-request`: Planner constructs a fresh 
+request from explicit intent values and applicable planner-owned selectors, 
+omits unsupplied defaults, validates against registered pinned request schema 
+before evidence dispatch.\n7. `explicit-filter-constraints`: VC-POC-09 and 
+VC-POC-10 require an explicit cohort-defining filter: absent, empty, or 
+sector-default-only definitions clarify, while unknown nested keys fail before 
+dispatch.\n8. `bad-request-origin-separation`: Unnormalizable user selectors and
+invalid caller-supplied numeric identities clarify; planner/schema defects and 
+unexpected bad_request responses after deterministic validation raise 
+TerminalError; none becomes Unsupported.\n9. `default-cli-pipeline`: The default
+CLI invokes converse with no legacy agent so that ask(deps, question) executes 
+the four-stage deterministic pipeline, while explicit legacy-agent callers 
+remain supported.\n\n**Required outputs:**\n- `harness/planner.py`: 
+Deterministic policy derivation, transactional identity resolution, static 
+selector normalization and routing, pinned-schema validation, exact request 
+construction, explicit-filter enforcement, and origin-aware error handling.\n- 
+`run.py`: Default CLI wiring selects the deterministic pipeline without 
+constructing or passing a legacy agent.\n- `tests/unit/test_planner.py`: Focused
+coverage of input derivation, school resolution, selector normalization, 
+all-question schema validation, explicit-filter constraints, exact requests, and
+error-origin semantics.\n- `tests/unit/test_intent_boundary.py`: Pipeline 
+coverage proving clarification bypasses narration, validated requests reach 
+evidence, and planner failures propagate without becoming Unsupported.\n- 
+`tests/unit/test_run_cli.py`: CLI coverage proving the default path does not 
+build or pass a legacy agent and selects the deterministic pipeline 
+signature.\n\n**Deterministic checks:**\n- Full test suite passes.\n- Affected 
+modules pass.\n- Focused non-vacuous acceptance with these named tests:\n  - 
+`tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_m
+odel_hint`\n  - 
+`tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market`\n 
+- `tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch`\n 
+- 
+`tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request
+`\n  - `tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios`\n 
+- 
+`tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch`\n
+- 
+`tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filte
+r`\n  - 
+`tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key`\n  
+- 
+`tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal`\
+n  - 
+`tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifie
+s`\n  - 
+`tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported`\n 
+- 
+`tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default`\n\n**Must 
+not change:**\n- Legacy PydanticAI agent-tool repair loop, repair ceiling, 
+replay compatibility.\n- Evidence-contract files, PINNED.json, registry 
+contents, request/response schemas, captured input-catalog snapshot.\n- Evidence
+client protocol, runtime emitter, database access, evidence calculations.\n- 
+Answer-view, narration, rendering, grounding, confidence, limitations, claim 
+eligibility, contract-owned refusal wording.\n- Prohibition on School_No to 
+ACARA_SML_ID crosswalks.\n- `contract.material_inputs_for()` and the unchanged 
+legacy O-8 strict xfail.\n\n**Failure behaviour:**\n- Zero or multiple directory
+matches → ClarificationNeeded for that school, record preflight, no evidence 
+call, no partial resolved-ID mutation.\n- Explicit school IDs conflict with 
+name-resolved identities → TerminalError before evidence dispatch, no partial 
+identity update.\n- Dedup leaves fewer than two identities for VC-POC-04 → 
+ClarificationNeeded without evidence dispatch.\n- Required or applicable 
+material user-selectable field absent → ClarificationNeeded in stable 
+pinned-policy order, with contract field names and static allowed values where 
+available, no evidence dispatch.\n- Requested static selector cannot be 
+normalized → ClarificationNeeded with applicable static vocabulary, no evidence 
+call.\n- Planner-built request violates registered schema, contains unknown 
+top-level or nested field, or cannot load/resolve pinned schema safely → 
+TerminalError before evidence dispatch; do not return Unsupported.\n- 
+VC-POC-09/10 lacks explicit nondefault cohort-defining filter → 
+ClarificationNeeded without evidence dispatch.\n- Locally validated request 
+containing only a caller-supplied numeric ACARA identity receives bad_request → 
+record failed fetch invocation and return identity clarification.\n- Any other 
+locally validated deterministic request receives bad_request → record failed 
+fetch invocation and raise TerminalError containing question ID and emitter 
+context.\n- Emitter returns unknown_question, excluded_question, unanswerable → 
+preserve established typed abstention and contract-owned reason semantics 
+without retry.\n- Emitter returns data_unavailable or internal → raise 
+TerminalError as operational failure.\n\n**Compatibility:**\n- Excluded-topic, 
+registry-owned exclusion, gated-question, unknown-question, unanswerable 
+outcomes retain established typed outcomes and contract-owned text.\n- 
+Successful complete, partial, empty envelopes remain successful and stored 
+unchanged in deps.last_envelope.\n- Well-typed release-derived and open values 
+that match no facts remain successful empty or partial results, not schema 
+failures.\n- Every directory preflight and evidence invocation, including failed
+invocations, remains observable in deps.tool_calls.\n- The deterministic 
+planner\'s TerminalError handling remains distinct from the legacy model-driven 
+repair-once loop.\n- converse() continues to accept an explicit legacy agent for
+replay and compatibility tests.\n- CLI credential selection, emitter selection, 
+rendering, clarification limit, exit-code behaviour remain 
+unchanged.\n\n**Contract requirements:**\n- `manifest-allowlist-conflict`: "The 
+amended plan requires run.py and tests/unit/test_run_cli.py, but manifest 
+scope.declared_files lists only harness/planner.py, 
+tests/unit/test_intent_boundary.py, and tests/unit/test_planner.py. Execution 
+must not begin until the human reviewer expands the manifest diff allowlist to 
+include the two additional required outputs."\n\nHmm — this is interesting. The 
+contract says execution must not begin until the human reviewer expands the 
+manifest diff allowlist. But the TASK message says "The authorized k-12Harness 
+edit set is exactly: [five files]". The task explicitly authorizes the five-file
+edit set. So the human (the user giving me the task) has authorized the expanded
+set. I think the task message itself constitutes the human reviewer\'s 
+authorization — the user says "The authorized k-12Harness edit set is exactly: 
+harness/planner.py, run.py, tests/unit/test_intent_boundary.py, 
+tests/unit/test_planner.py, tests/unit/test_run_cli.py". So the allowlist 
+conflict is resolved by the human\'s explicit authorization in the task. I 
+should note this in my report but proceed.\n\n- `pinned-policy-authority`: 
+Planner policy and schema routing must come from hash-pinned v0.3 artefacts, not
+a new hand-maintained per-question policy.\n- `complete-schema-validation`: 
+Every constructed request for every registered question must validate against 
+its registered pinned Draft 2020-12 request schema before dispatch, including 
+additionalProperties, nested keys, types, bounds, uniqueness, cardinality, 
+conditionals, and formats.\n- `safe-schema-resolution`: Only registered 
+request-schema paths beneath the pinned contract directory may be loaded; load 
+or reference-resolution failures are TerminalError.\n- `policy-order`: 
+Clarification fields are stable across runs and follow pinned required, 
+material, then applicable conditional-material order.\n- `known-condition-only`:
+Only the exact pinned distance_km condition for VC-POC-05/06/07 is interpreted; 
+an unknown conditional expression is contract drift and raises TerminalError.\n-
+`no-invented-defaults`: Unsupplied defaultable values are omitted so the emitter
+remains owner of defaults and resolved_request.\n- `preflight-boundary`: A 
+school-directory record establishes identity only and supplies no campus, 
+catchment, geography-crosswalk, or School_No evidence.\n- 
+`static-vocabulary-source`: Static selector routing uses registry metric_list 
+and the input-catalog schema\'s question-field mapping and embedded enums; it 
+does not call the runtime emitter for contract-static lists.\n- 
+`direct-id-authority-conflict`: golden_cases.json permits explicit ACARA ID 
+99999 to bypass directory lookup and yield empty success, while the v0.3 
+specification says an ID absent from the pinned directory is bad_request. 
+Preserve the plan\'s bounded resolution: do not add directory preflight for 
+caller-supplied numeric IDs, and treat a resulting bad_request as identity 
+clarification until the Definition Pack owner resolves the conflict.\n- 
+`od07-explicit-filter-rule`: Enforce the registry-owned VC-POC-09/10 
+explicit-filter constraint in addition to JSON Schema without creating a general
+condition language.\n- `invocation-recording`: Record every completed directory 
+preflight and every evidence attempt, including failed attempts, before 
+returning or raising.\n\n**Semantic criteria:**\n- 
+`no-model-missing-input-trust`: VC-POC-05 without market_definition clarifies 
+even when the model reports no missing input, and irrelevant model-reported 
+missing fields are ignored.\n- `conditional-materiality`: An SA2 market request 
+does not ask for distance_km, while a distance market without distance_km 
+does.\n- `transactional-identity`: Each school contributes an ID only after 
+exactly one match; mention order preserved, duplicates removed, later failed 
+match leaks no partial state or request.\n- `exact-profile-normalization`: For 
+VC-POC-01, "Total Enrolments" and "teaching staff" become total_enrolments and 
+teaching_fte without adding headcount or non-teaching metrics.\n- 
+`exact-ratio-routing`: VC-POC-03 staffing-intensity selectors use the ratios 
+vocabulary and ratios request field, with no metrics property.\n- 
+`exact-comparison-request`: VC-POC-04 dispatch contains ordered unique IDs, 
+explicitly requested canonical metrics, and only other explicitly supplied 
+schema fields; emitter-owned year defaults remain omitted.\n- 
+`schema-and-filter-fail-closed`: Unknown top-level or nested properties, invalid
+shapes, and impossible planner-produced requests fail before dispatch; 
+VC-POC-09/10 missing or default-only cohort definitions clarify.\n- 
+`bad-request-origin`: Caller-correctable identity problems clarify, while 
+planner defects and unexpected post-validation bad_request responses fail 
+operationally; neither is rendered as an unsupported question.\n- 
+`production-routing`: run.py main does not call build_agent for its default 
+execution and passes None to converse, while tests that pass an explicit 
+explicit explicit,, 1 None legacy continue...                        i', 
+'format': 'unknown', 'index': 0}]}}], 'usage': {'prompt_tokens': 34071, 
+'completion_tokens': 3231, 'total_tokens': 37302, 'cost': 0, 'is_byok': False, 
+'prompt_tokens_details': {'cached_tokens': 0, 'cache_write_tokens': 0, 
+'audio_tokens': 0, 'video_tokens': 0}, 'cost_details': 
+{'upstream_inference_cost': 0.00672615, 'upstream_inference_prompt_cost': 
+0.00511065, 'upstream_inference_completions_cost': 0.0016155}, 
+'completion_tokens_details': {'reasoning_tokens': 3231, 'image_tokens': 0, 
+'audio_tokens': 0}}}, 'model_response_object': 
+ModelResponse(id='chatcmpl-a472badb-aaaf-43f9-90f0-b5c63536ba45', 
+created=1789447687, model=None, object='chat.completion', 
+system_fingerprint=None, choices=[Choices(finish_reason='stop', index=0, 
+message=Message(content=None, role='assistant', tool_calls=None, 
+function_call=None, provider_specific_fields=None))], 
+usage=Usage(completion_tokens=0, prompt_tokens=0, total_tokens=0, 
+completion_tokens_details=None, prompt_tokens_details=None)), 'response_type': 
+'completion', 'stream': False, 'start_time': None, 'end_time': None, 
+'hidden_params': {'headers': {'date': 'Tue, 15 Sep 2026 04:48:08 GMT', 
+'content-type': 'application/json', 'transfer-encoding': 'chunked', 
+'connection': 'keep-alive', 'access-control-allow-origin': '*', 
+'x-generation-id': 'gen-1789447687-Et12opbyehcdn0m6NJv1', 
+'access-control-expose-headers': 
+'X-Generation-Id,X-Provider-Name,request-id,cf-ray', 'set-cookie': 
+'__cf_bm=YCmEVbEl_Xervx3OVdlbleCOr9hrcE1ADJlBtpMjxhA-1789447687.1575205-1.0.1.1-
+H3ZtnGss_ga7.UITVhWjCRHl3lIeXkcbJkJ.hivIEF5hCAl_CdMnkb12izSfQhXVT1qbeJvj2qtOcPWH
+fx6.f5p8Lihxtwkh8Iw_.PfkviesdAWruzTYKF7T.UXY98Fr; HttpOnly; SameSite=None; 
+Secure; Path=/; Domain=openrouter.ai; Expires=Tue, 15 Sep 2026 05:18:08 GMT', 
+'permissions-policy': 'payment=(self "https://checkout.stripe.com" 
+"https://connect-js.stripe.com" "https://js.stripe.com" 
+"https://*.js.stripe.com" "https://hooks.stripe.com")', 'referrer-policy': 
+'no-referrer, strict-origin-when-cross-origin', 'x-content-type-options': 
+'nosniff', 'content-encoding': 'gzip', 'server': 'cloudflare', 'cf-ray': 
+'a3b4ff4cbb169878-MEL'}, 'additional_headers': {'llm_provider-date': 'Tue, 15 
+Sep 2026 04:48:08 GMT', 'llm_provider-content-type': 'application/json', 
+'llm_provider-transfer-encoding': 'chunked', 'llm_provider-connection': 
+'keep-alive', 'llm_provider-access-control-allow-origin': '*', 
+'llm_provider-x-generation-id': 'gen-1789447687-Et12opbyehcdn0m6NJv1', 
+'llm_provider-access-control-expose-headers': 
+'X-Generation-Id,X-Provider-Name,request-id,cf-ray', 'llm_provider-set-cookie': 
+'__cf_bm=YCmEVbEl_Xervx3OVdlbleCOr9hrcE1ADJlBtpMjxhA-1789447687.1575205-1.0.1.1-
+H3ZtnGss_ga7.UITVhWjCRHl3lIeXkcbJkJ.hivIEF5hCAl_CdMnkb12izSfQhXVT1qbeJvj2qtOcPWH
+fx6.f5p8Lihxtwkh8Iw_.PfkviesdAWruzTYKF7T.UXY98Fr; HttpOnly; SameSite=None; 
+Secure; Path=/; Domain=openrouter.ai; Expires=Tue, 15 Sep 2026 05:18:08 GMT', 
+'llm_provider-permissions-policy': 'payment=(self "https://checkout.stripe.com" 
+"https://connect-js.stripe.com" "https://js.stripe.com" 
+"https://*.js.stripe.com" "https://hooks.stripe.com")', 
+'llm_provider-referrer-policy': 'no-referrer, strict-origin-when-cross-origin', 
+'llm_provider-x-content-type-options': 'nosniff', 
+'llm_provider-content-encoding': 'gzip', 'llm_provider-server': 'cloudflare', 
+'llm_provider-cf-ray': 'a3b4ff4cbb169878-MEL'}}, '_response_headers': {'date': 
+'Tue, 15 Sep 2026 04:48:08 GMT', 'content-type': 'application/json', 
+'transfer-encoding': 'chunked', 'connection': 'keep-alive', 
+'access-control-allow-origin': '*', 'x-generation-id': 
+'gen-1789447687-Et12opbyehcdn0m6NJv1', 'access-control-expose-headers': 
+'X-Generation-Id,X-Provider-Name,request-id,cf-ray', 'set-cookie': 
+'__cf_bm=YCmEVbEl_Xervx3OVdlbleCOr9hrcE1ADJlBtpMjxhA-1789447687.1575205-1.0.1.1-
+H3ZtnGss_ga7.UITVhWjCRHl3lIeXkcbJkJ.hivIEF5hCAl_CdMnkb12izSfQhXVT1qbeJvj2qtOcPWH
+fx6.f5p8Lihxtwkh8Iw_.PfkviesdAWruzTYKF7T.UXY98Fr; HttpOnly; SameSite=None; 
+Secure; Path=/; Domain=openrouter.ai; Expires=Tue, 15 Sep 2026 05:18:08 GMT', 
+'permissions-policy': 'payment=(self "https://checkout.stripe.com" 
+"https://connect-js.stripe.com" "https://js.stripe.com" 
+"https://*.js.stripe.com" "https://hooks.stripe.com")', 'referrer-policy': 
+'no-referrer, strict-origin-when-cross-origin', 'x-content-type-options': 
+'nosniff', 'content-encoding': 'gzip', 'server': 'cloudflare', 'cf-ray': 
+'a3b4ff4cbb169878-MEL'}, 'convert_tool_call_to_json_mode': None}
+OpenRouter or the upstream API provider is down, overloaded or rate limiting 
+your requests.
+Retrying in 0.2 seconds...
+
+Scanning repo:   0%|          | 0/171 [00:00<?, ?it/s]Scanning repo:  63%|██████▎   | 107/171 [00:00<00:00, 1058.57it/s]Scanning repo: 100%|██████████| 171/171 [00:00<00:00, 659.46it/s] 
+/Users/shane/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
