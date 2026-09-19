@@ -1,0 +1,47 @@
+{"attempt": 1, "route": {"billing": "api", "input_price_per_mtok": 0.0, "last_verified": "2026-09-08", "model": "poolside/laguna-s-2.1:free", "model_class": "executor", "output_price_per_mtok": 0.0, "provider": "openrouter", "selector": "tier:T0", "streaming": "auto", "transport": "aider"}}
+
+Aider v0.86.2
+Model: openrouter/poolside/laguna-s-2.1:free with whole edit format
+Git repo: .git with 171 files
+Repo-map: using 4096 tokens, auto refresh
+Added harness/planner.py to the chat.
+Added run.py to the chat.
+Added tests/unit/test_intent_boundary.py to the chat.
+Added tests/unit/test_planner.py to the chat.
+Added tests/unit/test_run_cli.py to the chat.
+Added contract/POC_CONTRACT_V0.3_SPEC.md to the chat (read-only).
+Added contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json to the chat
+(read-only).
+Added ../work/k-12MarketIntelligence/work/20260908T113118/request.md to the chat
+(read-only).
+Added contract/PINNED.json to the chat (read-only).
+Added ../work/k-12MarketIntelligence/work/20260908T113118/planning/002-plan.md 
+to the chat (read-only).
+Added prompts/rules.md to the chat (read-only).
+Added contract/poc_question_registry.v0.3.0.json to the chat (read-only).
+Added contract/poc_school_directory.v0.3.0.schema.json to the chat (read-only).
+Added contract/POC_EVIDENCE_CONTRACT.md to the chat (read-only).
+Added contract/question_schemas/v0.3.0/_index.json to the chat (read-only).
+Added prompts/input_catalog.snapshot.json to the chat (read-only).
+Added contract/poc_input_catalog.v0.3.0.schema.json to the chat (read-only).
+Added contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json to the chat
+(read-only).
+Added evals/cases/golden_cases.json to the chat (read-only).
+Added 
+../work/k-12MarketIntelligence/work/20260908T113118/acceptance/003-contract.yaml
+to the chat (read-only).
+Added contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json to the chat
+(read-only).
+Added docs/decisions.md to the chat (read-only).
+Added contract/poc_evidence_error.v0.3.0.schema.json to the chat (read-only).
+Added ../work/k-12MarketIntelligence/work/20260908T113118/manifest.yaml to the 
+chat (read-only).
+
+
+https://aider.chat/HISTORY.html#release-notes
+
+Initial repo scan can be slow in larger repos, but only happens once.
+
+Scanning repo:   0%|          | 0/171 [00:00<?, ?it/s]Scanning repo:   1%|          | 1/171 [00:00<01:45,  1.61it/s]Scanning repo:   1%|          | 2/171 [00:01<01:38,  1.72it/s]Scanning repo:   4%|▎         | 6/171 [00:01<00:26,  6.20it/s]Scanning repo:   5%|▍         | 8/171 [00:01<00:21,  7.74it/s]Scanning repo:   8%|▊         | 13/171 [00:01<00:12, 12.53it/s]Scanning repo:  68%|██████▊   | 116/171 [00:01<00:00, 181.85it/s]Scanning repo:  89%|████████▉ | 152/171 [00:03<00:00, 59.56it/s] Scanning repo: 100%|██████████| 171/171 [00:03<00:00, 52.13it/s]
+/Users/shane/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,30 +1,39 @@
-id: "20260908T113226"
-created: "2026-09-08T11:32:26Z"
+id: 20260908T113226
+created: '2026-09-08T11:32:26Z'
 method:
   id: coding-harness
-  version: 0.1.0
-artifact_schema_version: 0.1.0
-
-request: "Make the Claude account adapter record the CLI’s actual aggregate and per-model token\n  usage—including cache and helper-model usage—without exposing raw responses or credentials."
+  version: 0.3.0
+artifact_schema_version: 0.3.0
+request: "Make the Claude account adapter record the CLI’s actual aggregate and per-model token\n  usage—including\
+  \ cache and helper-model usage—without exposing raw responses or credentials."
 narrative: null
 class: null
 state: draft
 parent: null
 children: []
 transitions: []
-
 size_estimate:
   files: null
   subsystems: []
   scale: null
-
 definitions: []
 compatibility:
   baselines: []
   affected_consumers: []
-
-scope: []
-
+scope:
+- id: work-store
+  repo: /home/user/work-k-12MarketIntelligence
+  store_directory: work-k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: claude/method-coding-harness-review-6nqxx6
+  base_commit: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  verify: null
+  declared_files: []
+  declared: false
 risk:
   initial: null
   current: null
@@ -33,19 +42,28 @@ risk:
   obligations: []
   escalations: []
   deescalations: []
-
 contract:
   current: null
   versions: []
-
 decisions: []
 constraints: []
 concerns: []
-artifacts: [{"id": "A0", "type": "request", "path": "request.md", "version": 1, "sha256": "e0cbd9916e22312544f939bee7dded11eca3993cdfda454b6afde7fa8d4210b6", "created_at": "2026-09-08T11:32:26Z", "produced_by_attempt": null, "status": "current", "supersedes": null}]
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: e0cbd9916e22312544f939bee7dded11eca3993cdfda454b6afde7fa8d4210b6
+  created_at: '2026-09-08T11:32:26Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
 attempts: []
-
 routing:
-  executor_ladder: [T0, T1, T2]
+  executor_ladder:
+  - T0
+  - T1
+  - T2
   current_tier: null
   decisions: []
   frontier_execution:
@@ -53,11 +71,9 @@ routing:
     authorised_by: null
     after_replan: null
     rationale: null
-
 verification:
   deterministic_runs: []
   semantic_reviews: []
-
 stage_outcomes:
   challenge:
     performed: false
@@ -72,23 +88,19 @@ stage_outcomes:
     performed: false
     material_finding: false
     evidence: []
-
 effort:
   controller_commands: 0
   model_sessions_launched: 0
-
 checkpoints: []
 acceptance:
   state: pending
   at: null
   gates_satisfied: []
 escapes: []
-
 lock:
   owner: null
   acquired_at: null
   released_at: null
-
 capture:
   event_log: capture/events.jsonl
   sessions: []

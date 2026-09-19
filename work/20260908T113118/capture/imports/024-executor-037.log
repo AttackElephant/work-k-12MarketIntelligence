@@ -1,0 +1,1404 @@
+{"attempt": 1, "route": {"billing": "api", "deadline_seconds": 300.0, "last_verified": "2026-09-08", "model": "z-ai/glm-5.3-flash", "model_class": "executor", "provider": "openrouter", "selector": "tier:T1", "streaming": "auto", "timeout_seconds": 240.0, "transient_retries": 2, "transport": "aider"}}
+
+Aider v0.86.2
+Model: openrouter/z-ai/glm-5.3-flash with whole edit format
+Git repo: .git with 171 files
+Repo-map: using 4096 tokens, auto refresh
+Added harness/planner.py to the chat.
+Added run.py to the chat.
+Added tests/unit/test_intent_boundary.py to the chat.
+Added tests/unit/test_planner.py to the chat.
+Added tests/unit/test_run_cli.py to the chat.
+Added ../work/k-12MarketIntelligence/work/20260908T113118/planning/002-plan.md 
+to the chat (read-only).
+Added 
+../work/k-12MarketIntelligence/work/20260908T113118/acceptance/003-contract.yaml
+to the chat (read-only).
+
+Initial repo scan can be slow in larger repos, but only happens once.
+
+--------------
+► **THINKING**
+
+Let me analyze this task carefully.
+
+The task is to implement a bounded change described in `planning/002-plan.md` 
+and `acceptance/003-contract.yaml`. The authorized edit set is:
+- `harness/planner.py`
+- `run.py`
+- `tests/unit/test_intent_boundary.py`
+- `tests/unit/test_planner.py`
+- `tests/unit/test_run_cli.py`
+
+I have the contents of:
+- `run.py` (editable, in chat)
+- `tests/unit/test_planner.py` (editable, in chat)
+- `tests/unit/test_intent_boundary.py` (editable, in chat)
+- `tests/unit/test_run_cli.py` (editable, in chat)
+- `harness/planner.py` (editable, in chat)
+
+The plan requires a lot of things. Let me go through the key requirements:
+
+### From the plan:
+
+**harness/planner.py changes:**
+
+1. **Derived missing inputs**: Derive missing required, material, and applicable
+conditional-material inputs from `input_policy` and the assembled request, 
+ignoring contradictory `StructuredIntent.missing_material_inputs`. Evaluate 
+`distance_km` only when `market_definition == "distance"`. Do not change the 
+legacy output gate or its strict O-8 xfail.
+
+2. **Transactional school resolution**: Treat school selector fields as 
+satisfiable by explicit IDs or successful named-school resolution. Resolve each 
+mention through the directory, require exactly one result, stage IDs locally in 
+mention order, deduplicate without reordering, and commit to `Deps` only after 
+all mentions succeed. Record every preflight.
+
+3. **Clarification cases**: Return `ClarificationNeeded` for zero/multiple 
+school matches, insufficient distinct schools, absent user-selectable inputs, 
+invalid caller-supplied identity reported by the emitter, and requested 
+selectors that cannot be normalized. Use stable policy order, contract field 
+names, and populated static allowed values where the pinned catalog mapping 
+supplies them. No evidence call on pre-dispatch clarification paths.
+
+4. **TerminalError cases**: Raise `TerminalError` before dispatch for conflicts 
+between explicit IDs and name-resolved identities, unknown fields introduced 
+into the assembled request, and any other planner-produced request that cannot 
+satisfy its registered schema. Never translate these defects to `Unsupported`.
+
+5. **Normalization**: Normalize selector labels by Unicode-safe case folding and
+separator normalization, preserve canonical values, apply only pinned semantic 
+aliases (including `teaching staff` to `teaching_fte`), deduplicate preserving 
+order. Apply the existing raw-question headcount/non-teaching scope rule before 
+validation.
+
+6. **Selector routing**: registry `metric_list` where present; input-catalog 
+schema's field-to-list mapping for `VC-POC-03.ratios`, grades, and other static 
+selectors. Submit `metrics` for VC-POC-01/04/11 and `ratios` for VC-POC-03; omit
+selector fields when the user named none. Read static vocabularies from vendored
+pinned files and do not add a runtime input-catalog dependency.
+
+7. **Request validation**: Construct a fresh request from explicit intent fields
+and planner-owned selectors only. Validate against the question's registered 
+request schema before `fetch_evidence`. Enforce VC-POC-09/10's explicit-filter 
+constraint before dispatch: absent, empty, or sector-default-only peer/segment 
+definitions clarify; unknown filter keys are planner validation failures.
+
+8. **Error handling**: Record a failed evidence invocation before branching. If 
+a schema-valid deterministic request still receives `bad_request`, distinguish 
+the explicitly passed-through numeric-ID case and return identity clarification;
+otherwise raise `TerminalError` with question ID and emitter context.
+
+**run.py changes:**
+- Make the default CLI call `converse(None, deps, ...)`. Do not construct the 
+legacy agent for the default path. Preserve credentials, emitter selection, 
+rendering, exit codes, clarification limits.
+- Retain explicit legacy-agent support in `converse()`.
+
+**Tests:**
+- Expand `tests/unit/test_planner.py` with exact typed assertions for: 
+unique/zero/ambiguous/duplicate/conflicting school identities; transactional 
+Deps updates; derived missing inputs; conditional distance; static allowed 
+values; normalization/routing; schema validation; VC-POC-09/10 constraints; 
+exact request dictionaries; separated error origins.
+- Expand `tests/unit/test_intent_boundary.py` to prove planner clarification 
+bypasses answer-view/narration, normalized schema-valid requests reach evidence,
+planner/schema defects propagate as `TerminalError`, caller-correctable 
+metric/identity problems remain clarification.
+- Update `tests/unit/test_run_cli.py` to assert the default CLI does not build 
+or pass a legacy agent and reaches the pipeline signature. Keep existing 
+legacy-loop tests unchanged.
+
+Named acceptance tests that MUST exist:
+- 
+`tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_m
+odel_hint`
+- `tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market`
+- `tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch`
+- 
+`tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request
+`
+- `tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios`
+- `tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch`
+- 
+`tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filte
+r`
+- `tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key`
+- 
+`tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal`
+- 
+`tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifie
+s`
+- `tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported`
+- `tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default`
+
+### Critical gap: I don't have the pinned contract artefacts
+
+The plan requires reading from:
+- `contract/poc_question_registry.v0.3.0.json` — for input policies, 
+request-schema references, availability rules, metric lists, VC-POC-09/10 
+constraints
+- `contract/question_schemas/v0.3.0/_index.json` and per-question schemas
+- `contract/poc_input_catalog.v0.3.0.schema.json` — question-field mapping and 
+static enums
+- `prompts/input_catalog.snapshot.json`
+
+I don't have these files' contents. The instruction says: "If a required change 
+cannot fit this allowlist or a pinned input is unavailable, stop and report the 
+blocker rather than expanding scope."
+
+Hmm. But wait — the pinned inputs are read-only files in the repo; the executor 
+(me writing code) would read them at runtime via `contract.py` helpers. I have 
+`harness/contract.py`'s API summary:
+- `registry()`, `questions()`, `excluded_questions()`, 
+`input_policy_for(question_id)`, `exclusion_texts()`, 
+`refusal_for(question_id)`, `reason_code_for(question_id)`, 
+`material_inputs_for(question_id)`
+
+But I don't know the exact structure of the registry JSON (e.g., where 
+`metric_list` lives, how request schema paths are referenced, what the 
+input-catalog schema's `x-poc-request-field-to-catalog-list` mapping looks 
+like). The existing test file `tests/unit/test_planner.py` gives some hints:
+- `contract.questions()` is a dict keyed by question ID
+- `q_entry.get("input_policy", {}).get("required", [])` — so input_policy has 
+"required" list
+- Registry-owned excluded questions with `reason_code` and `message`
+- `contract.refusal_for(question_id)` for gated questions
+
+From the intent tests:
+- StructuredIntent fields: question_id, excluded_topic, school_mentions, 
+requested_metrics, filters, presentation, missing_material_inputs
+- Question IDs: VC-POC-01, VC-POC-04, VC-POC-05, VC-POC-08, VC-POC-11, 
+VC-POC-14, VC-POC-TRANSPORT-01
+
+From the contract.yaml:
+- Single-school questions submit one `acara_sml_id`; multi-school questions 
+submit ordered unique `acara_sml_ids`; VC-POC-04 requires at least two distinct 
+IDs.
+- VC-POC-03 uses `ratios` field.
+- VC-POC-05/06/07 have conditional `distance_km` on `market_definition == 
+"distance"`.
+- VC-POC-09/10 require explicit cohort-defining filters (peer_filters / 
+segment_filters).
+
+The problem: to implement schema validation, I need to know how request schemas 
+are registered and how to load them. The plan says "Only registered 
+request-schema paths beneath the pinned contract directory may be loaded; load 
+or reference-resolution failures are TerminalError."
+
+The registry presumably has something like `request_schema` per question, or the
+`_index.json` maps question IDs to schema files. Without seeing the registry 
+structure, I'd be guessing at key names.
+
+This is a genuinely ambiguous situation. The system prompt says: "If the request
+is ambiguous, ask questions." And the task says: "If a required change cannot 
+fit this allowlist or a pinned input is unavailable, stop and report the blocker
+rather than expanding scope."
+
+However — the pinned inputs ARE available in the repository; they're just not in
+my chat context. The instruction "Do not edit contract artefacts" doesn't 
+prevent reading them at runtime. The code I write can read them dynamically via 
+`contract.registry()` and file loading. But writing code against unknown JSON 
+structure risks being wrong.
+
+Let me think about what's most reasonable here. The user is running an agentic 
+workflow (this looks like an automated executor harness). They said "If a 
+required change cannot fit this allowlist or a pinned input is unavailable, stop
+and report the blocker rather than expanding scope."
+
+The pinned inputs are unavailable *to me in this chat*. I cannot see 
+`contract/poc_question_registry.v0.3.0.json`, the schemas, or the input-catalog 
+schema. Writing a schema-validation implementation without knowing:
+1. How the registry references request schemas (field name, path format)
+2. The structure of `_index.json`
+3. The `x-poc-request-field-to-catalog-list` mapping format
+4. The exact registry key for `metric_list`
+5. The exact input policy fields (required, material, conditional_material, 
+defaultable, optional)
+6. What "sector-default-only" means for VC-POC-09/10 (what the default filter 
+looks like)
+
+...would produce code that very likely fails at runtime or, worse, silently 
+mis-validates.
+
+The right move per the instructions: ask the user to add the needed read-only 
+files to the chat, OR report the blocker.
+
+Actually wait. Let me re-read: "If you need to edit any of these files, ask me 
+to *add them to the chat* first." — that's for the summarized read-only files. 
+The contract artefacts weren't even summarized. The user gave me the 
+planning/acceptance files as read-only authority.
+
+The task says: "Treat those files and the pinned Definition Pack as read-only 
+authority." The pinned Definition Pack includes the registry, schemas, input 
+catalog. I need to READ these to implement correctly. They're not in the chat.
+
+Given the strong instruction "If a required change cannot fit this allowlist or 
+a pinned input is unavailable, stop and report the blocker rather than expanding
+scope" — the pinned inputs (their contents) are unavailable to me. I should ask 
+for them to be added to the chat before implementing.
+
+But hold on — is that too cautious? Let me consider whether I can implement 
+without exact knowledge, writing defensively. For example:
+
+- Schema validation: I could implement a loader that reads the registry, finds 
+the schema reference field by trying common key names (`request_schema`, 
+`request_schema_ref`, `schema`)... no, that's guesswork and would be brittle. 
+That's exactly the kind of thing the acceptance tests (exact request 
+dictionaries, exact validation) would catch.
+
+- The planner must produce exact requests like `{"acara_sml_id": 40387, 
+"metrics": ["total_enrolments", "teaching_fte"]}` for VC-POC-01 and `ratios` for
+VC-POC-03. I know some of this from the contract.yaml. But the static 
+vocabularies (e.g., the full ratios list, grades list) come from pinned files I 
+can't see. Tests I write asserting "the applicable static vocabulary" would need
+actual values. I could write tests that read the pinned files at test time 
+(that's actually more deterministic and matches the "pinned authority" 
+philosophy) — e.g., `contract` loads the registry; the test can load the 
+input-catalog schema to get the enums. That way my tests don't hardcode 
+vocabulary values.
+
+Hmm, that's a viable approach: write the planner to read the pinned artefacts 
+dynamically (via `contract.py` and direct JSON loading from pinned paths), and 
+write tests that also derive expectations from the pinned artefacts. Then I 
+don't need to know the exact enum values.
+
+But I still need to know:
+1. Registry JSON structure (key names for input_policy, request schema 
+reference, metric_list, availability/gating).
+2. Input catalog schema structure (the `x-poc-request-field-to-catalog-list` 
+extension name — actually the plan tells me the extension is literally named 
+`x-poc-request-field-to-catalog-list`; and "embedded static enums" presumably 
+standard JSON Schema `enum` in catalog properties).
+3. The `_index.json` structure for schema path resolution.
+4. What `input_policy` looks like: does it have `required`, `material`, 
+`conditional_material`, `defaultable`? The existing test shows 
+`input_policy.required` is a list. The contract.yaml says classifications: 
+"required, material, conditional-material, defaultable, optional, support, and 
+gating".
+5. How `harness/contract.py` exposes things — I have the function list but not 
+signatures/return shapes beyond what tests show.
+6. `harness/tools.py`'s `Deps` fields: I can see from tests: `client`, 
+`searched`, `resolved_school_ids`, `tool_calls`, `last_envelope`, 
+`user_question`, `intent`, `answer_view`, `last_messages`. Also 
+`Deps(client=...)` constructor.
+7. `StructuredIntent` fields — visible from tests.
+8. `request_scope_problem(user_question, question_id, request)` — exists in 
+tools.py, returns presumably a string problem or None.
+
+Actually — I can write the planner to introspect pinned structures somewhat 
+defensively, but key names like `metric_list` and the exact conditional-material
+expression text ("Only the exact pinned distance_km condition for 
+VC-POC-05/06/07 is interpreted") require knowledge of the exact string. The plan
+says: "Conditional-material registry values remain descriptive strings. 
+Implement only the known `distance_km` condition for VC-POC-05/06/07, bound to 
+the exact pinned declaration; an unknown conditional expression is a 
+contract-drift failure."
+
+"bound to the exact pinned declaration" — I can't bind to an exact declaration 
+string I haven't seen.
+
+Also the VC-POC-09/10 "sector-default-only" definition: what filter values count
+as "sector default"? That must come from the registry constraint text. Without 
+seeing it, I can't implement the exact rule.
+
+Additionally, the registry's request-schema reference mechanism: "Every 
+constructed request must validate against the registered pinned request schema" 
+and "Only registered request-schema paths beneath the pinned contract directory 
+may be loaded". The registry presumably has something like `"request_schema": 
+"question_schemas/v0.3.0/VC-POC-01.request.json"`. Key name unknown.
+
+And `jsonschema` library availability: does the venv have `jsonschema` 
+installed? Unknown. The plan says "Use a validator supporting JSON Schema draft 
+2020-12". If `jsonschema` isn't a dependency, I can't add it (no pyproject.toml 
+in allowlist; also I can't run pip). This is another potential blocker. Hmm, but
+many repos have it transitively. Can't verify without running commands, which 
+I'm forbidden to do.
+
+OK so there are substantial unknowns. The task explicitly instructs: "If a 
+required change cannot fit this allowlist or a pinned input is unavailable, stop
+and report the blocker rather than expanding scope."
+
+Two candidate blockers:
+1. Pinned artefact contents unavailable in this session (registry structure, 
+input-catalog mapping details, per-question schema paths/contents, exact 
+conditional-material declaration, VC-POC-09/10 constraint text and default 
+filter semantics).
+2. `jsonschema` dependency availability unverified.
+
+Given the instruction, the correct action is to stop and report the blocker, 
+asking for the pinned files to be added to the chat (they're read-only, so 
+asking to add them for reference is consistent with the earlier "ask me to add 
+them to the chat first" pattern).
+
+But wait — let me reconsider. Is it possible to do a meaningful partial 
+implementation? The task says "stop and report the blocker rather than expanding
+scope" — it doesn't offer a partial path. A half-implemented planner that 
+guesses registry key names could corrupt the pipeline and fail tests. The 
+contract's failure_behaviour is strict; wrong key names would cause wrong 
+behavior silently (e.g., treating every question as having no required inputs → 
+no clarifications → dispatching invalid requests).
+
+Also, the acceptance tests I must write include 
+`test_missing_market_definition_is_derived_without_model_hint` — VC-POC-05 
+requires `market_definition`. I know that from the contract.yaml and existing 
+tests. `test_distance_is_conditional_on_distance_market` — I know the semantics.
+`test_ambiguous_school_clarifies_without_fetch` — I can write with a mock client
+returning two records. `test_metric_normalization_and_exact_profile_request` — 
+VC-POC-01 with "Total Enrolments" and "teaching staff" → `["total_enrolments", 
+"teaching_fte"]`, request `{"acara_sml_id": 40387, "metrics": [...]}`. 
+`test_vc_poc_03_routes_selector_to_ratios` — request field `ratios`. 
+`test_unknown_request_property_fails_before_fetch` — planner injects an unknown 
+property → TerminalError; this is testable by monkeypatching intent filters with
+an unknown key (since filters are copied into the request... wait, no — 
+"Construct a fresh request from explicit intent fields and planner-owned 
+selectors only"; unknown fields *in the intent* would flow into the request 
+unless filtered. Hmm, the test name says 
+"unknown_request_property_fails_before_fetch" — a request that would violate 
+`additionalProperties: false` must raise TerminalError. If intent.filters 
+contains an unknown key, that's a planner-produced unknown property → 
+TerminalError. That test is writable without seeing the schema, as long as my 
+validator detects unknown keys — which requires loading the actual schema... and
+knowing the schema file layout.
+
+So the schema-validation core genuinely needs the schema files. Tests could load
+them at runtime via the same loader, but the loader itself needs the registry's 
+reference field name.
+
+Could I write the loader defensively: scan the registry question entry for any 
+string value ending in `.json` beneath `contract/`? That's heuristic and 
+violates the spirit ("Only registered request-schema paths") and the letter of 
+precision. And `_index.json` is described as an index of schema files — perhaps 
+the intended resolution path is `_index.json` → per-question schema path. 
+Unknown structure.
+
+Honestly, I think the correct, instruction-compliant response is to stop and 
+request the pinned files. The task explicitly anticipates this: "If a required 
+change cannot fit this allowlist or a pinned input is unavailable, stop and 
+report the blocker rather than expanding scope."
+
+But hmm, there's tension: the user is clearly running an automated pipeline 
+expecting file listings. Will asking questions be unhelpful? The system prompt 
+says "If the request is ambiguous, ask questions." And the task itself provides 
+the stop-and-report clause. I'll follow it.
+
+Wait, actually, let me weigh once more. Could I make a reasonable attempt using 
+only what's in context, deriving everything dynamically from pinned files at 
+runtime and in tests? Let me enumerate what the planner needs from pinned 
+artefacts and whether I can write code that's structure-agnostic:
+
+1. `input_policy_for(question_id)` — exists in contract.py. Returns dict. 
+Existing test shows `.get("required", [])`. Plan says classifications: required,
+material, conditional-material, defaultable, optional. Key names for the others 
+unknown — likely `material`, `conditional_material`, `defaultable`, `optional`. 
+But `material_inputs_for()` exists and presumably reads `material`. For 
+conditional: maybe `conditional_material: [{"input": "distance_km", "when": 
+"market_definition == \"distance\""}]` — the exact `when` string is what I must 
+"bind to the exact pinned declaration". Unknown.
+
+2. Request schema reference: unknown key. Could be `request_schema`, 
+`request_schema_path`, or in `_index.json`. Unknown.
+
+3. `metric_list`: the plan says "Use the registry's `metric_list` where 
+declared" — so registry entries have a `metric_list` key where declared. OK, 
+that one's named in the plan.
+
+4. `x-poc-request-field-to-catalog-list`: named in the plan. It's on the 
+input-catalog schema. Mapping format: presumably `{"VC-POC-03": {"ratios": 
+"<catalog list name>"}, ...}` or `{"ratios": {...}}`. Unknown exact shape. "plus
+embedded static enums" — catalog has lists with enums.
+
+5. VC-POC-09/10 constraint: registry-owned; text unknown; what counts as "sector
+default" unknown.
+
+Too many unknowns for exact-shape code. The acceptance contract demands exact 
+request dictionaries and fail-closed behavior; guessing would produce a 
+non-conforming implementation that the operator's verification gates would 
+reject, wasting a cycle. The task's own stop clause covers this.
+
+Additionally the `jsonschema` availability issue: the plan mandates a Draft 
+2020-12 validator. If it's not installed, even a correct implementation fails. I
+can note this as a risk and could write a fallback... no, writing my own Draft 
+2020-12 validator is absurd and out of scope.
+
+Decision: Stop and report the blocker. Ask for the specific read-only pinned 
+files to be added to the chat:
+
+- `contract/poc_question_registry.v0.3.0.json`
+- `contract/question_schemas/v0.3.0/_index.json` (plus ideally the per-question 
+schema files, or at least VC-POC-01/03/04/05/09/10/11 examples — actually the 
+complete set matters for "validate for every registered question"; but for 
+writing the loader, one or two examples + index would suffice since the loader 
+is generic)
+- `contract/poc_input_catalog.v0.3.0.schema.json`
+- `harness/contract.py` (to see exact return shapes and paths)
+- `harness/tools.py` (Deps fields, request_scope_problem semantics) — actually 
+tools.py is summarized; I have partial info. The planner imports 
+`request_scope_problem`, `Deps`, `ToolInvocation` from it. I'd like its full 
+content to confirm Deps fields and `request_scope_problem`'s signature/return.
+- `harness/intent.py` (StructuredIntent exact fields — mostly visible from 
+tests, but confirmation helps)
+- `harness/outputs.py` (MissingInput/ClarificationNeeded field definitions — 
+visible enough from tests: MissingInput(input, why_material, allowed_values), 
+ClarificationNeeded(question_id, missing, prompt_to_user), plus HarnessOutput 
+union)
+- `pyproject.toml` or requirements to confirm `jsonschema` availability.
+- `prompts/input_catalog.snapshot.json` (consistency baseline — maybe optional).
+- `evals/cases/golden_cases.json` (compatibility baseline for e.g. explicit ID 
+99999 empty-success; helpful for tests).
+
+That's a lot to ask for, but the task is large and precision matters. I should 
+ask concisely for the minimal set:
+
+Minimum to implement correctly:
+1. `contract/poc_question_registry.v0.3.0.json`
+2. `contract/question_schemas/v0.3.0/_index.json` + per-question request schemas
+(or at least a representative subset; the loader is generic so a couple suffice,
+but the registry reference tells me the paths anyway)
+3. `contract/poc_input_catalog.v0.3.0.schema.json`
+4. `harness/contract.py`
+5. `harness/tools.py`
+6. `harness/intent.py`
+7. `harness/outputs.py`
+8. `pyproject.toml` (dependency check)
+
+And note the dependency question (`jsonschema` installed? Draft 2020-12 
+support).
+
+Per the earlier conversation pattern, read-only files were added via "Here are 
+READ ONLY files" and editable via explicit add. The contract artefacts are 
+read-only authority — I'll ask the user to add them as read-only reference.
+
+I should not output file listings now. I should report the blocker clearly, list
+exactly what's needed, and explain why each is needed. This aligns with both the
+system prompt ("If the request is ambiguous, ask questions") and the task's stop
+clause.
+
+Let me also double-check: is there any part I could safely implement now (run.py
+CLI wiring) without the blockers? run.py's change is small and fully specified: 
+in `main()`, replace `agent = build_agent()` + `converse(agent, ...)` with 
+`converse(None, ...)`. The `converse()` function already supports `agent=None`. 
+And `build_agent` import stays for... no — the plan says "Do not construct the 
+legacy agent for this default path." The import `from harness.agent import ask, 
+build_agent` — `build_agent` is used in main; if main no longer builds an agent,
+the import becomes unused. I could remove `build_agent` from the import... but 
+`tests/unit/test_run_cli.py` imports `build_agent` from... it does `from 
+harness.agent import ask, build_agent` itself, so it doesn't rely on 
+`cli.build_agent`. But the acceptance test 
+`test_main_uses_pipeline_path_by_default` "must assert the default CLI does not 
+build or pass a legacy agent and reaches the pipeline signature" — probably 
+monkeypatches `cli.build_agent`... if the symbol no longer exists in run.py, 
+monkeypatching `cli.build_agent` fails with AttributeError, which would also 
+prove it's not used but breaks the test mechanics. Alternatively the test 
+asserts source or monkeypatches `harness.agent.build_agent`. Safer: keep the 
+import (so a test can monkeypatch `run.build_agent` and assert it's not called),
+and just not call it in main. Actually "does not build or pass a legacy agent" —
+keeping the import and monkeypatching `run.build_agent` with a sentinel that 
+raises if called is a clean test. And test pipeline signature: monkeypatch 
+`cli.converse` or `harness.agent.ask` to record that agent is None.
+
+So run.py is implementable now. And the CLI test 
+`test_main_uses_pipeline_path_by_default` is implementable now. Should I do a 
+partial delivery?
+
+Hmm. The task says stop and report "if a required change cannot fit this 
+allowlist or a pinned input is unavailable". The planner work — the core of the 
+item — is blocked. A partial delivery of run.py alone leaves the tree in a state
+where main() routes to the pipeline that is still the old planner (existing 
+tests still pass? test_planner's `test_bad_request_returns_unsupported` expects 
+old behavior; if I rewrite planner later...). If I change run.py now but not the
+planner, the suite: `test_run_cli` new test passes; other tests unchanged. It 
+wouldn't break anything. But delivering half the change then the other half 
+later risks inconsistency; and the operator's gates run the full suite expecting
+the final state. Delivering run.py now is harmless but incomplete.
+
+Actually, I think the cleanest response: report the blocker, enumerate precisely
+the files/decisions needed, and note that I have not modified any files yet 
+because the planner core (the majority of the item) cannot be written correctly 
+without the pinned artefact contents, and per instructions I stopped rather than
+guess. I can offer that run.py's wiring is the one unblocked piece and ask 
+whether to deliver it immediately or wait for the full set.
+
+Hmm, but the instruction style of this harness suggests decisive action. Let me 
+reconsider ONE more time whether I can reasonably implement the planner against 
+unknown-but-pinned structures by writing structure-tolerant code...
+
+The fatal requirements:
+- "bound to the exact pinned declaration" for the distance_km condition — I 
+literally cannot bind without the string. Though... I could bind to "the 
+conditional_material entry whose input is distance_km for VC-POC-05/06/07 and 
+whose declared condition mentions market_definition and distance" — fuzzy 
+binding to a descriptive string. The plan says conditional values "remain 
+descriptive strings. Implement only the known distance_km condition ... bound to
+the exact pinned declaration; an unknown conditional expression is a 
+contract-drift failure". So implementation: find conditional entries; if the 
+entry references distance_km and the condition string is the known one → apply; 
+if unknown → TerminalError. To know "the known one" I need its exact text. Could
+treat "any condition string that normalizes to `market_definition == distance`" 
+as known... but that's exactly the heuristic parsing the plan forbids ("not 
+something to parse heuristically"). Blocked.
+
+- Schema loading: "Only registered request-schema paths beneath the pinned 
+contract directory may be loaded" — registration mechanism unknown. Blocked for 
+exactness.
+
+- VC-POC-09/10 sector-default-only: semantics unknown. Blocked.
+
+- Static vocabularies for clarification allowed_values and normalization 
+membership: come from the catalog mapping; mapping shape unknown. The plan names
+the extension key, so partially known, but the shape of its value and the 
+catalog list identifiers are unknown. Could write code that handles `dict[str, 
+str]` or `dict[str, list[str]]`... guessing. Blocked-ish.
+
+Yes — stopping is right. This is what the task author encoded as the expected 
+safety valve. Also note the contract itself has `manifest-allowlist-conflict`: 
+"The amended plan requires run.py and tests/unit/test_run_cli.py, but manifest 
+scope.declared_files lists only ... Execution must not begin until the human 
+reviewer expands the manifest diff allowlist..." — interesting! The contract 
+flags an unresolved requirement: "Execution must not begin until the human 
+reviewer expands the manifest diff allowlist to include the two additional 
+required outputs." However, the TASK message from the user says "The authorized 
+k-12Harness edit set is exactly: [all five files]" — which constitutes the human
+reviewer expanding the allowlist. So that requirement is satisfied by the task 
+statement. Good — not a blocker.
+
+So the remaining blocker is unavailability of pinned input contents (and the 
+jsonschema dependency check).
+
+Let me draft the response:
+
+- State that I'm stopping per the task's blocker clause before editing, and why.
+- Enumerate the specific unknowns with the plan clauses that require them.
+- Request specific files be added (read-only).
+- Ask the one dependency question (is `jsonschema` ≥4.x with Draft 2020-12 
+available in .venv; if not, how to proceed since pyproject isn't in the 
+allowlist).
+- Offer the unblocked run.py piece as an option (or just note I'll deliver 
+everything together once unblocked — cleaner for the gates).
+
+Actually, should I just deliver run.py + its test now since they're unblocked? 
+The task says "stop and report the blocker rather than expanding scope". Partial
+delivery isn't expanding scope... but mixed partial states could confuse 
+verification. The operator said they'll run gates after; delivering a partial 
+change and reporting "these two files are complete, three blocked" is honest and
+useful. Hmm. But `test_main_uses_pipeline_path_by_default` in test_run_cli.py — 
+if I add it now alongside other run_cli tests, fine. But wait: if main() routes 
+to the pipeline and the pipeline planner is still old, the default CLI still 
+works (old planner behavior). No breakage.
+
+I'll deliver run.py and test_run_cli.py now? Careful: test_run_cli.py changes 
+are only ADDING the new test (keep existing legacy-loop tests unchanged — they 
+are). Actually the instruction: "Update tests/unit/test_run_cli.py to assert the
+default CLI does not build or pass a legacy agent and reaches the pipeline 
+signature." I can write that test now. It should pass against the updated 
+run.py.
+
+Hmm, but if I'm stopping, maybe simplest is to stop entirely with a clear 
+report. Delivering 2 of 5 files while 3 are blocked creates a mixed message. Yet
+it shows progress on what's unblocked. The task's stop clause is about not 
+proceeding with guesses; the run.py piece involves no guesses.
+
+Let me decide: I will deliver run.py and the new test_run_cli.py addition now 
+(they're fully specified and safe), and stop on harness/planner.py, 
+test_planner.py, test_intent_boundary.py pending the pinned artefacts. That 
+respects both "stop and report" and makes real progress. And explicitly not 
+claim verification.
+
+Wait — one more check on run.py edit specifics:
+
+Current main():
+```python
+def main(argv: list[str] | None = None) -> int:
+    configure_logging()
+    args = build_parser().parse_args(argv)
+
+    require_credentials()
+    client = build_client(args.stub)
+    agent = build_agent()
+    deps = Deps(client=client)
+    ask_user = None if args.no_interactive else _prompt_on_terminal
+
+    try:
+        output = asyncio.run(
+            converse(
+                agent,
+                deps,
+                args.question,
+                ...
+```
+
+New main(): remove `agent = build_agent()`, call `converse(None, deps, 
+args.question, ...)`.
+
+Import line: `from harness.agent import ask, build_agent  # noqa: E402` — 
+build_agent would be unused in run.py. Keep it for monkeypatch-target 
+testability? An unused import is fine and serves as the seam the test patches 
+(`monkeypatch.setattr(cli, "build_agent", boom)`). The test "does not build ... 
+a legacy agent" is best proven by patching `run.build_agent` with a function 
+that raises and asserting main() completes. If I remove the import, the test can
+instead patch `harness.agent.build_agent`. Either works. Keeping the import is 
+lower-churn and keeps `# noqa: E402` grouping. But an unused import might look 
+sloppy. Hmm, the docstring/comment can explain it's retained as a patch seam? 
+Actually, converse() still supports legacy agents and run.py is the CLI; keeping
+the import just for a test seam is a bit odd but harmless and makes the 
+regression test precise. Alternatively, main could keep an explicit parameter? 
+No, keep minimal per plan: "Do not construct the legacy agent for this default 
+path."
+
+I'll keep the import with a brief comment that it remains for explicit legacy 
+callers/tests — wait, converse() is in run.py; legacy callers call 
+converse(agent,...) directly with their own agent from harness.agent. run.py 
+doesn't need build_agent for them. I'll keep the import and note the seam 
+purpose in a comment. Actually cleaner: the test can patch `cli.build_agent`. 
+Keep it.
+
+Now the new CLI test:
+
+```python
+def test_main_uses_pipeline_path_by_default(monkeypatch):
+    """The default CLI must reach ask(deps, question) — the deterministic
+    pipeline — without constructing or passing a legacy agent."""
+    def _boom(*_a, **_k):
+        raise AssertionError("the default CLI must not build a legacy agent")
+
+    seen: dict[str, Any] = {}
+
+    async def fake_converse(agent, deps, question, **kwargs):
+        seen["agent"] = agent
+        seen["question"] = question
+        return ClarificationNeeded(question_id="VC-POC-01", missing=[], 
+prompt_to_user="x")
+
+    monkeypatch.setattr(cli, "build_agent", _boom)
+    monkeypatch.setattr(cli, "converse", fake_converse)
+    monkeypatch.setattr(cli, "require_credentials", lambda: None)
+    monkeypatch.setattr(cli, "build_client", lambda use_stub: stub_client())
+    code = cli.main(["--no-interactive", "--stub", "q"])
+    assert code == cli.EXIT_CLARIFICATION
+    assert seen["agent"] is None
+    assert seen["question"] == "q"
+```
+
+Wait — ClarificationNeeds with empty missing list: MissingInput list empty is 
+fine. Rendering? With --no-interactive and json flag? main prints 
+output.model_dump_json or render_text. render_clarification with empty missing →
+prompt only, fine. EXIT_BY_BRANCH[ClarificationNeeded] = 2. Good. Also needs 
+`import ClarificationNeeded` in test file — already imported.
+
+But careful: main() signature — it parses argv, calls require_credentials 
+(patched), build_client (patched), build_agent (patched to boom — proving not 
+called), converse (patched fake). asyncio.run around fake_converse works. 
+
+Hmm — one subtlety: monkeypatch.setattr(cli, "converse", fake_converse) — main 
+calls `converse(None, deps, args.question, ask_user=..., 
+max_clarifications=...)`. My fake accepts (agent, deps, question, **kwargs). 
+Good. And I assert seen["agent"] is None → "does not pass a legacy agent". And 
+`_boom` never called → "does not build". 
+
+Also "reaches the pipeline signature" — agent is None is the pipeline signature 
+in converse. Good.
+
+Should the fake return a ClarificationNeeded or a RenderedAnswer? RenderedAnswer
+requires the full preserved-fields construction — harder. ClarificationNeeded is
+easy. Fine.
+
+Now: do I also need to worry that main() with `--stub` and `--no-interactive`...
+require_credentials is patched so no credential check. build_client patched. OK.
+
+Edge: `EXIT_BY_BRANCH[type(output)]` — type(fake ClarificationNeeded) → key 
+present. Good.
+
+Now the dilemma about delivering partial. Let me re-read the task's final line: 
+"If a required change cannot fit this allowlist or a pinned input is 
+unavailable, stop and report the blocker rather than expanding scope." And 
+"Report changed files and any unmet criterion."
+
+Delivering run.py + test_run_cli.py while reporting the blocker on the other 
+three seems compliant: changed files reported, blocker reported, unmet criteria 
+enumerated (all the planner-side acceptance tests not yet added).
+
+But there's a risk the operator treats a partial delivery as the final state. 
+I'll make the report unambiguous: this is a partial delivery; three files are 
+intentionally unchanged pending inputs; do not run final acceptance yet.
+
+Alternatively... deliver nothing and just ask. Given "If the request is 
+ambiguous, ask questions" from the system prompt and the explicit stop clause, 
+and to avoid any chance the operator runs gates on a half-changed tree expecting
+full behavior... Hmm.
+
+The stop clause says "stop and report the blocker" — the plain reading is: don't
+implement; report. A partial delivery is still "stopping" on the blocked part. I
+think partial delivery of the fully-specified, zero-ambiguity piece is 
+defensible and useful. But is run.py truly zero-ambiguity? The plan: "Make the 
+default CLI call converse(None, deps, ...)... Do not construct the legacy agent 
+for this default path... Retain explicit legacy-agent support in converse()." 
+Yes, fully specified, and converse() already implements both paths (verified in 
+the provided source). The only judgment call is the retained import. Zero risk.
+
+Decision: deliver run.py + tests/unit/test_run_cli.py, stop on the rest, report 
+precisely.
+
+Hmm, wait. Let me reconsider once more whether I'm being too conservative on the
+planner. Could the operator expect me to have these pinned files available "in 
+the repo" and consider them available? The phrase "a pinned input is 
+unavailable" — unavailable to whom? I'm a code-writing agent; my only access is 
+the chat context. I cannot read the repo (no shell, no file reads beyond chat). 
+So from my seat, they're unavailable. Asking to add them is exactly the 
+established protocol in this conversation ("ask me to add them to the chat 
+first"). Confident.
+
+Also the `jsonschema` dependency: even with files added, if the package isn't 
+installed, TerminalError-on-load would make every fetch fail. I'll ask them to 
+confirm or add `pyproject.toml`/`requirements*.txt` to the chat (read-only) so I
+can check; if absent, that's a blocker to report (dependency addition would be 
+outside the allowlist → needs operator action).
+
+Let me now also precisely list what I need and why, mapped to plan requirements:
+
+1. `contract/poc_question_registry.v0.3.0.json` — input_policy key 
+names/classifications (required/material/conditional-material/defaultable), the 
+exact conditional `distance_km` declaration text, per-question `metric_list`, 
+request-schema reference field, VC-POC-09/10 constraint text and what 
+constitutes the sector default. (plan: pinned-policy-authority, 
+known-condition-only, od07-explicit-filter-rule, static-vocabulary-source)
+
+2. `contract/question_schemas/v0.3.0/_index.json` and the per-question request 
+schema files (at minimum VC-POC-01, 03, 04, 05, 09, 10, 11 — ideally all, since 
+validation is generic and I want the loader's resolution rule right; the 
+registry reference + index is what the loader needs; sample schemas confirm the 
+reference format) — schema path registration/resolution, and to write 
+schema-validation tests without hardcoding.
+
+Actually for writing code I need: the reference mechanism. For writing tests: I 
+plan tests that load via the same loader, so sample files not strictly needed if
+registry references are enough — but seeing 2-3 real schemas confirms 
+assumptions ($schema draft, additionalProperties usage, definitions/$ref layout 
+for the resolver). Ask for the full directory ideally; accept a subset.
+
+3. `contract/poc_input_catalog.v0.3.0.schema.json` — the 
+`x-poc-request-field-to-catalog-list` value shape and where embedded static 
+enums live (e.g., `student_context_metrics` list backing VC-POC-11 metrics and 
+VC-POC-03 ratios). Needed for normalization membership, allowed_values in 
+clarifications, and VC-POC-03 routing.
+
+4. `harness/contract.py` — exact loader APIs/paths and return shapes so the 
+planner reads pinned data through the same trusted accessors and my 
+safe-resolution rule (only paths beneath the pinned contract dir) matches 
+reality.
+
+5. `harness/tools.py` — `Deps` full field set (I see usages: client, searched, 
+resolved_school_ids, tool_calls, last_envelope, user_question, intent, 
+answer_view, last_messages) and `request_scope_problem()` return type/semantics;
+ToolInvocation signature ordering.
+
+6. `harness/intent.py` — StructuredIntent exact field list/types (filters 
+typing, requested_metrics).
+
+7. `harness/outputs.py` — MissingInput/ClarificationNeeded/HarnessOutput 
+definitions (mostly inferred; confirmation avoids pydantic surprises).
+
+8. Dependency check: `pyproject.toml` (or requirements/uv.lock) to confirm a 
+Draft 2020-12 validator (`jsonschema>=4.x`) is installed; if not, I stop and 
+report since adding a dependency is outside the allowlist.
+
+Optional but useful: `prompts/input_catalog.snapshot.json`, 
+`evals/cases/golden_cases.json`, `tests/conftest.py` — the snapshot for 
+consistency baselines; golden cases for the 99999 explicit-ID behavior; conftest
+to see if any fixtures/monkeypatching conventions exist.
+
+Now write the final answer. Structure:
+
+1. Status: partial delivery + blocker report. No claims of running anything.
+2. Blocker detail.
+3. What I delivered (run.py, test_run_cli.py) with file listings.
+4. Exactly what I need added to the chat to finish the remaining three files.
+5. Unmet criteria list (the named acceptance tests not yet added).
+
+Wait, actually, hmm. Let me reconsider delivering run.py/test_run_cli.py at all.
+If the operator's gate runs `.venv/bin/python -m pytest tests/ -q` expecting 
+full completion... a partial tree fails focused tests (missing planner tests) 
+anyway — the acceptance focused command references planner tests that don't 
+exist yet → collection error. So the operator already knows it's incomplete from
+my report. Partial delivery doesn't mislead if I'm explicit.
+
+But another thought: does changing run.py alone break anything? Existing 
+test_run_cli tests: they use `cli.converse` directly with explicit agents 
+(unchanged behavior), `cli.build_client`, `cli.require_credentials`, 
+`answered()` via build_agent directly (not via cli.main). Nothing tests main()'s
+agent construction currently. So no existing test breaks. Safe.
+
+One more consideration on the new CLI test name — the acceptance command 
+references 
+`tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default`. Must 
+match exactly. Yes.
+
+Also must NOT claim tests pass — I haven't run them (can't). State that.
+
+Now, one more scan of run.py for the edit:
+
+```python
+from harness.agent import ask, build_agent  # noqa: E402
+```
+Keep as is (build_agent becomes a patch seam). Hmm — actually, is an unused 
+import going to trip a linter gate? There's `# noqa: E402` for import order, not
+unused. The repo may run ruff? Unknown. An unused import `build_agent` in run.py
+would be flagged by ruff F401 if configured. To be safe, I could use it in a 
+harmless way or... The existing code imports `MissingInput`? Let me check 
+current imports in run.py: `BudgetExceeded, ClarificationNeeded, HarnessOutput, 
+RenderedAnswer, Unsupported` — all used in EXIT_BY_BRANCH/render functions. 
+`ask` used in converse. `build_agent` — after my change, unused. Options: (a) 
+remove from import; test patches `harness.agent.build_agent` instead and main() 
+doesn't reference it at all — this proves "does not build" even more strongly 
+(patch the source, assert not called). (b) keep and risk lint. 
+
+I'll remove `build_agent` from run.py's import and have the test patch 
+`harness.agent.build_agent` (raising sentinel) — strongest proof: even if run.py
+somehow called it, the sentinel fires. And no unused import. 
+
+Test:
+```python
+def test_main_uses_pipeline_path_by_default(monkeypatch):
+    import harness.agent as agent_mod
+
+    def _no_legacy_agent(*_args, **_kwargs):
+        raise AssertionError("default CLI must not build a legacy agent")
+
+    monkeypatch.setattr(agent_mod, "build_agent", _no_legacy_agent)
+    monkeypatch.setattr(cli, "require_credentials", lambda: None)
+
+    seen: dict[str, Any] = {}
+
+    async def fake_converse(agent, deps, question, **_kwargs):
+        seen["agent"] = agent
+        seen["question"] = question
+        seen["deps"] = deps
+        return ClarificationNeeded(
+            question_id="VC-POC-01", missing=[], prompt_to_user="clarify"
+        )
+
+    monkeypatch.setattr(cli, "converse", fake_converse)
+    monkeypatch.setattr(cli, "build_client", lambda _stub: stub_client())
+
+    exit_code = cli.main(["--stub", "--no-interactive", "a question"])
+
+    assert exit_code == cli.EXIT_CLARIFICATION
+    assert seen["agent"] is None
+    assert seen["question"] == "a question"
+    assert seen["deps"] is not None
+```
+
+Hmm wait — if run.py no longer imports build_agent, patching 
+`agent_mod.build_agent` only matters if run.py calls it transitively — it won't.
+The assertion still proves intent: if anyone reintroduces a call, it fails. But 
+if run.py doesn't import it, patching harness.agent.build_agent guards the true 
+source. Good. Also removes doubt about lint.
+
+Also `deps` — main constructs `Deps(client=client)`. fake_converse captures it. 
+Assert it's a Deps? `assert isinstance(seen["deps"], Deps)` — Deps imported 
+already in the test file. Good.
+
+Note: `main` also has configure_logging() — fine in tests (already happens in 
+other runs?). It configures logging; harmless.
+
+`render_text` for ClarificationNeeded with empty missing: 
+`output.prompt_to_user.strip()` → "clarify"; "Needed before this can be 
+answered:\n" with empty bullets; fine — but we pass... main prints only when not
+args.json. We don't pass --json so it prints rendered text. Fine.
+
+Also `--stub` flag: build_client patched with lambda taking `use_stub` 
+positionally — main calls `build_client(args.stub)` → positional. `lambda _stub:
+stub_client()` — main calls with one positional arg, lambda accepts one. OK. Let
+me name it `lambda use_stub: stub_client()`.
+
+Also need `from harness.outputs import ... ClarificationNeeded` — already 
+imported in test_run_cli.py. Yes: `from harness.outputs import BudgetExceeded, 
+ClarificationNeeded, MissingInput, Unsupported`. Good.
+
+And `import harness.agent as agent_mod` inside the test or top-level? Top-level 
+import addition: `from harness.agent import ask, build_agent` already exists; 
+I'll just do `import harness.agent` inside the test to keep top clean, or add 
+top-level. Inside-test import is fine and keeps the diff tight. Hmm, the test 
+file style imports inside functions sometimes (e.g., `from config import 
+settings` inside tests). I'll import inside the test.
+
+Wait, but if run.py no longer imports build_agent, does anything else in 
+test_run_cli use build_agent? Yes — `answered()` uses `build_agent(...)` 
+imported at top: `from harness.agent import ask, build_agent`. Keep that import.
+Fine.
+
+Now full run.py listing with changes:
+- Remove `build_agent` from the harness.agent import → `from harness.agent 
+import ask  # noqa: E402`
+- main(): drop `agent = build_agent()`, call converse(None, deps, ...).
+
+Also update any docstring mention? The module docstring doesn't mention the 
+agent build. converse() docstring already documents agent None. Add a short 
+comment in main noting the default path is the deterministic pipeline (per plan)
+— helpful.
+
+Now write the blocker report carefully. List required additions:
+
+Must-have (planner core):
+- `contract/poc_question_registry.v0.3.0.json`
+- `contract/question_schemas/v0.3.0/_index.json` plus the per-question request 
+schemas (the directory or at minimum VC-POC-01, VC-POC-03, VC-POC-04, 
+VC-POC-05/06/07, VC-POC-09, VC-POC-10, VC-POC-11)
+- `contract/poc_input_catalog.v0.3.0.schema.json`
+- `harness/contract.py`
+- `harness/tools.py`
+- `harness/intent.py`
+- `harness/outputs.py`
+- `pyproject.toml` or the lock/requirements file (to confirm a Draft 2020-12 
+validator is installed)
+
+Helpful:
+- `evals/cases/golden_cases.json`, `prompts/input_catalog.snapshot.json`, 
+`prompts/rules.md` (pinned alias), `tests/conftest.py` if present.
+
+Why each unknown blocks (tie to specific plan/contract requirements):
+- Exact key names/classifications in `input_policy` → derived-missing-inputs 
+(contract: pinned-policy-authority, policy-order).
+- Exact pinned `distance_km` conditional declaration → known-condition-only 
+(must bind to exact declaration; heuristic parsing forbidden).
+- Registry request-schema reference mechanism → safe-schema-resolution, 
+complete-schema-validation.
+- `metric_list` location/shape and catalog mapping shape → 
+static-vocabulary-source, metric-normalization-routing, allowed_values 
+population.
+- VC-POC-09/10 constraint text & sector-default definition → 
+od07-explicit-filter-rule, test_peer_filters_require_explicit_nondefault_filter.
+- Deps/request_scope_problem/StructuredIntent exact shapes → transactional 
+identity, scope rule, no invented fields.
+- jsonschema availability → the validator itself.
+
+Unmet criteria if I stop now: all planner/intent_boundary focused tests (list 
+them) plus run_cli test — no wait, run_cli test IS delivered. Unmet: the 10 
+planner node IDs and 
+test_intent_boundary::test_planner_failure_is_not_unsupported, plus the 
+planner-side required_outputs.
+
+Format: The response must include the two file listings. Keep the report tight 
+but complete. Also per instructions: "Report changed files and any unmet 
+criterion. Do not claim build or verification passed."
+
+Length: two full file listings (run.py ~300 lines, test_run_cli.py ~350 lines) 
+plus report. That's necessary since I'm changing both. Make sure listings are 
+complete and exact copies with only my modifications.
+
+Let me write run.py fully now, carefully preserving everything else 
+byte-for-byte where possible.
+
+Original run.py — I'll reproduce with the two edits:
+1. Import line: `from harness.agent import ask, build_agent  # noqa: E402` → 
+`from harness.agent import ask  # noqa: E402`
+2. main():
+```python
+    require_credentials()
+    client = build_client(args.stub)
+    agent = build_agent()
+    deps = Deps(client=client)
+    ask_user = None if args.no_interactive else _prompt_on_terminal
+
+    try:
+        output = asyncio.run(
+            converse(
+                agent,
+                deps,
+                args.question,
+```
+→
+```python
+    require_credentials()
+    client = build_client(args.stub)
+    # Default CLI path: agent=None selects ask(deps, question) — the
+    # deterministic four-stage pipeline. The legacy tool loop stays available
+    # to converse() for explicit callers (replay/compatibility tests), but the
+    # shipped entry point never constructs it.
+    deps = Deps(client=client)
+    ask_user = None if args.no_interactive else _prompt_on_terminal
+
+    try:
+        output = asyncio.run(
+            converse(
+                None,
+                deps,
+                args.question,
+```
+
+Now test_run_cli.py: add the new test in the "exit codes and wiring" section. 
+Insert after `test_json_output_is_the_branch_itself()` or near wiring tests. 
+I'll add at the end of the wiring section.
+
+Full file reproduction needed. Let me carefully copy the provided 
+test_run_cli.py and insert:
+
+```python
+def test_main_uses_pipeline_path_by_default(monkeypatch):
+    """The default CLI runs the deterministic pipeline: main() passes no agent
+    to converse() and never constructs the legacy tool loop. Patching the
+    legacy builder to explode proves the "never constructs" half; capturing
+    converse()'s first argument proves the "passes None" half."""
+    import harness.agent as agent_mod
+
+    def _no_legacy_agent(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("the default CLI must not build a legacy agent")
+
+    seen: dict[str, Any] = {}
+
+    async def fake_converse(agent, deps, question, **_kwargs):
+        seen["agent"] = agent
+        seen["deps"] = deps
+        seen["question"] = question
+        return ClarificationNeeded(
+            question_id="VC-POC-01",
+            missing=[],
+            prompt_to_user="Needs one more detail.",
+        )
+
+    monkeypatch.setattr(agent_mod, "build_agent", _no_legacy_agent)
+    monkeypatch.setattr(cli, "require_credentials", lambda: None)
+    monkeypatch.setattr(cli, "build_client", lambda use_stub: stub_client())
+    monkeypatch.setattr(cli, "converse", fake_converse)
+
+    exit_code = cli.main(["--stub", "--no-interactive", "How many students?"])
+
+    assert exit_code == cli.EXIT_CLARIFICATION
+    assert seen["agent"] is None
+    assert isinstance(seen["deps"], Deps)
+    assert seen["question"] == "How many students?"
+```
+
+Check: main() calls `converse(None, deps, args.question, ask_user=ask_user, 
+max_clarifications=...)` — fake_converse(agent, deps, question, **kwargs) 
+absorbs ask_user/max_clarifications. Good.
+
+`configure_logging()` runs — fine.
+
+Now, is `ClarificationNeeded(question_id=..., missing=[], prompt_to_user=...)` 
+valid pydantic? missing: list[MissingInput] default empty ok. main → not json → 
+render_text → render_clarification: prompt_to_user.strip() ok; missing list 
+empty → "Needed before this can be answered:\n" + "" → fine. EXIT_BY_BRANCH → 2.
+
+One catch: `EXIT_BY_BRANCH[type(output)]` — type is ClarificationNeeded → 2. 
+Good.
+
+Also note `test_main_uses_pipeline_path_by_default` patching 
+`agent_mod.build_agent`: since run.py no longer imports build_agent, this patch 
+only guards the source module. If someone re-adds `from harness.agent import 
+build_agent` at module import time in run.py, the patch (applied before main()) 
+replaces the module attribute — but run.py's `from ... import` binds at import 
+time; monkeypatching agent_mod.build_agent after run.py was imported would NOT 
+affect run.py's bound name. Hmm! So the sentinel wouldn't fire if run.py 
+re-imports build_agent. To make the guard effective regardless, patch should 
+happen before `import run`... but test module imports run at top. Alternative: 
+make the test robust by checking `cli` module doesn't call build_agent — the 
+"passes None" assertion is the real behavioral proof; the "does not build" is 
+proven by main() simply not referencing it. To also catch a reintroduction, I 
+can assert via source inspection like the ADR-011 test does:
+
+```python
+source = (Path(__file__).resolve().parents[2] / "run.py").read_text("utf-8")
+assert "build_agent" not in source
+```
+
+Hmm, that's a bit crude but consistent with an existing test style in this file 
+(`test_anthropic_credentials_use_the_sdks_own_resolver` reads source). 
+Combining: monkeypatch agent_mod.build_agent (guard for transitive calls) + 
+behavioral None assertion + maybe source check. I'll include the source check 
+too — it directly encodes "does not build or pass a legacy agent" at the entry 
+point. Actually the plan says the test must "assert the default CLI does not 
+build or pass a legacy agent and reaches the pipeline signature." The behavioral
+assertion (agent is None) covers "does not pass" and "reaches pipeline 
+signature". Adding the source check covers "does not build" durably. I'll 
+include both. Wait — if run.py retains the word "build_agent" in a comment it'd 
+false-fail; I control run.py so it won't contain that string anywhere. OK.
+
+Hmm, though — maybe keep it simpler: patching `harness.agent.build_agent` and 
+asserting converse receives None is enough, plus source check. Fine, include all
+three assertions; cheap.
+
+Actually — one concern with source check: `run.py` docstrings... current 
+docstring doesn't mention build_agent. After my edit, no occurrence. OK.
+
+Now assemble the final answer:
+
+Structure:
+- Brief status: delivering the fully-specified CLI wiring now; stopping on the 
+planner core per the stop clause because pinned inputs aren't in context; list 
+exactly what to add.
+- Changed files list.
+- Unmet criteria (tests not yet added / outputs not yet produced).
+- File listings for run.py and tests/unit/test_run_cli.py.
+
+Let me write out run.py completely, preserving the original exactly except my 
+edits. I must be meticulous — copy from the provided content.
+
+Then test_run_cli.py completely with the added test. Where to place it: in "exit
+codes and wiring" section after `test_json_output_is_the_branch_itself()`. 
+
+Double-check test file imports already present: asyncio, json, sys, Path, Any, 
+pytest, pydantic_ai bits, replay_mod, load_cases/load_reference_solutions, 
+ask/build_agent, EvidenceClient, outputs, Deps, cli. My new test uses: Any 
+(imported), ClarificationNeeded (imported), Deps (imported), Path (imported), 
+cli, stub_client (defined). Good — no new imports needed except `import 
+harness.agent as agent_mod` inside the test.
+
+Write everything out now. Also keep the docstring of run.py unchanged.
+
+One more scan of run.py for other references to agent... `converse()` uses 
+`agent` param — fine. Nothing else.
+
+For the blocker list, be precise and concise. Also mention explicitly: I have 
+not run any commands; verification is left to the operator gates; partial state 
+will fail the focused acceptance command until the remaining three files land — 
+do not treat this delivery as complete.
+
+Also mention the manifest-allowlist item is satisfied by the task's explicit 
+five-file authorization (not a blocker).
+
+Length check on planner unknowns — keep tight bullets.
+
+------------
+► **ANSWER**
+
+I have to stop part-way and report a blocker, per your instructions ("If ... a 
+pinned input is unavailable, stop and report the blocker rather than expanding 
+scope").
+
+
+
+## What I delivered now
+
+
+
+`run.py` and `tests/unit/test_run_cli.py` are fully specified by the plan and 
+contract and involve no pinned-artefact unknowns, so I implemented those:
+
+
+
+- **`run.py`** — `main()` no longer constructs the legacy agent; it calls 
+`converse(None, deps, ...)`, selecting `ask(deps, question)` (the deterministic 
+pipeline). `converse()`'s explicit legacy-agent support is untouched, as are 
+credentials, emitter selection, rendering, exit codes, and the clarification 
+limit. The now-unused `build_agent` import was removed.
+
+- **`tests/unit/test_run_cli.py`** — added 
+`test_main_uses_pipeline_path_by_default` (exact contracted node ID). It proves 
+the legacy builder is neither imported/called nor passed, and that `converse()` 
+receives `None` with a real `Deps`. All pre-existing tests, including the 
+legacy-loop ones, are unchanged.
+
+
+
+## Blocker: pinned inputs are not available in this session
+
+
+
+The planner core cannot be written correctly without seeing the pinned 
+artefacts' actual structures. I cannot read the repository — I can only work 
+from files added to this chat. Guessing key names would violate the contract's 
+own precision requirements (`pinned-policy-authority`, `known-condition-only`, 
+`safe-schema-resolution`). Specifically I need:
+
+
+
+1. **`contract/poc_question_registry.v0.3.0.json`** — exact `input_policy` key 
+names/classifications (required / material / conditional-material / 
+defaultable), the **exact pinned `distance_km` conditional declaration string** 
+(I must bind to it exactly; heuristic parsing is forbidden), per-question 
+`metric_list` shape, the request-schema reference field, and the **VC-POC-09/10 
+constraint text including what constitutes the sector default**.
+
+2. **`contract/question_schemas/v0.3.0/_index.json`** plus the per-question 
+request schemas (at minimum VC-POC-01/03/04/05/09/10/11) — needed to implement 
+registered-path-only loading, draft-2020-12 validation, and schema-derived tests
+without hardcoding.
+
+3. **`contract/poc_input_catalog.v0.3.0.schema.json`** — the value shape of 
+`x-poc-request-field-to-catalog-list` and where the embedded static enums live 
+(`student_context_metrics`, ratios, grades) for normalization membership, 
+VC-POC-03 routing, and clarification `allowed_values`.
+
+4. **`harness/contract.py`** — exact accessor return shapes and pinned paths so 
+planner reads go through the same trusted loaders.
+
+5. **`harness/tools.py`** — full `Deps` field set, `ToolInvocation` signature 
+order, and `request_scope_problem()` semantics.
+
+6. **`harness/intent.py`** and **`harness/outputs.py`** — exact 
+`StructuredIntent` and output-model definitions.
+
+7. **`pyproject.toml`** (or requirements/lock) — to confirm a JSON Schema 
+draft-2020-12 validator (`jsonschema>=4`) is installed. If it is not, that is a 
+second blocker: adding a dependency is outside the five-file allowlist.
+
+
+
+Helpful but secondary: `evals/cases/golden_cases.json`, `prompts/rules.md`, 
+`prompts/input_catalog.snapshot.json`.
+
+
+
+## Unmet criteria in this partial state
+
+
+
+- `harness/planner.py` required output: not started (blocked).
+
+- Not yet added: all ten `tests/unit/test_planner.py` acceptance node IDs and 
+`tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported`.
+
+- The focused acceptance command **will fail collection** in this state. Do not 
+run final verification yet.
+
+- I have not run any commands and claim no build/test results.
+
+
+
+Note: the contract's `manifest-allowlist-conflict` requirement is satisfied by 
+your explicit five-file authorization, so that is not a blocker.
+
+
+
+Please add the files above (read-only is fine) and I will complete 
+`harness/planner.py`, `tests/unit/test_planner.py`, and 
+`tests/unit/test_intent_boundary.py`.
+
+
+
+run.py
+
+```diff
+@@ -43,11 +43,11 @@
+ from config import settings  # noqa: E402
+ from harness.claude_account_cli import (  # noqa: E402
+     ClaudeAccountCliError,
+     claude_account_status,
+ )
+-from harness.agent import ask, build_agent  # noqa: E402
++from harness.agent import ask  # noqa: E402
+ from harness.errors import HarnessError  # noqa: E402
+ from harness.evidence import EmitterFailure, EvidenceClient  # noqa: E402
+ from harness.logging_config import configure_logging  # noqa: E402
+ from harness.outputs import (  # noqa: E402
+     BudgetExceeded,
+@@ -309,18 +309,21 @@
+     configure_logging()  # once per entry point, before anything else logs
+     args = build_parser().parse_args(argv)
+ 
+     require_credentials()
+     client = build_client(args.stub)
+-    agent = build_agent()
++    # Default CLI path: agent=None selects ask(deps, question) — the
++    # deterministic four-stage pipeline. The legacy tool loop remains available
++    # to converse() for explicit callers (replay/compatibility tests), but the
++    # shipped entry point never constructs it.
+     deps = Deps(client=client)
+     ask_user = None if args.no_interactive else _prompt_on_terminal
+ 
+     try:
+         output = asyncio.run(
+             converse(
+-                agent,
++                None,
+                 deps,
+                 args.question,
+                 ask_user=ask_user,
+                 max_clarifications=args.max_clarifications,
+             )
+```
+
+
+
+tests/unit/test_run_cli.py
+
+```diff
+@@ -348,10 +348,52 @@
+     payload = json.loads(output.model_dump_json())
+     assert payload["question_id"] == output.question_id
+     assert payload["limitations"] == output.limitations
+ 
+ 
++def test_main_uses_pipeline_path_by_default(monkeypatch):
++    """The default CLI runs the deterministic pipeline: main() passes no agent
++    to converse() and never constructs the legacy tool loop.
++
++    Proven three ways: the entry-point source no longer references the legacy
++    builder; patching the builder at its source explodes if anything calls it;
++    and the captured converse() first argument is None with a real Deps — the
++    pipeline signature.
++    """
++    import harness.agent as agent_mod
++
++    def _no_legacy_agent(*_args: Any, **_kwargs: Any) -> None:
++        raise AssertionError("the default CLI must not build a legacy agent")
++
++    source = (Path(__file__).resolve().parents[2] / 
+"run.py").read_text("utf-8")
++    assert "build_agent" not in source
++
++    seen: dict[str, Any] = {}
++
++    async def fake_converse(agent, deps, question, **_kwargs):
++        seen["agent"] = agent
++        seen["deps"] = deps
++        seen["question"] = question
++        return ClarificationNeeded(
++            question_id="VC-POC-01",
++            missing=[],
++            prompt_to_user="Needs one more detail.",
++        )
++
++    monkeypatch.setattr(agent_mod, "build_agent", _no_legacy_agent)
++    monkeypatch.setattr(cli, "require_credentials", lambda: None)
++    monkeypatch.setattr(cli, "build_client", lambda use_stub: stub_client())
++    monkeypatch.setattr(cli, "converse", fake_converse)
++
++    exit_code = cli.main(["--stub", "--no-interactive", "How many students?"])
++
++    assert exit_code == cli.EXIT_CLARIFICATION
++    assert seen["agent"] is None
++    assert isinstance(seen["deps"], Deps)
++    assert seen["question"] == "How many students?"
++
++
+ # --------------------------------------------------------------------------
+ # the corrected auth-source check (ADR-011 follow-up)
+ # --------------------------------------------------------------------------
+ 
+ 
+```
+
+
+Tokens: 29k sent, 20k received. Cost: $0.01 message, $0.01 session.
+
+authcheck.py
+
+contract/poc_input_catalog.v0.3.0.schema.json
+
+contract/poc_question_registry.v0.3.0.json
+Warning: it's best to only add files that need changes to the chat.
+https://aider.chat/docs/troubleshooting/edit-errors.html
+
+contract/question_schemas/v0.3.0/_index.json
+
+evals/cases/golden_cases.json
+
+evals/stub_emitter.py
+
+harness/contract.py
+
+harness/intent.py
+
+harness/outputs.py
+
+harness/tools.py
+
+prompts/input_catalog.snapshot.json
+
+prompts/rules.md
+
+Scanning repo:   0%|          | 0/171 [00:00<?, ?it/s]Scanning repo:  58%|█████▊    | 100/171 [00:00<00:00, 963.82it/s]Scanning repo: 100%|██████████| 171/171 [00:00<00:00, 683.55it/s]
+/Users/shane/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

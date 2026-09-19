@@ -1,0 +1,63 @@
+# Independent Problem Analysis
+
+The work item asks `harness/planner.py` to (1) deterministically derive required inputs, (2) resolve schools safely, (3) normalize requested metrics, (4) construct exact evidence requests, and (5) surface planner-generated bad requests as failures rather than as unsupported user questions. With the actual bodies of `harness/planner.py`, `tests/unit/test_planner.py`, `harness/contract.py`, and `harness/intent.py` in hand, the Stage A hypotheses can now be tested against code rather than restated. Several are confirmed, several are disproved, and the request's headline requirement (5) is directly contradicted by the current implementation and by a test that enshrines the behaviour to be changed.
+
+## Confirmed implementation facts
+
+- **The planner is a deterministic, no-model Stage 2.** `plan_and_execute()` returns `dict | ClarificationNeeded | Unsupported` and raises `TerminalError` for `data_unavailable`/`internal`. Branch order is fixed: (1) `question_id == "excluded"`; (2) registry-owned excluded question (VC-POC-TRANSPORT-01); (3) gated question via `contract.refusal_for` (VC-POC-14 → `not_yet_validated`); (4) not-in-registry → `not_in_registry`; (5) missing material input → `ClarificationNeeded`; (6) school resolution; (7) request build; (8) fetch + `_branch_evidence_error`.
+- **Current `bad_request` handling is exactly the behaviour the work item targets.** `_branch_evidence_error` maps an emitter `bad_request` to `Unsupported(reason_kind="out_of_scope")`, with the in-code comment “the planner cannot repair (no model); return out_of_scope so the caller knows the data layer rejected the request.” That is a planner/data-layer rejection being surfaced as a user-facing `Unsupported` — the precise masking pattern requirement (5) exists to remove. `tests/unit/test_planner.py::test_bad_request_returns_unsupported` asserts this mapping, so the current suite locks in the pre-change behaviour.
+- **Materiality derivation is contract-sourced, not a hardcoded table.** `contract.material_inputs_for()` reads `input_policy` (`material` + the keys of `conditional_material`) from the pinned registry; its docstring states it “reads the contract instead of `settings.MATERIAL_INPUTS`, and nothing here parses prose for a ‘when …’ condition any more.” No prose string-split remains at this layer.
+- **Conditional materiality is handled by widening, not by expressing the condition.** `material_inputs_for()` unions all `conditional_material` keys into the material set unconditionally, so `distance_km` counts as material for VC-POC-05/06/07 regardless of `market_definition`; the condition itself is deferred to the emitter. Clause 5 only clarifies when the *intent model* has already listed the input in `missing_material_inputs` AND it is in that material set.
+- **School resolution is directory-only but not ambiguity- or batch-aware.** Clause 6 loops `for school_name in intent.school_mentions`, calling `client.school_directory(search=school_name, limit=25)` once per name and taking `resolved[0]` (“best-effort resolution”; ambiguity is explicitly delegated to “the live-model path”). It never name-matches against non-directory fields and never fabricates an ID.
+- **Metrics are passed through, not normalized in the planner.** `request.setdefault("metrics", intent.requested_metrics)` forwards NL labels verbatim (comment: “NL labels are passed through for now — the real emitter validates them”). The only metric processing is `request_scope_problem` dropping `*_headcount`/`non_teaching_*` expansions for VC-POC-01/04.
+- **No planner-side schema validation.** The request is `dict(intent.filters)` plus resolved IDs and metrics; nothing validates it against the per-question request schema or enforces `additionalProperties: false` before `fetch_evidence`. Rejection is left entirely to the emitter.
+- **Stage 1 supplies the slots the planner trusts.** `harness/intent.py`'s `StructuredIntent` carries `school_mentions`, `requested_metrics`, `filters`, and `missing_material_inputs`; the planner branches on these without re-reading the question. Determinism of “which inputs are missing” is therefore bounded by the model's intent extraction, not derived by the planner from the request contents.
+- **Contract is pinned v0.3.0** (`PINNED.json`, registry `0.3.0`, `golden_cases.json` `0.3.0`); the six-value error taxonomy and static-closed/release-derived/open split (OD-03, input-catalog `x-poc-static-vs-release-derived`) are the authoritative classification surface.
+
+## Disproved initial hypotheses
+
+- **My earlier suspicion that the `settings.MATERIAL_INPUTS` shim (O-1) persists is disproved.** `contract.py` reads materiality from the pinned `input_policy`; the decision-log open items (O-1/O-8/G-4) are stale relative to the code, not descriptions of current behaviour.
+- **H8 (prose string-splitting for `distance_km`) is disproved as current state** — `contract.py` performs no prose parsing. Caveat: the condition is not *expressed* either; it is widened away and delegated to the emitter.
+- **H3 (safe school resolution including ambiguity-clarify and multi-name batching) is partially disproved.** Directory-only and no fabrication hold; ambiguity-clarify does not (takes first match) and batching does not (one `school_directory` call per name).
+- **H4 (metric-normalization fidelity in the planner) is disproved.** The planner performs no NL→vocabulary mapping; it forwards `requested_metrics` and only prunes headcount/non-teaching for two questions.
+- **H5 (schema-exact construction enforced planner-side) is disproved.** No `additionalProperties`/schema validation occurs in the planner; compliance depends on the intent model and the emitter.
+- **H6 (a distinct planner-`bad_request`-as-failure classification exists) is disproved.** The single `bad_request` branch collapses every origin into `Unsupported(out_of_scope)`; there is no failure signal and no separation of planner-shape vs user-identity vs release-derived cases.
+
+## Unresolved evidence gaps
+
+- **`harness/tools.py`** — `request_scope_problem`, `Deps`, `ToolInvocation`, and the referenced `_branch_on_error_kind` / `RepairCapExceeded`. The planner says it *reproduces* `_branch_on_error_kind` “exactly”; whether the agent-loop version repairs `bad_request` once (per `rules.md`) while the planner does not means there are two divergent execution paths. Which is production is unconfirmed.
+- **`harness/outputs.py`** — whether `reason_kind="out_of_scope"` is a legitimate, renderable kind or an ad-hoc value invented only for this masking branch; and the full `Unsupported`/`ClarificationNeeded` contract.
+- **`harness/evidence.py`** — whether `EvidenceClient.school_directory` can accept multiple search terms in one call (bearing on the batching requirement) and how `EvidenceError.reason_code` is populated.
+- **`config/settings.py`** — whether `MATERIAL_INPUTS` still exists anywhere (even if unused by `contract.py`).
+- **`tests/unit/test_agent_loop.py`** — whether the O-8 `distance_km` `xfail` is still present, and whether the agent-loop path (not the planner) is where conditional materiality and repair are exercised.
+- **`evals/graders.py` / `evals/replay.py` / `tests/unit/test_golden_cases.py`** — whether the golden `expected_request` shapes are actually asserted against planner output and whether replay drives the real planner path.
+
+## Requirements and risks that remain valid
+
+- **Requirement (5) is currently unmet and is the crux.** The planner surfaces emitter `bad_request` as `Unsupported(out_of_scope)`, and a test guards that. Any acceptance contract must overturn `test_bad_request_returns_unsupported` and require a distinct failure signal, with a negative test that a planner-constructed malformed request is *not* rendered as a user-facing refusal.
+- **The three `bad_request` dispositions must be separated:** planner-shape defect (failure), directory-absent `acara_sml_id` (repairable/retry-once, per ADR-014 — but note the planner has no loop, so this lives in the tool path), and release-derived/open non-match (empty/partial, OD-03 — never `bad_request`). The current single branch collapses all three.
+- **Conditional materiality of `distance_km`** must fire only under `market_definition == distance` (golden `clarify/market_definition` vs `clarify/distance_km-conditional`); the widen-and-delegate design does not express this and depends on the intent model to avoid the O-8 over-clarify mode.
+- **Directory-only identity with ambiguity-clarify and multi-name batching** (ADR-001, `rules.md` step 1) is only partially realised in the planner.
+- **Smallest-request metric discipline** protecting grounding (ADR-009) is only partially realised (scope-prune for two questions; no normalization).
+- **VC-POC-14 and excluded topics route through the registry-owned refusal path** — confirmed in clauses 1–3 and their tests; this must not be re-routed through any new planner-failure path.
+
+## Acceptance hazards
+
+- **Masking hazard (highest, and currently realised).** The live code converts a planner/data-layer rejection into `Unsupported(out_of_scope)`. A suite asserting only “a refusal occurred” passes over exactly the defect the item targets. Acceptance must positively distinguish failure from refusal and delete/replace the enshrining test.
+- **Disposition-collapse hazard.** With one `bad_request` branch, a change that fixes planner-shape reporting could regress the (tool-path) user-identity repair or wrongly reject release-derived non-matches. All three need explicit tests in opposite directions.
+- **Two-path divergence.** `rules.md` (repair once then stop) describes the agent-loop path; the planner explicitly does not repair. Acceptance should confirm which path is production and that requirement (5) is enforced on the one that ships.
+- **Model-trust hazard for “deterministic derivation.”** “Which inputs are missing” and “which metrics were requested” are supplied by the intent model, not derived by the planner from the request. A truly deterministic derivation (per requirement 1/3) would need the planner to compute these from contract + supplied filters, not accept the model's `missing_material_inputs`/`requested_metrics` unchecked.
+- **`additionalProperties: false` boundary.** No planner-side validation means a model-injected unknown filter reaches the emitter and becomes the masked `out_of_scope` refusal. Acceptance must assert exact request shape (respecting `unordered_request_keys`).
+- **Stale-log false comfort.** O-1/O-8/G-4 read as current but are stale vs `contract.py`; do not accept them as evidence of current behaviour, and check whether the O-8 `xfail` was actually retired.
+
+## Falsifiable questions for planning
+
+1. Is `_branch_evidence_error`'s `bad_request` branch still `Unsupported(out_of_scope)`, and does any test require a planner-generated malformed request to surface as a *failure* distinct from refusal? *Disproved-if:* a failure-signal branch plus a negative discriminating test exist.
+2. Are the three `bad_request` origins (planner-shape / directory-absent-ID / release-derived non-match) given distinct dispositions and separately tested? *Disproved-if:* three separate tests exist.
+3. Does school resolution clarify on multiple directory matches and batch multiple named schools into one call, or does it take `resolved[0]` and loop one call per name? *Disproved-if:* an ambiguity-clarify test and a single-call multi-name test exist.
+4. Does the planner normalize NL metrics to the per-question static-closed vocabulary, or forward `intent.requested_metrics` verbatim? *Disproved-if:* a normalization mapping and its tests exist in the planner.
+5. Does the planner validate the constructed request against the per-question schema (`additionalProperties: false`) before fetch, or rely solely on the emitter? *Disproved-if:* planner-side validation and a rejection test exist.
+6. Is conditional materiality expressed (fires only under `market_definition == distance`) or widened-and-delegated? *Disproved-if:* the planner/contract evaluates the condition rather than unioning the key.
+7. Which execution path is production — the deterministic pipeline (`planner.py`) or the PydanticAI agent-loop (`tools.py`) — and is requirement (5) enforced on it? *Disproved-if:* the shipping path is identified and its `bad_request` failure handling is asserted.
+
+*Boundary note: this is Critic analysis only. It proposes no code changes and makes no determination of pass/fail, materiality, blocking status, or reconciliation; those remain Work Controller decisions.*

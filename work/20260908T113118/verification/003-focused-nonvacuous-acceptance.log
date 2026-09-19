@@ -1,0 +1,10 @@
+started: 2026-09-18T09:57:55Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "-q", "tests/unit/test_planner.py::test_missing_market_definition_is_derived_without_model_hint", "tests/unit/test_planner.py::test_distance_is_conditional_on_distance_market", "tests/unit/test_planner.py::test_ambiguous_school_clarifies_without_fetch", "tests/unit/test_planner.py::test_metric_normalization_and_exact_profile_request", "tests/unit/test_planner.py::test_vc_poc_03_routes_selector_to_ratios", "tests/unit/test_planner.py::test_unknown_request_property_fails_before_fetch", "tests/unit/test_planner.py::test_peer_filters_require_explicit_nondefault_filter", "tests/unit/test_planner.py::test_segment_filters_reject_unknown_nested_key", "tests/unit/test_planner.py::test_schema_valid_emitter_bad_request_is_terminal", "tests/unit/test_planner.py::test_invalid_explicit_identity_bad_request_clarifies", "tests/unit/test_intent_boundary.py::test_planner_failure_is_not_unsupported", "tests/unit/test_run_cli.py::test_main_uses_pipeline_path_by_default"]
+
+...............................                                          [100%]
+31 passed in 0.38s
+
+ended: 2026-09-18T09:57:55Z
+exit_code: 0
+duration_seconds: 0.624

@@ -1,0 +1,2 @@
+{"attempt": 1, "route": {"billing": "subscription", "last_verified": "2026-09-08", "model": "claude-opus-4-8", "model_class": "frontier", "provider": "anthropic", "selector": "role:critic", "transport": "claude"}}
+

@@ -1,0 +1,64 @@
+{"attempt": 1, "route": {"billing": "api", "deadline_seconds": 360.0, "input_price_per_mtok": 0.0, "last_verified": "2026-09-08", "model": "poolside/laguna-s-2.1:free", "model_class": "executor", "output_price_per_mtok": 0.0, "provider": "openrouter", "selector": "tier:T0", "streaming": "auto", "timeout_seconds": 300.0, "transient_retries": 3, "transport": "aider"}}
+
+Aider v0.86.2
+Model: openrouter/poolside/laguna-s-2.1:free with whole edit format
+Git repo: .git with 171 files
+Repo-map: using 4096 tokens, auto refresh
+Added harness/planner.py to the chat.
+Added run.py to the chat.
+Added tests/unit/test_intent_boundary.py to the chat.
+Added tests/unit/test_planner.py to the chat.
+Added tests/unit/test_run_cli.py to the chat.
+Added ../work/k-12MarketIntelligence/work/20260908T113118/planning/002-plan.md 
+to the chat (read-only).
+Added 
+../work/k-12MarketIntelligence/work/20260908T113118/acceptance/003-contract.yaml
+to the chat (read-only).
+
+Initial repo scan can be slow in larger repos, but only happens once.
+litellm.RateLimitError: RateLimitError: OpenrouterException - 
+{"error":{"message":"Provider returned 
+error","code":429,"metadata":{"raw":"poolside/laguna-s-2.1:free is temporarily 
+rate-limited upstream. Please retry shortly, or add your own key to accumulate 
+your rate limits: 
+https://openrouter.ai/settings/integrations","provider_name":"Poolside","is_byok
+":false,"limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry 
+shortly, add your own provider key 
+(https://openrouter.ai/settings/integrations), or route to another provider with
+provider routing: 
+https://openrouter.ai/docs/features/provider-routing"}},"user_id":"user_3InUkwYP
+4H7jt3JVXLB0lQeuiIW"}
+The API provider has rate limited you. Try again later or check your quotas.
+Retrying in 0.2 seconds...
+litellm.RateLimitError: RateLimitError: OpenrouterException - 
+{"error":{"message":"Provider returned 
+error","code":429,"metadata":{"raw":"poolside/laguna-s-2.1:free is temporarily 
+rate-limited upstream. Please retry shortly, or add your own key to accumulate 
+your rate limits: 
+https://openrouter.ai/settings/integrations","provider_name":"Poolside","is_byok
+":false,"limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry 
+shortly, add your own provider key 
+(https://openrouter.ai/settings/integrations), or route to another provider with
+provider routing: 
+https://openrouter.ai/docs/features/provider-routing"}},"user_id":"user_3InUkwYP
+4H7jt3JVXLB0lQeuiIW"}
+The API provider has rate limited you. Try again later or check your quotas.
+Retrying in 0.5 seconds...
+litellm.RateLimitError: RateLimitError: OpenrouterException - 
+{"error":{"message":"Provider returned 
+error","code":429,"metadata":{"raw":"poolside/laguna-s-2.1:free is temporarily 
+rate-limited upstream. Please retry shortly, or add your own key to accumulate 
+your rate limits: 
+https://openrouter.ai/settings/integrations","provider_name":"Poolside","is_byok
+":false,"limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry 
+shortly, add your own provider key 
+(https://openrouter.ai/settings/integrations), or route to another provider with
+provider routing: 
+https://openrouter.ai/docs/features/provider-routing"}},"user_id":"user_3InUkwYP
+4H7jt3JVXLB0lQeuiIW"}
+The API provider has rate limited you. Try again later or check your quotas.
+Retrying in 1.0 seconds...
+
+Scanning repo:   0%|          | 0/171 [00:00<?, ?it/s]Scanning repo:  43%|████▎     | 73/171 [00:00<00:00, 706.69it/s]Scanning repo:  84%|████████▍ | 144/171 [00:00<00:00, 507.74it/s]Scanning repo: 100%|██████████| 171/171 [00:00<00:00, 492.10it/s]
+/Users/shane/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,0 +1,63 @@
+executor_ladder:
+- tier: T0
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  model_class: executor
+  billing: api
+  context_window: null
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  timeout_seconds: 1800
+  deadline_seconds: 1860
+  transient_retries: 3
+  editor_model: openai/gpt-4o-mini
+  last_verified: '2026-09-08'
+  editor_edit_format: diff
+  editor_fallback_tier: T1
+- tier: T1
+  provider: openrouter
+  model: openai/gpt-4o-mini
+  model_class: executor
+  billing: api
+  timeout_seconds: 1800
+  deadline_seconds: 1860
+  transient_retries: 2
+  transport: aider
+- tier: T2
+  provider: openai
+  model: gpt-5.6-luna
+  model_class: executor
+  billing: subscription
+  context_window: null
+  timeout_seconds: 1800
+  deadline_seconds: 1860
+  transient_retries: 1
+  last_verified: '2026-09-08'
+roles:
+  planner:
+    provider: openai
+    model: gpt-5.6-sol
+    model_class: frontier
+    billing: subscription
+    context_window: null
+    last_verified: '2026-09-08'
+    timeout_seconds: 360
+    deadline_seconds: 1200
+  critic:
+    provider: anthropic
+    model: claude-opus-4-8
+    effort: high
+    timeout_seconds: 360
+    deadline_seconds: 600
+    streaming: true
+    model_class: frontier
+    billing: subscription
+    context_window: null
+    last_verified: '2026-09-08'
+  verifier:
+    provider: openai
+    model: gpt-5.6-sol
+    model_class: frontier
+    billing: subscription
+    context_window: null
+    last_verified: '2026-09-08'

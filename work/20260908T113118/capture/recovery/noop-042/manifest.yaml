@@ -1,0 +1,2722 @@
+id: 20260908T113118
+created: '2026-09-08T11:31:18Z'
+method:
+  id: coding-harness
+  version: 0.4.0
+artifact_schema_version: 0.4.0
+request: "Make harness/planner.py deterministically derive required inputs, resolve schools\n  safely,\
+  \ normalize requested metrics, construct exact evidence requests, and surface planner-\n  generated\
+  \ bad requests as failures rather than unsupported user questions."
+narrative: null
+class: null
+state: executed
+parent: null
+children: []
+transitions:
+- at: '2026-09-09T07:31:31Z'
+  transition: ADOPT
+  event: adopt
+  from: draft
+  to: contracted
+  by: operator
+  reason: planning, risk classification and contracting were performed by hand before the controller existed;
+    the evidence is real but no transition was ever recorded
+  guards: []
+- at: '2026-09-12T10:13:32Z'
+  transition: F2
+  event: requires-replan
+  from: contracted
+  to: requires_replan
+  by: shane
+  reason: "Grounded analysis A7 and native plan-review log 011 identify material defects in\n    the current\
+    \ plan. Further full Critic runs offer insufficient expected benefit, so return\n    to manual planning\
+    \ using the preserved evidence."
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (227 characters)
+  - guard: attempt_closed
+    evidence: 21 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+- at: '2026-09-13T23:26:57Z'
+  transition: F19
+  event: review-feedback
+  from: requires_replan
+  to: requires_replan
+  by: shane
+  reason: Record the completed aggregate decision; retain the replan route
+  guards:
+  - guard: review_reconciliation_authorises
+    evidence: TR-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf authorises requires_replan
+      -> requires_replan
+  - guard: review_source_target_guards
+    evidence: requires_replan -> requires_replan is an approved upstream or holding route
+  - guard: human_authorisation
+    evidence: authorised by shane
+  reconciliation: TR-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  reconciliation_sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  review_batches: []
+  approval_ids: []
+  approval_hashes: []
+  review_set_sha256: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
+  approved_target: requires_replan
+  operation_fingerprint: a0f4d0573cc8aee19bad5b95eb47e42d1f810be049b7696f3ad0b392ffcdf5da
+  event_seq: 113
+- at: '2026-09-14T01:18:32Z'
+  transition: F5
+  event: replan
+  from: requires_replan
+  to: planned
+  by: shane
+  reason: Authorize the traced amendment
+  guards:
+  - guard: replan_budget_remains
+    evidence: replan 1 of 2
+  - guard: plan_amendment_appended
+    evidence: planning/002-plan.md c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+  - guard: definitions_resolved
+    evidence: 15 definition references resolve at their recorded revisions
+  - guard: replan_scope_revalidated
+    evidence: repository state matches confirmed replan basis e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  - guard: human_authorisation
+    evidence: authorised by shane
+  targeted_operation: 358e958266e7e254a0bf521e45662a1b361dbd837ffa10bd423e6cb0db15a4d8
+  event_seq: 126
+  replan_basis: &id001
+    path: replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+    sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+    event:
+      seq: 112
+      sha256: 7a52b95a2fb3120e76c55a9c3406fc3e0aa516516336b6711cc1a9b5ca5abdb6
+  amendment_sha256: c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+- at: '2026-09-14T01:19:40Z'
+  transition: T2
+  event: risk
+  from: planned
+  to: classified
+  by: shane@Mimir.local
+  reason: Risk obligations retained
+  guards:
+  - guard: risk_classified
+    evidence: risk high with rationale
+- at: '2026-09-14T01:24:43Z'
+  transition: T3
+  event: acceptance-ready
+  from: classified
+  to: contracted
+  by: shane@Mimir.local
+  reason: Contract 003 binds plan 002 and defines deterministic checks
+  guards:
+  - guard: contract_current_and_intact
+    evidence: contract v3 intact (2b7a5d5eecf2)
+  - guard: contract_deterministic_criteria
+    evidence: 3 deterministic criteria
+- at: '2026-09-14T06:34:16Z'
+  transition: T4
+  event: challenge-ready
+  from: contracted
+  to: challenged
+  by: shane@Mimir.local
+  reason: Operator-authored manual delta disposition accepted; all eight findings resolved; no Critic
+    reviewed the corrected packet
+  guards:
+  - guard: obligations_include_challenge
+    evidence: challenge is an obligation
+  - guard: challenge_two_pass_in_order
+    evidence: composite challenge basis e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  - guard: critic_independence_recorded
+    evidence: critic providers ['anthropic'] differ from planner ['openai']
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+- at: '2026-09-14T06:37:07Z'
+  transition: T6
+  event: execute-ready
+  from: challenged
+  to: ready
+  by: shane@Mimir.local
+  reason: Accepted operator-authored manual delta disposition resolves all eight findings; no Critic reviewed
+    the corrected packet
+  guards:
+  - guard: contract_current_and_intact
+    evidence: contract v3 intact (2b7a5d5eecf2)
+  - guard: challenge_two_pass_in_order
+    evidence: composite challenge basis e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  - guard: reconciliation_recorded
+    evidence: human delta decision reconciles composite a4ae2ec0667f8d39c0e9a14b6bdf3a1905d68093e653fc113b12c3052277e3a7
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  composite_basis_sha256: a4ae2ec0667f8d39c0e9a14b6bdf3a1905d68093e653fc113b12c3052277e3a7
+- at: '2026-09-14T06:44:02Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: Preflight passed for both scopes at T0; context-window headroom recorded as an unevaluated gap
+  guards:
+  - guard: review_readiness_current
+    evidence: current composite readiness with human delta acceptance and no late feedback
+  - guard: scope_revalidated
+    evidence: revalidated work-store@d32d0de9591f (evidence, branch only), k-12Harness@9495079fd3a2
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''challenge'', ''contract'', ''planning'', ''reconciliation'']'
+  - guard: headroom_guard_passed
+    evidence: 'not evaluated: tier T0 has no recorded context_window (estimated 81941 input tokens)'
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+- at: '2026-09-14T23:20:39Z'
+  transition: F12
+  event: retry-later
+  from: executing
+  to: ready
+  by: shane@Mimir.local
+  reason: 'run_executor: timeout at T0 (1/3)'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 33 failure_reason=transient
+  - guard: environmental_failure_only
+    evidence: failure_reason is transient
+  - guard: attempt_closed
+    evidence: 33 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+- at: '2026-09-15T00:02:08Z'
+  transition: F21
+  event: scope-recovered
+  from: ready
+  to: ready
+  by: shane
+  reason: "Contract v3 requires the two added CLI files; plan 002 and the recorded delta\n    disposition\
+    \ cover this expansion."
+  guards:
+  - guard: scope_recovery_current
+    evidence: scope recovery 65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''challenge'', ''contract'', ''planning'', ''reconciliation'']'
+  - guard: human_authorisation
+    evidence: authorised by shane
+  scope_recovery_sha256: 65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157
+- at: '2026-09-15T00:02:14Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: current human-authorized scope recovery with no late feedback
+  - guard: scope_revalidated
+    evidence: revalidated work-store@400fc0d02eec (evidence, branch only), k-12Harness@9495079fd3a2 (confirmed
+      snapshot, F5 event 126)
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''challenge'', ''contract'', ''planning'', ''reconciliation'']'
+  - guard: headroom_guard_passed
+    evidence: 'not evaluated: tier T0 has no recorded context_window (estimated 90228 input tokens)'
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+- at: '2026-09-15T00:07:15Z'
+  transition: F12
+  event: retry-later
+  from: executing
+  to: ready
+  by: shane@Mimir.local
+  reason: 'run_executor: timeout at T0 (1/3)'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 34 failure_reason=transient
+  - guard: environmental_failure_only
+    evidence: failure_reason is transient
+  - guard: attempt_closed
+    evidence: 34 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+- at: '2026-09-15T04:43:04Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: current human-authorized scope recovery with no late feedback
+  - guard: scope_revalidated
+    evidence: revalidated work-store@400fc0d02eec (evidence, branch only), k-12Harness@9495079fd3a2 (confirmed
+      snapshot, F5 event 126)
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''challenge'', ''contract'', ''planning'', ''reconciliation'']'
+  - guard: headroom_guard_passed
+    evidence: 'not evaluated: tier T0 has no recorded context_window (estimated 90828 input tokens)'
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+- at: '2026-09-15T04:48:05Z'
+  transition: F23
+  event: transient-escalate
+  from: executing
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: T0 transient budget spent'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 35 failure_reason=transient
+  - guard: transient_failure_only
+    evidence: failure_reason is transient
+  - guard: transient_budget_exhausted
+    evidence: transient budget of 3 exhausted at tier T0
+  - guard: next_tier_available
+    evidence: next tier T1
+  - guard: attempt_closed
+    evidence: 35 attempt(s), all closed
+- at: '2026-09-15T04:52:05Z'
+  transition: F22
+  event: transient-retry
+  from: executing
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: transient timeout at T1'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 36 failure_reason=transient
+  - guard: transient_failure_only
+    evidence: failure_reason is transient
+  - guard: transient_budget_remains
+    evidence: transient retry 1 of 2 at tier T1
+  - guard: attempt_closed
+    evidence: 36 attempt(s), all closed
+- at: '2026-09-15T04:56:06Z'
+  transition: F22
+  event: transient-retry
+  from: executing
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: transient timeout at T1'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 37 failure_reason=transient
+  - guard: transient_failure_only
+    evidence: failure_reason is transient
+  - guard: transient_budget_remains
+    evidence: transient retry 2 of 2 at tier T1
+  - guard: attempt_closed
+    evidence: 37 attempt(s), all closed
+- at: '2026-09-15T05:00:06Z'
+  transition: F23
+  event: transient-escalate
+  from: executing
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: T1 transient budget spent'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 38 failure_reason=transient
+  - guard: transient_failure_only
+    evidence: failure_reason is transient
+  - guard: transient_budget_exhausted
+    evidence: transient budget of 2 exhausted at tier T1
+  - guard: next_tier_available
+    evidence: next tier T2
+  - guard: attempt_closed
+    evidence: 38 attempt(s), all closed
+- at: '2026-09-15T05:00:07Z'
+  transition: F12
+  event: retry-later
+  from: executing
+  to: ready
+  by: shane@Mimir.local
+  reason: 'run_executor: configuration at T2'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 39 failure_reason=harness_error
+  - guard: environmental_failure_only
+    evidence: failure_reason is harness_error
+  - guard: attempt_closed
+    evidence: 39 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+- at: '2026-09-15T13:54:04Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: current human-authorized scope recovery with no late feedback
+  - guard: scope_revalidated
+    evidence: revalidated work-store@400fc0d02eec (evidence, branch only), k-12Harness@9495079fd3a2 (confirmed
+      snapshot, F5 event 126)
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''challenge'', ''contract'', ''planning'', ''reconciliation'']'
+  - guard: headroom_guard_passed
+    evidence: 'not evaluated: tier T0 has no recorded context_window (estimated 92669 input tokens)'
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+- at: '2026-09-15T13:59:05Z'
+  transition: F22
+  event: transient-retry
+  from: executing
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: transient timeout at T0'
+  guards:
+  - guard: failure_reason_recorded
+    evidence: attempt 40 failure_reason=transient
+  - guard: transient_failure_only
+    evidence: failure_reason is transient
+  - guard: transient_budget_remains
+    evidence: transient retry 1 of 3 at tier T0
+  - guard: attempt_closed
+    evidence: 40 attempt(s), all closed
+- at: '2026-09-16T03:55:32Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  guards:
+  - guard: attempt_closed
+    evidence: 42 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v3 intact (2b7a5d5eecf2)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 0 file(s) within 5 declared'
+  - guard: contracted_outputs_exist
+    evidence: 5 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 006-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+size_estimate:
+  files: 3
+  subsystems:
+  - deterministic planner
+  - school-directory preflight
+  - input-catalog normalization
+  - pipeline error propagation
+  - unit and integration tests
+  scale: medium
+  source: 001-plan.md
+  recorded_by: operator
+definitions:
+- ref: contract/PINNED.json
+  authority: null
+  revision: sha256:d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc
+  sha256: d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc
+  repo: k-12Harness
+- ref: contract/POC_CONTRACT_V0.3_SPEC.md
+  authority: null
+  revision: sha256:065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57
+  sha256: 065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57
+  repo: k-12Harness
+- ref: contract/POC_EVIDENCE_CONTRACT.md
+  authority: null
+  revision: sha256:956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199
+  sha256: 956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199
+  repo: k-12Harness
+- ref: contract/poc_evidence_error.v0.3.0.schema.json
+  authority: null
+  revision: sha256:88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5
+  sha256: 88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5
+  repo: k-12Harness
+- ref: contract/poc_input_catalog.v0.3.0.schema.json
+  authority: null
+  revision: sha256:41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2
+  sha256: 41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2
+  repo: k-12Harness
+- ref: contract/poc_question_registry.v0.3.0.json
+  authority: null
+  revision: sha256:3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb
+  sha256: 3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb
+  repo: k-12Harness
+- ref: contract/poc_school_directory.v0.3.0.schema.json
+  authority: null
+  revision: sha256:b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29
+  sha256: b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29
+  repo: k-12Harness
+- ref: contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  authority: null
+  revision: sha256:67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11
+  sha256: 67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11
+  repo: k-12Harness
+- ref: contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  authority: null
+  revision: sha256:680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3
+  sha256: 680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3
+  repo: k-12Harness
+- ref: contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  authority: null
+  revision: sha256:f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2
+  sha256: f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2
+  repo: k-12Harness
+- ref: contract/question_schemas/v0.3.0/_index.json
+  authority: null
+  revision: sha256:e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d
+  sha256: e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d
+  repo: k-12Harness
+- ref: docs/decisions.md
+  authority: null
+  revision: sha256:18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+  sha256: 18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+  repo: k-12Harness
+- ref: evals/cases/golden_cases.json
+  authority: null
+  revision: sha256:10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92
+  sha256: 10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92
+  repo: k-12Harness
+- ref: prompts/input_catalog.snapshot.json
+  authority: null
+  revision: sha256:a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10
+  sha256: a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10
+  repo: k-12Harness
+- ref: prompts/rules.md
+  authority: null
+  revision: sha256:6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28
+  sha256: 6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28
+  repo: k-12Harness
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope:
+- id: work-store
+  repo: /home/user/work-k-12MarketIntelligence
+  store_directory: work-k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: claude/method-coding-harness-review-6nqxx6
+  base_commit: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  dirty: false
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  verify: null
+  declared_files: []
+  declared: true
+- repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  branch: wi/20260908T113118
+  base_commit: 9495079fd3a2caf5adb95fea631681341e6b67df
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: 9495079fd3a2caf5adb95fea631681341e6b67df
+  verify: .venv/bin/python -m pytest tests/ -q
+  declared_files:
+  - harness/planner.py
+  - run.py
+  - tests/unit/test_intent_boundary.py
+  - tests/unit/test_planner.py
+  - tests/unit/test_run_cli.py
+  id: k-12Harness
+  governance: diff-allowlist
+  declared: true
+risk:
+  initial: high
+  current: high
+  maximum: high
+  rationale: This is the first run; risk is high because there is no prior evidence.
+  obligations:
+  - planning
+  - contract
+  - challenge
+  - reconciliation
+  - deterministic
+  - semantic
+  escalations: []
+  deescalations: []
+contract:
+  current: 3
+  versions:
+  - version: 1
+    path: acceptance/001-contract.yaml
+    artifact: A1
+    sha256: 702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19
+    status: superseded
+  - version: 2
+    path: acceptance/002-contract.yaml
+    artifact: A2
+    sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+    status: superseded
+  - version: 3
+    path: acceptance/003-contract.yaml
+    artifact: A16
+    sha256: 2b7a5d5eecf211e61e3b45e11f2addf1fa58f159c1e9cda86960dc73863139df
+    status: current
+    reason: Bind criteria to the amended plan
+    plan_sha256: c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+    recorded_at: '2026-09-14T01:22:10Z'
+decisions: []
+constraints: []
+concerns:
+- id: C1
+  origin_stage: planning
+  raised_by: planner
+  summary: golden_cases.json and the v0.3 specification disagree on an explicitly supplied ACARA ID that
+    is absent from the pinned directory
+  detail: evals/cases/golden_cases.json treats explicitly supplied ACARA ID 99999 as requiring no directory
+    lookup and permits an empty success. contract/POC_CONTRACT_V0.3_SPEC.md classifies an ID absent from
+    the pinned directory as bad_request. The two cannot both be satisfied by pre-dispatch directory-membership
+    validation. This work item is bounded around the conflict rather than resolving it (contract requirement
+    direct-id-authority-conflict, and the matching out_of_scope entry), so it is advisory here. It becomes
+    blocking for any work item that enforces directory membership for caller-supplied IDs, and the Definition
+    Pack owner must rule before then.
+  blocking: false
+  status: open
+  opened_at: '2026-09-09T07:31:25Z'
+  references:
+  - planning/001-plan.md
+  - acceptance/002-contract.yaml
+  - contract/POC_CONTRACT_V0.3_SPEC.md
+  - evals/cases/golden_cases.json
+  resolution: null
+  resolved_at: null
+- id: C2
+  origin_stage: planning
+  raised_by: planner
+  summary: the Definition Pack supplies request schemas for only three of the registered questions
+  detail: Only VC-POC-01, VC-POC-03 and VC-POC-04 request schemas are captured, so generic local JSON
+    Schema validation cannot be applied to every registered question. The plan limits exact schema assertions
+    to those three and the contract puts the rest out of scope. Adding the remaining request schemas to
+    the Definition Pack is the precondition for full pre-dispatch validation.
+  blocking: false
+  status: open
+  opened_at: '2026-09-09T07:31:25Z'
+  references:
+  - planning/001-plan.md
+  - contract/question_schemas/v0.3.0/_index.json
+  resolution: null
+  resolved_at: null
+- id: C3
+  origin_stage: challenge
+  raised_by: Codex operator
+  summary: Critic run 3 plan-review artifact A8 contains only a summary
+  detail: The native log contains a substantive plan review as assistant text, but the final StructuredOutput
+    response is a 342-byte meta-summary. run_critic.py validates no plan-review headings, indexed that
+    summary as A8, and left T4 formally ready. Treat A8 and run 3 as insufficient until an independently
+    reviewed repair enforces the complete plan-review contract and the stage is rerun without overwriting
+    history.
+  blocking: true
+  status: resolved
+  opened_at: '2026-09-12T08:18:15Z'
+  references:
+  - challenge/006-plan-review-v3.md
+  - capture/imports/011-critic-009-plan-review.log
+  - methods/coding-harness/scripts/run_critic.py
+  resolution: 'Resolved by the operator decision recorded in observations/001-trust.md: the Critic reviews
+    are accepted as complete in aggregate; no fifth Critic run is authorized; A8 remains invalid as a
+    standalone artifact; A7 and native log 011 retain the substantive review evidence; unchallenged plan
+    content is accepted and carried forward; replanning is limited to challenged items and strictly necessary
+    dependent changes.'
+  resolved_at: '2026-09-12T12:08:18Z'
+  resolved_by: shane
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: 85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93
+  created_at: '2026-09-08T11:31:18Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+- id: A1
+  type: acceptance_contract
+  path: acceptance/001-contract.yaml
+  version: 1
+  sha256: 702cd4825a49adcc1cf78346be099c315fb2a627fb8f63fc4e1c156910977a19
+  produced_by_attempt: 3
+  status: superseded
+  supersedes: null
+- id: A2
+  type: acceptance_contract
+  path: acceptance/002-contract.yaml
+  version: 2
+  sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+  produced_by_attempt: 5
+  status: superseded
+  supersedes: null
+- status: superseded
+  supersedes: null
+  id: A3
+  type: contract_review_view
+  path: acceptance/002-contract-review.md
+  version: 2
+  sha256: ce6c3ff0836f507eb6137a8b0b023d0048e2defd4a7ddbbd2a56f7dd633f1ea6
+  created_at: '2026-09-09T07:32:00Z'
+  produced_by_attempt: null
+  derived_from: A2
+- status: superseded
+  supersedes: null
+  id: A4
+  type: planning_plan
+  path: planning/001-plan.md
+  version: 1
+  sha256: 44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489
+  created_at: '2026-09-08T13:25:35Z'
+  produced_by_attempt: 1
+  source_kind: legacy_plan_adoption
+  source_event: 22
+- status: superseded
+  supersedes: null
+  id: A5
+  type: critic_review
+  path: challenge/003-problem-framing-v2.md
+  version: 2
+  sha256: baa1cf3b87323f9f1bdf849fbd8e4c689d62cccefb79c1bac1bb719c847fc481
+  created_at: '2026-09-12T02:44:21Z'
+  produced_by_attempt: 14
+  critic_kind: problem-framing
+  critic_run: 2
+  critic_session: 4
+  critic_protocol: 2
+- status: superseded
+  supersedes: null
+  id: A6
+  type: critic_review
+  path: challenge/005-problem-framing-v3.md
+  version: 3
+  sha256: df229763fa5c666b916b026154fb12f442615d5c92c09239c08387a37719381f
+  created_at: '2026-09-12T08:03:30Z'
+  produced_by_attempt: 17
+  critic_kind: problem-framing
+  critic_run: 3
+  critic_session: 7
+  critic_protocol: 2
+- status: current
+  supersedes: null
+  id: A7
+  type: critic_review
+  path: challenge/005-problem-analysis-v3.md
+  version: 3
+  sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  created_at: '2026-09-12T08:08:34Z'
+  produced_by_attempt: 18
+  critic_kind: problem-analysis
+  critic_run: 3
+  critic_session: 8
+  critic_protocol: 2
+- status: current
+  supersedes: null
+  id: A8
+  type: critic_review
+  path: challenge/006-plan-review-v3.md
+  version: 3
+  sha256: a6ad0a90a6bd3a4df26ce63f54cb2ddd72eb5ca581c19824ebf8ebf7a1f93379
+  created_at: '2026-09-12T08:16:14Z'
+  produced_by_attempt: 19
+  critic_kind: plan-review
+  critic_run: 3
+  critic_session: 9
+  critic_protocol: 2
+- status: current
+  supersedes: null
+  id: A9
+  type: critic_review
+  path: challenge/007-problem-framing-v4.md
+  version: 4
+  sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  created_at: '2026-09-12T08:39:08Z'
+  produced_by_attempt: 20
+  critic_kind: problem-framing
+  critic_run: 4
+  critic_session: 10
+  critic_protocol: 2
+- status: current
+  supersedes: null
+  id: A10
+  type: replan_operator
+  path: replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+  version: 1
+  sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+  created_at: '2026-09-13T22:40:24Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A11
+  type: replan_proposal
+  path: replanning/proposal-c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701.json
+  version: 1
+  sha256: c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701
+  created_at: '2026-09-13T22:40:24Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A12
+  type: replan_basis
+  path: replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+  version: 1
+  sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  created_at: '2026-09-13T23:26:20Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A13
+  type: replan_review_extract
+  path: replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md
+  version: 1
+  sha256: bbb0aa721327be170bcf2aba8dc8efe19989b82db16131b367a47c765b531003
+  created_at: '2026-09-14T00:56:11Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A14
+  type: replan_planner_output
+  path: replanning/planner_output-51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a.json
+  version: 1
+  sha256: 51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a
+  created_at: '2026-09-14T01:14:01Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A15
+  type: planning_plan
+  path: planning/002-plan.md
+  version: 2
+  sha256: c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+  created_at: '2026-09-14T01:14:01Z'
+  produced_by_attempt: 24
+- status: current
+  supersedes: null
+  id: A16
+  type: acceptance_contract
+  path: acceptance/003-contract.yaml
+  version: 3
+  sha256: 2b7a5d5eecf211e61e3b45e11f2addf1fa58f159c1e9cda86960dc73863139df
+  created_at: '2026-09-14T01:22:10Z'
+  produced_by_attempt: 25
+- status: current
+  supersedes: null
+  id: A17
+  type: contract_review_view
+  path: acceptance/003-contract-review.md
+  version: 3
+  sha256: 72574c3aed8af13d62fb8401c50aedb1c9ba02f0a6e3803ebad7f49041358113
+  created_at: '2026-09-14T01:22:10Z'
+  produced_by_attempt: 25
+  derived_from: A16
+- status: current
+  supersedes: null
+  id: A18
+  type: replan_delta
+  path: replanning/delta-a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25.json
+  version: 1
+  sha256: a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25
+  created_at: '2026-09-14T06:01:39Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A19
+  type: replan_delta_acceptance
+  path: replanning/delta_acceptance-d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb.json
+  version: 1
+  sha256: d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb
+  created_at: '2026-09-14T06:01:39Z'
+  produced_by_attempt: null
+- status: current
+  supersedes: null
+  id: A20
+  type: replan_scope_recovery
+  path: replanning/scope_recovery-65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157.json
+  version: 1
+  sha256: 65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157
+  created_at: '2026-09-15T00:02:04Z'
+  produced_by_attempt: null
+attempts:
+- attempt: 1
+  reconstructed: true
+  model: gpt-5.6-sol
+  provider: openai
+  role: planner
+  state: planning
+  opened_at: '2026-09-08T13:19:04Z'
+  opened_event: 20
+  status: closed
+  exit_code: 0
+  plan: planning/001-plan.md
+  closed_at: '2026-09-08T13:25:35Z'
+  closed_event: 22
+- attempt: 2
+  reconstructed: true
+  model: gpt-5.6-sol
+  provider: openai
+  role: contract
+  opened_at: '2026-09-08T23:50:29Z'
+  opened_event: 26
+  status: closed
+  exit_code: null
+  outcome_unknown: true
+  reconstruction_note: no attempt.closed event was ever written; the outcome of this attempt is not recoverable
+    from the evidence
+- attempt: 3
+  reconstructed: true
+  model: gpt-5.6-sol
+  provider: openai
+  role: contract
+  opened_at: '2026-09-08T23:54:21Z'
+  opened_event: 27
+  status: closed
+  error: manifest does not contain its expected contract block
+  exit_code: 1
+  closed_at: '2026-09-08T23:55:40Z'
+  closed_event: 31
+  outcome_unknown: true
+  reconstruction_note: closed 2 times with exit codes [0, 1]; the last close is recorded and the earlier
+    ones are retained in the evidence chain
+- attempt: 4
+  reconstructed: true
+  role: contract-recovery
+  source_attempt: 3
+  opened_at: '2026-09-09T00:00:00Z'
+  opened_event: 32
+  status: closed
+  contract: acceptance/001-contract.yaml
+  exit_code: 0
+  recovered_from_attempt: 3
+  closed_at: '2026-09-09T00:00:00Z'
+  closed_event: 33
+- attempt: 5
+  reconstructed: true
+  model: gpt-5.6-sol
+  provider: openai
+  role: contract
+  opened_at: '2026-09-09T00:02:08Z'
+  opened_event: 35
+  status: closed
+  contract: acceptance/002-contract.yaml
+  exit_code: 0
+  closed_at: '2026-09-09T00:04:40Z'
+  closed_event: 37
+- attempt: 6
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T02:00:56Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 2
+  closed_at: '2026-09-10T02:00:56Z'
+  failure_kind: configuration
+  failure_reason: harness_error
+- attempt: 7
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T23:28:16Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 2
+  closed_at: '2026-09-10T23:28:16Z'
+  failure_kind: configuration
+  failure_reason: harness_error
+- attempt: 8
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T23:36:10Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 3
+  closed_at: '2026-09-10T23:36:10Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+- attempt: 9
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T23:38:11Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 7
+  closed_at: '2026-09-10T23:38:13Z'
+  failure_kind: transport
+  failure_reason: harness_error
+- attempt: 10
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T23:45:04Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 6
+  closed_at: '2026-09-10T23:46:54Z'
+  failure_kind: timeout
+  failure_reason: transient
+- attempt: 11
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-10T23:51:48Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  exit_code: 6
+  closed_at: '2026-09-10T23:53:38Z'
+  failure_kind: timeout
+  failure_reason: transient
+- attempt: 12
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-11T00:47:18Z'
+  critic_run: 1
+  critic_session: 1
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-11T00:49:55Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 9
+    cache_creation_input_tokens: 10249
+    cache_read_input_tokens: 349043
+    output_tokens: 10549
+  initial_input_tokens: 44710
+  peak_input_tokens: 44710
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  challenge: challenge/001-problem-analysis.md
+  sha256: ff7681d4d52a44fdc46be2eb8c78868404f78e5e15cfe5cb5cd80e0041adcb41
+  growth_per_turn: 0.0
+- attempt: 13
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-11T00:49:55Z'
+  critic_run: 1
+  critic_session: 2
+  critic_pass: plan-review
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-11T00:59:20Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 9
+    cache_creation_input_tokens: 241792
+    cache_read_input_tokens: 371516
+    output_tokens: 40468
+  initial_input_tokens: 54738
+  peak_input_tokens: 87833
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root2:planning/001-plan.md
+  - root2:acceptance/002-contract.yaml
+  - root2:challenge/001-problem-analysis.md
+  - root1:harness/planner.py
+  - root1:harness/contract.py
+  - root1:harness/intent.py
+  - root1:harness/errors.py
+  - root1:config/settings.py
+  - root1:tests/unit/test_planner.py
+  - root1:tests/unit/test_agent_loop.py
+  - root2:acceptance/002-contract-review.md
+  - root2:acceptance/001-contract.yaml
+  - root2:manifest.yaml
+  challenge: challenge/002-plan-review.md
+  sha256: ced8c09d1ea72071208ed7b47d6d945e9c8d4bf7f8febf05953fa66757c111d6
+  growth_per_turn: 16547.5
+- attempt: 14
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T02:41:56Z'
+  critic_run: 2
+  critic_session: 4
+  critic_pass: problem-framing
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-12T02:44:21Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 7
+    cache_creation_input_tokens: 75678
+    cache_read_input_tokens: 193996
+    output_tokens: 11338
+  initial_input_tokens: 42269
+  peak_input_tokens: 42269
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  challenge: challenge/003-problem-framing-v2.md
+  sha256: baa1cf3b87323f9f1bdf849fbd8e4c689d62cccefb79c1bac1bb719c847fc481
+  critic_protocol: 2
+  growth_per_turn: 0.0
+- attempt: 15
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T02:44:21Z'
+  critic_run: 2
+  critic_session: 5
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 6
+  closed_at: '2026-09-12T02:54:21Z'
+  failure_kind: timeout
+  failure_reason: transient
+  critic_protocol: 2
+- attempt: 16
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T07:52:06Z'
+  critic_run: 3
+  critic_session: 7
+  critic_pass: problem-framing
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 9
+  closed_at: '2026-09-12T07:55:24Z'
+  failure_kind: validation
+  failure_reason: capability
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 9
+    cache_creation_input_tokens: 135112
+    cache_read_input_tokens: 194055
+    output_tokens: 13177
+  initial_input_tokens: 42269
+  peak_input_tokens: 42384
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root0:work/20260908T113118/request.md
+  requested_files_read:
+  - root0:work/20260908T113118/request.md
+  critic_protocol: 2
+  growth_per_turn: 57.5
+- attempt: 17
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T07:59:34Z'
+  critic_run: 3
+  critic_session: 7
+  critic_pass: problem-framing
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-12T08:03:30Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 11
+    cache_creation_input_tokens: 88614
+    cache_read_input_tokens: 329137
+    output_tokens: 19773
+  initial_input_tokens: 42269
+  peak_input_tokens: 45752
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root0:work/20260908T113118/request.md
+  requested_files_read:
+  - root0:work/20260908T113118/request.md
+  challenge: challenge/005-problem-framing-v3.md
+  sha256: df229763fa5c666b916b026154fb12f442615d5c92c09239c08387a37719381f
+  critic_protocol: 2
+  growth_per_turn: 1741.5
+- attempt: 18
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T08:03:30Z'
+  critic_run: 3
+  critic_session: 8
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-12T08:08:34Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 14
+    cache_creation_input_tokens: 199107
+    cache_read_input_tokens: 417055
+    output_tokens: 21866
+  initial_input_tokens: 50312
+  peak_input_tokens: 64868
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root2:challenge/005-problem-framing-v3.md
+  - root1:harness/planner.py
+  - root1:tests/unit/test_planner.py
+  - root1:harness/contract.py
+  - root1:harness/intent.py
+  requested_files_read:
+  - root1:harness/planner.py
+  - root1:tests/unit/test_planner.py
+  - root1:harness/contract.py
+  - root1:harness/intent.py
+  challenge: challenge/005-problem-analysis-v3.md
+  sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  critic_protocol: 2
+  grounding_evidence:
+    current implementation:
+    - root1:harness/contract.py
+    - root1:harness/intent.py
+    - root1:harness/planner.py
+    relevant tests:
+    - root1:tests/unit/test_planner.py
+  growth_per_turn: 7278.0
+- attempt: 19
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T08:08:34Z'
+  critic_run: 3
+  critic_session: 9
+  critic_pass: plan-review
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-12T08:16:14Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 9
+    cache_creation_input_tokens: 235702
+    cache_read_input_tokens: 303363
+    output_tokens: 32941
+  initial_input_tokens: 55092
+  peak_input_tokens: 87664
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root2:planning/001-plan.md
+  - root2:acceptance/002-contract.yaml
+  - root2:challenge/005-problem-analysis-v3.md
+  - root1:harness/planner.py
+  - root1:harness/contract.py
+  - root1:harness/intent.py
+  - root1:tests/unit/test_planner.py
+  - root1:harness/tools.py
+  - root1:harness/evidence.py
+  - root2:acceptance/002-contract-review.md
+  - root2:acceptance/001-contract.yaml
+  - root2:challenge/002-plan-review.md
+  - root2:manifest.yaml
+  requested_files_read:
+  - root1:harness/planner.py
+  - root1:harness/contract.py
+  - root1:harness/intent.py
+  - root1:tests/unit/test_planner.py
+  - root1:harness/tools.py
+  - root1:harness/evidence.py
+  - root2:acceptance/002-contract-review.md
+  - root2:acceptance/001-contract.yaml
+  - root2:challenge/002-plan-review.md
+  - root2:manifest.yaml
+  challenge: challenge/006-plan-review-v3.md
+  sha256: a6ad0a90a6bd3a4df26ce63f54cb2ddd72eb5ca581c19824ebf8ebf7a1f93379
+  critic_protocol: 2
+  growth_per_turn: 16286.0
+- attempt: 20
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T08:36:26Z'
+  critic_run: 4
+  critic_session: 10
+  critic_pass: problem-framing
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 0
+  closed_at: '2026-09-12T08:39:08Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 7
+    cache_creation_input_tokens: 5741
+    cache_read_input_tokens: 257852
+    output_tokens: 9899
+  initial_input_tokens: 42269
+  peak_input_tokens: 42384
+  files_read:
+  - root2:request.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root0:work/20260908T113118/request.md
+  requested_files_read:
+  - root0:work/20260908T113118/request.md
+  challenge: challenge/007-problem-framing-v4.md
+  sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  critic_protocol: 2
+  growth_per_turn: 57.5
+- attempt: 21
+  role: critic
+  state: challenge
+  status: closed
+  opened_at: '2026-09-12T08:39:08Z'
+  critic_run: 4
+  critic_session: 11
+  critic_pass: problem-analysis
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 7
+  closed_at: '2026-09-12T08:39:15Z'
+  failure_kind: transport
+  failure_reason: harness_error
+  critic_protocol: 2
+- attempt: 22
+  role: planner
+  state: targeted-replan
+  status: closed
+  opened_at: '2026-09-13T23:27:41Z'
+  plan_version: 2
+  replan_basis_sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planner
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  streaming: auto
+  exit_code: 9
+  closed_at: '2026-09-13T23:27:41Z'
+  failure_kind: validation
+  failure_reason: capability
+  elapsed_seconds: 0.04913995903916657
+  evidence_inputs:
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/request.md
+    sha256: 85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93
+    bytes: 265
+  - path: /Users/shane/Projects/k-12Harness/contract/PINNED.json
+    sha256: d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc
+    bytes: 6506
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_CONTRACT_V0.3_SPEC.md
+    sha256: 065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57
+    bytes: 14344
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_EVIDENCE_CONTRACT.md
+    sha256: 956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199
+    bytes: 2853
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_evidence_error.v0.3.0.schema.json
+    sha256: 88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5
+    bytes: 1710
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_input_catalog.v0.3.0.schema.json
+    sha256: 41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2
+    bytes: 9388
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_question_registry.v0.3.0.json
+    sha256: 3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb
+    bytes: 35842
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_school_directory.v0.3.0.schema.json
+    sha256: b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29
+    bytes: 3882
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+    sha256: 67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11
+    bytes: 2560
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+    sha256: 680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3
+    bytes: 2112
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+    sha256: f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2
+    bytes: 2663
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/_index.json
+    sha256: e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d
+    bytes: 9445
+  - path: /Users/shane/Projects/k-12Harness/docs/decisions.md
+    sha256: 18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+    bytes: 43170
+  - path: /Users/shane/Projects/k-12Harness/evals/cases/golden_cases.json
+    sha256: 10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92
+    bytes: 22379
+  - path: /Users/shane/Projects/k-12Harness/prompts/input_catalog.snapshot.json
+    sha256: a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10
+    bytes: 4219
+  - path: /Users/shane/Projects/k-12Harness/prompts/rules.md
+    sha256: 6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28
+    bytes: 4863
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+    sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+    bytes: 10541
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/planning/001-plan.md
+    sha256: 44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489
+    bytes: 12222
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/acceptance/002-contract.yaml
+    sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+    bytes: 15627
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+    bytes: 12693
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/capture/imports/011-critic-009-plan-review.log
+    sha256: 1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d
+    bytes: 987729
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+    bytes: 13494
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/observations/001-trust.md
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  context_bytes: 1220351
+  attempt_count: 1
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: null
+    events:
+    - seq: 93
+      sha256: ba82378b36d4b5271999b2f498e5d17804ec0d4abf78f5f76bbe8990e69dddf3
+    path: capture/imports/011-critic-009-plan-review.log
+    sha256: 1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  invalidation_reason: []
+- attempt: 23
+  role: planner
+  state: targeted-replan
+  status: closed
+  opened_at: '2026-09-14T00:56:11Z'
+  plan_version: 2
+  replan_basis_sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planner
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-14T00:58:17Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 125.36888275004458
+  evidence_inputs:
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/request.md
+    sha256: 85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93
+    bytes: 265
+  - path: /Users/shane/Projects/k-12Harness/contract/PINNED.json
+    sha256: d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc
+    bytes: 6506
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_CONTRACT_V0.3_SPEC.md
+    sha256: 065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57
+    bytes: 14344
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_EVIDENCE_CONTRACT.md
+    sha256: 956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199
+    bytes: 2853
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_evidence_error.v0.3.0.schema.json
+    sha256: 88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5
+    bytes: 1710
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_input_catalog.v0.3.0.schema.json
+    sha256: 41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2
+    bytes: 9388
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_question_registry.v0.3.0.json
+    sha256: 3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb
+    bytes: 35842
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_school_directory.v0.3.0.schema.json
+    sha256: b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29
+    bytes: 3882
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+    sha256: 67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11
+    bytes: 2560
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+    sha256: 680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3
+    bytes: 2112
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+    sha256: f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2
+    bytes: 2663
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/_index.json
+    sha256: e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d
+    bytes: 9445
+  - path: /Users/shane/Projects/k-12Harness/docs/decisions.md
+    sha256: 18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+    bytes: 43170
+  - path: /Users/shane/Projects/k-12Harness/evals/cases/golden_cases.json
+    sha256: 10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92
+    bytes: 22379
+  - path: /Users/shane/Projects/k-12Harness/prompts/input_catalog.snapshot.json
+    sha256: a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10
+    bytes: 4219
+  - path: /Users/shane/Projects/k-12Harness/prompts/rules.md
+    sha256: 6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28
+    bytes: 4863
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+    sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+    bytes: 10541
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/planning/001-plan.md
+    sha256: 44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489
+    bytes: 12222
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/acceptance/002-contract.yaml
+    sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+    bytes: 15627
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+    bytes: 12693
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md
+    sha256: bbb0aa721327be170bcf2aba8dc8efe19989b82db16131b367a47c765b531003
+    bytes: 34085
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+    bytes: 13494
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/observations/001-trust.md
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  context_bytes: 266707
+  attempt_count: 1
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: null
+    events:
+    - seq: 93
+      sha256: ba82378b36d4b5271999b2f498e5d17804ec0d4abf78f5f76bbe8990e69dddf3
+    path: capture/imports/011-critic-009-plan-review.log
+    sha256: 1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  invalidation_reason: []
+- attempt: 24
+  role: planner
+  state: targeted-replan
+  status: closed
+  opened_at: '2026-09-14T01:11:42Z'
+  plan_version: 2
+  replan_basis_sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planner
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-14T01:14:01Z'
+  outcome: amendment-projected
+  newly_produced_evidence:
+  - path: planning/002-plan.md
+    sha256: c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+    event:
+      seq: 123
+      sha256: bce06c20691ba26fe4ef3193272ef340791d36a025e986b33ee5382860f2d9be
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 285565
+    cached_input_tokens: 84096
+    cache_write_input_tokens: 0
+    output_tokens: 4858
+    reasoning_output_tokens: 656
+  initial_input_tokens: 69712
+  peak_input_tokens: 107848
+  files_read:
+  - root1:request.md
+  - root0:contract/PINNED.json
+  - root0:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root0:contract/POC_EVIDENCE_CONTRACT.md
+  - root0:contract/poc_evidence_error.v0.3.0.schema.json
+  - root0:contract/poc_input_catalog.v0.3.0.schema.json
+  - root0:contract/poc_question_registry.v0.3.0.json
+  - root0:contract/poc_school_directory.v0.3.0.schema.json
+  - root0:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root0:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root0:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root0:contract/question_schemas/v0.3.0/_index.json
+  - root0:docs/decisions.md
+  - root0:evals/cases/golden_cases.json
+  - root0:prompts/input_catalog.snapshot.json
+  - root0:prompts/rules.md
+  - root1:replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+  - root1:planning/001-plan.md
+  - root1:acceptance/002-contract.yaml
+  - root1:replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+  - root1:challenge/005-problem-analysis-v3.md
+  - root1:replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md
+  - root1:challenge/007-problem-framing-v4.md
+  - root1:observations/001-trust.md
+  - root0:run.py
+  - root0:harness/agent.py
+  - root0:harness/planner.py
+  - root0:harness/tools.py
+  - root0:harness/outputs.py
+  - root0:harness/contract.py
+  - root0:harness/evidence.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_agent_loop.py
+  requested_files_read:
+  - root0:run.py
+  - root0:harness/agent.py
+  - root0:harness/planner.py
+  - root0:harness/tools.py
+  - root0:harness/outputs.py
+  - root0:harness/contract.py
+  - root0:harness/evidence.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_agent_loop.py
+  elapsed_seconds: 139.18285220803227
+  evidence_inputs:
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/request.md
+    sha256: 85f40f3b8ec8d3ca5ab353e03bcb8ebcaa36749308eaa2807a2831c10bfbaa93
+    bytes: 265
+  - path: /Users/shane/Projects/k-12Harness/contract/PINNED.json
+    sha256: d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc
+    bytes: 6506
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_CONTRACT_V0.3_SPEC.md
+    sha256: 065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57
+    bytes: 14344
+  - path: /Users/shane/Projects/k-12Harness/contract/POC_EVIDENCE_CONTRACT.md
+    sha256: 956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199
+    bytes: 2853
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_evidence_error.v0.3.0.schema.json
+    sha256: 88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5
+    bytes: 1710
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_input_catalog.v0.3.0.schema.json
+    sha256: 41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2
+    bytes: 9388
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_question_registry.v0.3.0.json
+    sha256: 3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb
+    bytes: 35842
+  - path: /Users/shane/Projects/k-12Harness/contract/poc_school_directory.v0.3.0.schema.json
+    sha256: b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29
+    bytes: 3882
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+    sha256: 67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11
+    bytes: 2560
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+    sha256: 680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3
+    bytes: 2112
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+    sha256: f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2
+    bytes: 2663
+  - path: /Users/shane/Projects/k-12Harness/contract/question_schemas/v0.3.0/_index.json
+    sha256: e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d
+    bytes: 9445
+  - path: /Users/shane/Projects/k-12Harness/docs/decisions.md
+    sha256: 18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+    bytes: 43170
+  - path: /Users/shane/Projects/k-12Harness/evals/cases/golden_cases.json
+    sha256: 10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92
+    bytes: 22379
+  - path: /Users/shane/Projects/k-12Harness/prompts/input_catalog.snapshot.json
+    sha256: a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10
+    bytes: 4219
+  - path: /Users/shane/Projects/k-12Harness/prompts/rules.md
+    sha256: 6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28
+    bytes: 4863
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/basis-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf.json
+    sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+    bytes: 10541
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/planning/001-plan.md
+    sha256: 44525a85c16a4756c9115545bbce79a5351605ec1bbb5c974af1d25eecc86489
+    bytes: 12222
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/acceptance/002-contract.yaml
+    sha256: 081b344cd86fc83d57bd96e9d071d9b1df307bdccb478513c412bfa784c6214c
+    bytes: 15627
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+    bytes: 12693
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md
+    sha256: bbb0aa721327be170bcf2aba8dc8efe19989b82db16131b367a47c765b531003
+    bytes: 34085
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+    bytes: 13494
+  - path: /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113118/observations/001-trust.md
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    bytes: 922
+  context_bytes: 266707
+  attempt_count: 2
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: null
+    events:
+    - seq: 93
+      sha256: ba82378b36d4b5271999b2f498e5d17804ec0d4abf78f5f76bbe8990e69dddf3
+    path: capture/imports/011-critic-009-plan-review.log
+    sha256: 1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  invalidation_reason: []
+  growth_per_turn: 19068.0
+- attempt: 25
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-14T01:20:29Z'
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planner
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-14T01:22:10Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 296891
+    cached_input_tokens: 91008
+    cache_write_input_tokens: 0
+    output_tokens: 4631
+    reasoning_output_tokens: 233
+  initial_input_tokens: 67922
+  peak_input_tokens: 95535
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/002-plan.md
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  - root2:acceptance/002-contract.yaml
+  - root2:planning/001-plan.md
+  - root1:harness/planner.py
+  - root1:run.py
+  - root1:tests/unit/test_planner.py
+  - root1:tests/unit/test_intent_boundary.py
+  - root1:tests/unit/test_run_cli.py
+  - root1:contract/question_schemas/v0.3.0/VC-POC-05.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-09.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-10.request.schema.json
+  requested_files_read:
+  - root2:acceptance/002-contract.yaml
+  - root2:planning/001-plan.md
+  - root1:harness/planner.py
+  - root1:run.py
+  - root1:tests/unit/test_planner.py
+  - root1:tests/unit/test_intent_boundary.py
+  - root1:tests/unit/test_run_cli.py
+  - root1:contract/question_schemas/v0.3.0/VC-POC-05.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-09.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-10.request.schema.json
+  contract: acceptance/003-contract.yaml
+  growth_per_turn: 13806.5
+- attempt: 26
+  role: critic
+  state: delta-review
+  status: closed
+  opened_at: '2026-09-14T01:25:31Z'
+  delta_packet_sha256: 3c4725d5ade7543efec0bf0296bacccfdbebbec865f1c325b3bbfa05ad99a2a5
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 3
+  closed_at: '2026-09-14T01:25:31Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+  elapsed_seconds: 0.06968454108573496
+  context_bytes: 67789
+  evidence_inputs:
+  - 3c4725d5ade7543efec0bf0296bacccfdbebbec865f1c325b3bbfa05ad99a2a5
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  attempt_count: 1
+  invalidation_reason: []
+- attempt: 27
+  role: critic
+  state: delta-review
+  status: closed
+  opened_at: '2026-09-14T01:30:27Z'
+  delta_packet_sha256: 3c4725d5ade7543efec0bf0296bacccfdbebbec865f1c325b3bbfa05ad99a2a5
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 9
+  closed_at: '2026-09-14T01:32:41Z'
+  failure_kind: validation
+  failure_reason: capability
+  elapsed_seconds: 133.95433308300562
+  context_bytes: 67789
+  evidence_inputs:
+  - 3c4725d5ade7543efec0bf0296bacccfdbebbec865f1c325b3bbfa05ad99a2a5
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  attempt_count: 2
+  invalidation_reason: []
+- attempt: 28
+  role: critic
+  state: delta-review
+  status: closed
+  opened_at: '2026-09-14T05:07:45Z'
+  delta_packet_sha256: e57bf9eb8862e2722c286e7ef375ebeaa688d4720d07d061f25f60fb0a8dad52
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 3
+  closed_at: '2026-09-14T05:07:45Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+  elapsed_seconds: 0.0922568750102073
+  context_bytes: 71178
+  evidence_inputs:
+  - e57bf9eb8862e2722c286e7ef375ebeaa688d4720d07d061f25f60fb0a8dad52
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  attempt_count: 1
+  invalidation_reason: []
+- attempt: 29
+  role: critic
+  state: delta-review
+  status: closed
+  opened_at: '2026-09-14T05:10:20Z'
+  delta_packet_sha256: e57bf9eb8862e2722c286e7ef375ebeaa688d4720d07d061f25f60fb0a8dad52
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:critic
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: 'on'
+  exit_code: 3
+  closed_at: '2026-09-14T05:10:20Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+  elapsed_seconds: 0.07208783400710672
+  context_bytes: 71178
+  evidence_inputs:
+  - e57bf9eb8862e2722c286e7ef375ebeaa688d4720d07d061f25f60fb0a8dad52
+  reused_evidence:
+  - artifact_id: A7
+    events:
+    - seq: 90
+      sha256: 6c80b144e7a99a31de376ed3b88a5c2c4cb03db8332ad214ec1136b6ccee85b5
+    - seq: 91
+      sha256: a873587b6f035d271ad48642910ca04c9778482c484eda5fae7456782a48b5fc
+    path: challenge/005-problem-analysis-v3.md
+    sha256: c503f261b28666035d429b19e080d15a9cdc38d0176f741b756a40f6c5ecec1f
+  - artifact_id: A9
+    events:
+    - seq: 100
+      sha256: 1ccbe72a262020a7b8b4300bf27e55b57e23011365704ae5e6dca18888eb3765
+    - seq: 101
+      sha256: 1bd2dd0be0478109342f8809961970669cc597cea8022af614b844289bd3a8fa
+    path: challenge/007-problem-framing-v4.md
+    sha256: f95f67c839799c5113523a294f45999ec870ec8441e3be54fdb84fec21a3d095
+  attempt_count: 2
+  invalidation_reason: []
+- attempt: 30
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-14T07:19:35Z'
+  provider: openrouter
+  model: poolside/laguna-s-2.1:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  streaming: auto
+  exit_code: 3
+  closed_at: '2026-09-14T07:19:35Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+- attempt: 31
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-14T09:37:08Z'
+  provider: openrouter
+  model: poolside/laguna-s-2.1:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-14T09:38:58Z'
+  failure_kind: timeout
+  failure_reason: transient
+- attempt: 32
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-14T09:56:11Z'
+  provider: openrouter
+  model: poolside/laguna-s-2.1:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-14T10:02:11Z'
+  failure_kind: timeout
+  failure_reason: transient
+- attempt: 33
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-14T23:15:38Z'
+  provider: openrouter
+  model: poolside/laguna-s-2.1:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 360.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-14T23:20:39Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 300.0561846670462
+- attempt: 34
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-15T00:02:14Z'
+  provider: openrouter
+  model: poolside/laguna-s-2.1:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 360.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T00:07:14Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 300.0463690829929
+- attempt: 35
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-15T04:43:04Z'
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 360.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T04:48:04Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 300.04400766605977
+- attempt: 36
+  role: executor
+  state: executing
+  tier: T1
+  status: closed
+  opened_at: '2026-09-15T04:48:05Z'
+  provider: openrouter
+  model: z-ai/glm-5.3-flash
+  transport: aider
+  selector: tier:T1
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 240.0
+  deadline_seconds: 300.0
+  transient_retries: 2
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T04:52:05Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 240.04485958395526
+- attempt: 37
+  role: executor
+  state: executing
+  tier: T1
+  status: closed
+  opened_at: '2026-09-15T04:52:05Z'
+  provider: openrouter
+  model: z-ai/glm-5.3-flash
+  transport: aider
+  selector: tier:T1
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 240.0
+  deadline_seconds: 300.0
+  transient_retries: 2
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T04:56:05Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 240.04158962506335
+- attempt: 38
+  role: executor
+  state: executing
+  tier: T1
+  status: closed
+  opened_at: '2026-09-15T04:56:06Z'
+  provider: openrouter
+  model: z-ai/glm-5.3-flash
+  transport: aider
+  selector: tier:T1
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 240.0
+  deadline_seconds: 300.0
+  transient_retries: 2
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T05:00:06Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 240.0422787090065
+- attempt: 39
+  role: executor
+  state: executing
+  tier: T2
+  status: closed
+  opened_at: '2026-09-15T05:00:07Z'
+  provider: openai
+  model: gpt-5.6-luna
+  transport: codex
+  selector: tier:T2
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 400.0
+  transient_retries: 1
+  streaming: auto
+  exit_code: 2
+  closed_at: '2026-09-15T05:00:07Z'
+  failure_kind: configuration
+  failure_reason: harness_error
+  elapsed_seconds: 0.00025649997405707836
+- attempt: 40
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-15T13:54:04Z'
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 360.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 6
+  closed_at: '2026-09-15T13:59:05Z'
+  failure_kind: timeout
+  failure_reason: transient
+  elapsed_seconds: 300.0422415829962
+  read_context_files: 17
+  native_log_bytes: 2629
+- attempt: 41
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-15T13:59:05Z'
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 300.0
+  deadline_seconds: 360.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-15T13:59:22Z'
+  transport_attempts: 1
+  elapsed_seconds: 16.7418017500313
+  read_context_files: 17
+  native_log_bytes: 348783
+- attempt: 42
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-16T03:39:14Z'
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  transport: aider
+  selector: tier:T0
+  input_price_per_mtok: 0.0
+  output_price_per_mtok: 0.0
+  billing: api
+  model_class: executor
+  last_verified: '2026-09-08'
+  timeout_seconds: 1800.0
+  deadline_seconds: 1860.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-16T03:55:31Z'
+  transport_attempts: 1
+  elapsed_seconds: 977.3999414999271
+  read_context_files: 17
+  native_log_bytes: 1223069
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: T0
+  decisions:
+  - at: '2026-09-14T06:41:01Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: openrouter
+    model: poolside/laguna-s-2.1:free
+    transport: aider
+    selector: tier:T0
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    streaming: auto
+  - at: '2026-09-14T23:20:41Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: openrouter
+    model: poolside/laguna-s-2.1:free
+    transport: aider
+    selector: tier:T0
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 300.0
+    deadline_seconds: 360.0
+    transient_retries: 3
+    streaming: auto
+  - at: '2026-09-15T00:02:10Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: openrouter
+    model: poolside/laguna-s-2.1:free
+    transport: aider
+    selector: tier:T0
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 300.0
+    deadline_seconds: 360.0
+    transient_retries: 3
+    streaming: auto
+  - at: '2026-09-15T04:43:00Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: openrouter
+    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    transport: aider
+    selector: tier:T0
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 300.0
+    deadline_seconds: 360.0
+    transient_retries: 3
+    streaming: auto
+  - at: '2026-09-15T04:48:05Z'
+    tier: T1
+    reason: 'transient escalation from T0: timeout'
+    provider: openrouter
+    model: z-ai/glm-5.3-flash
+    transport: aider
+    selector: tier:T1
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 240.0
+    deadline_seconds: 300.0
+    transient_retries: 2
+    streaming: auto
+  - at: '2026-09-15T05:00:07Z'
+    tier: T2
+    reason: 'transient escalation from T1: timeout'
+    provider: openai
+    model: gpt-5.6-luna
+    transport: codex
+    selector: tier:T2
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 300.0
+    deadline_seconds: 400.0
+    transient_retries: 1
+    streaming: auto
+  - at: '2026-09-15T13:54:00Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: openrouter
+    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    transport: aider
+    selector: tier:T0
+    input_price_per_mtok: 0.0
+    output_price_per_mtok: 0.0
+    billing: api
+    model_class: executor
+    last_verified: '2026-09-08'
+    timeout_seconds: 300.0
+    deadline_seconds: 360.0
+    transient_retries: 3
+    streaming: auto
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+stage_outcomes:
+  challenge:
+    performed: true
+    changed_plan: false
+    changed_contract: false
+    evidence:
+    - challenge/001-problem-analysis.md
+    - challenge/002-plan-review.md
+    - challenge/005-problem-analysis-v3.md
+    - challenge/005-problem-framing-v3.md
+    - challenge/006-plan-review-v3.md
+  reconciliation:
+    performed: false
+    changed_plan: false
+    evidence: []
+    current_for_context: false
+    consumed_by_transition: 113
+  semantic_verification:
+    performed: false
+    material_finding: false
+    evidence: []
+effort:
+  controller_commands: 31
+  model_sessions_launched: 37
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+lock:
+  owner: shane@Mimir.local
+  acquired_at: '2026-09-16T03:39:14Z'
+  released_at: '2026-09-16T03:55:31Z'
+  attempt: 42
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []
+review_batches: []
+review_reconciliations:
+- id: TR-e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  artifact: A12
+  sha256: e89d9fb430662b4b0ddfd24287f75907cffe0adc7f7ffd5943c80557a00faaaf
+  status: applied
+  complete: true
+  completed_by: shane
+  consumed_by_transition: 113
+review_items: []
+review_actions: []
+scope_version: 2
+scope_sha256: a70d0f0d9bc922b9af8f26d221590bdbdfcb491095774176ce42a141183f1753
+targeted_replan:
+  operator:
+    path: replanning/operator-4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241.txt
+    sha256: 4b9feeee76566693548f9547af541fe984ce4b4e73e72083407485f45b37a241
+    event:
+      seq: 110
+      sha256: e99cf3772173d8f9d806b09c5d3b82fc9c7222e226054cef8a3c2b609cdd80e4
+  proposal:
+    path: replanning/proposal-c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701.json
+    sha256: c7d9880969ab0d0bf5aab76eb3d0f6e9036bc77088af198cc34ca44e88d5e701
+    event:
+      seq: 111
+      sha256: 30b3d79836d641b92af0f1bae367b771560fe6294d15a90ea6ea69e7fb8c8354
+  basis: *id001
+  review_extract:
+    path: replanning/review-text-1de7e4ae0c5bb0eab18d2fd22251e0eafb77e9de24974b9baad6a2e4ce448c5d.md
+    sha256: bbb0aa721327be170bcf2aba8dc8efe19989b82db16131b367a47c765b531003
+    event:
+      seq: 117
+      sha256: 3256f02f4f9b05600ccc1e30d74b0fe580453853c86d024d2c052ecaf5d1052d
+  planner_output:
+    path: replanning/planner_output-51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a.json
+    sha256: 51e3ad7454f0cfa8cc7f354c0673ba52144e9770123e0605fd6427ae6c55d55a
+    event:
+      seq: 122
+      sha256: 81bfd347aefe47ec071ceeca1b04fe9a373e58b46bcd817fd92d92eec3b78322
+  amendment:
+    path: planning/002-plan.md
+    sha256: c6fa4c8559ca213dd3e25d9c6c15fa5f865f69b6842422f4e59bc2edeb7b2159
+    event:
+      seq: 123
+      sha256: bce06c20691ba26fe4ef3193272ef340791d36a025e986b33ee5382860f2d9be
+  delta:
+    path: replanning/delta-a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25.json
+    sha256: a49fc97669432b2121844f24e9f484911e710f714c39a46bd03ab04adec1de25
+    event:
+      seq: 145
+      sha256: a85452f6730530e9a66807d305f940d974d768a164b6ff54f3ad55468d6802ee
+  delta_acceptance:
+    path: replanning/delta_acceptance-d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb.json
+    sha256: d5a91ef200a26762369d2b1ca1ea913351b85f5f55fb4ce6eafb6ba5165ca8fb
+    event:
+      seq: 146
+      sha256: e725f797f94f12a27873a77111a44695b79e38a572d335cb7f3a7cf9c6732688
+  scope_recovery:
+    path: replanning/scope_recovery-65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157.json
+    sha256: 65fa32b5ec5aa1370e7c93af6b52598fd8f6f03f1a4ebdf8c516a2af36975157
+    event:
+      seq: 184
+      sha256: c5e722e581c0e504e3019be7596f4ed9b3ec4e744ca04f3f6974c284b9a5f1c0

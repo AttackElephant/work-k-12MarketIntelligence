@@ -1,0 +1,12 @@
+started: 2026-09-18T09:57:53Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_planner.py", "tests/unit/test_intent_boundary.py", "tests/unit/test_run_cli.py", "-q"]
+
+........................................................................ [ 41%]
+........................................................................ [ 83%]
+............................                                             [100%]
+172 passed in 1.12s
+
+ended: 2026-09-18T09:57:55Z
+exit_code: 0
+duration_seconds: 1.381

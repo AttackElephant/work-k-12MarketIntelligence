@@ -1,0 +1,2399 @@
+diff --git a/harness/planner.py b/harness/planner.py
+index 6af882b..14d96b7 100644
+--- a/harness/planner.py
++++ b/harness/planner.py
+@@ -2,27 +2,57 @@
+ 
+ `plan_and_execute()` takes a StructuredIntent and returns either:
+ - a dict (the evidence envelope) — the happy path
+-- ClarificationNeeded — a material input is missing
++- ClarificationNeeded — an input the caller must supply or correct
+ - Unsupported — an exclusion or an unknown question
+ 
+-No model calls. Every branch is a pure function of the intent and the contract.
+-The evidence call itself is the only I/O, and its error handling mirrors the
+-tool layer's `_branch_on_error_kind()` exactly: the same closed set of outcomes,
+-the same reason codes, the same contract text.
+-
+-Why reproduce `_branch_on_error_kind` here rather than calling it? Because the
+-tool layer raises `ModelRetry`, `UnsupportedSignal`, and `RepairCapExceeded` —
+-exceptions designed for PydanticAI's agent loop. The pipeline has no loop, so
+-those signals have no handler; they would escape to the caller as unclassified
+-RuntimeErrors. The planner translates the same error semantics into the pipeline's
+-typed return values instead.
++No model calls. Every branch is a pure function of the intent, the pinned
++contract artefacts, and the evidence client's responses.
++
++What Stage 2 now guarantees (work item 20260908T113118):
++
++- Required, material, and applicable conditional-material inputs are derived
++  from the pinned question policy and the assembled request. The intent
++  model's `missing_material_inputs` claim is never trusted.
++- Named schools resolve through the pinned directory and must match exactly
++  one record each. IDs are staged in mention order, deduplicated without
++  reordering, and committed to `Deps` only after every mention resolves; a
++  zero or ambiguous match clarifies with no evidence call and no partial
++  identity mutation. Caller-supplied numeric IDs bypass the preflight (the
++  bounded resolution of the pinned Definition-Pack conflict) and any conflict
++  with name-resolved identities fails closed before dispatch.
++- Selector labels are Unicode-case-folded and separator-normalized, matched
++  against pinned static vocabularies (registry `metric_list` where declared;
++  otherwise the input-catalog schema's field mapping and embedded enums), and
++  routed to the question's own request field: `metrics` for VC-POC-01/04/11,
++  `ratios` for VC-POC-03, `grades` for VC-POC-02/07. Unsupplied selectors are
++  omitted — the emitter keeps default ownership (no invented defaults).
++- Every request is validated against its registered pinned per-question
++  schema before dispatch. A planner-produced request that cannot satisfy its
++  schema raises TerminalError — planner defects are never dressed up as
++  Unsupported user outcomes.
++- Error origins are separated: a bad_request against a request containing only
++  caller-supplied numeric school identity is an identity clarification; any
++  other bad_request after deterministic validation is planner/contract drift
++  and raises TerminalError. excluded/unknown/unanswerable keep their typed
++  abstentions; data_unavailable/internal remain operational stops.
+ """
+ 
+ from __future__ import annotations
+ 
++import json
+ import logging
++import math
++import re
++from copy import deepcopy
++from functools import lru_cache
++from pathlib import Path
+ from typing import Any
+ 
++from jsonschema import Draft202012Validator
++from jsonschema.exceptions import SchemaError
++from referencing import Registry, Resource
++from referencing.exceptions import CannotDetermineSpecification, Unresolvable
++
+ from harness import contract
+ from harness.errors import TerminalError
+ from harness.evidence import EvidenceClient, EvidenceError
+@@ -32,6 +62,11 @@ from harness.tools import Deps, ToolInvocation, request_scope_problem
+ 
+ logger = logging.getLogger("harness.planner")
+ 
++# Pinned contract artefacts. Static vocabularies and per-question schemas are
++# read from the vendored, hash-pinned directory `harness.contract` reads —
++# never from the runtime emitter.
++_SCHEMA_DIR = contract.CONTRACT_DIR / "question_schemas" / "v0.3.0"
++
+ # Keyword hints the intent model may use for excluded topics, mapped to a search
+ # term that appears in the corresponding contract exclusion text. The mapping is
+ # fuzzy: the planner searches for any exclusion text that contains the keyword.
+@@ -49,6 +84,26 @@ _EXCLUSION_KEYWORD_MAP: dict[str, str] = {
+     "gtfs": "GTFS",
+ }
+ 
++# The one pinned semantic alias (prompts/rules.md): for school-profile
++# requests "teaching staff" means teaching_fte. Keyed by the normalized label,
++# so "Teaching Staff" and "teaching-staff" match the same alias.
++_PINNED_SELECTOR_ALIASES: dict[str, str] = {"teaching staff": "teaching_fte"}
++
++_SCHOOL_FIELDS = ("acara_sml_id", "acara_sml_ids")
++
++# Label-selector request fields the requested label bag can be routed into.
++_SELECTOR_BAG_FIELDS = ("metrics", "ratios", "grades")
++
++# The only conditional-material declaration currently authorized by the pinned
++# contract. It belongs only to these questions; other operators, punctuation or
++# question IDs are drift, not prose for the planner to interpret.
++_DISTANCE_CONDITION = "market_definition equals distance"
++_DISTANCE_CONDITION_QUESTIONS = frozenset(
++    {"VC-POC-05", "VC-POC-06", "VC-POC-07"}
++)
++
++_SEPARATOR_RE = re.compile(r"[\W_]+", re.UNICODE)
++
+ 
+ def _find_exclusion_text(excluded_topic: str | None) -> str:
+     """Find the contract exclusion text matching a topic hint.
+@@ -79,19 +134,762 @@ def _find_exclusion_text(excluded_topic: str | None) -> str:
+     return texts[0]
+ 
+ 
++# --------------------------------------------------------------------------- #
++# Pinned artefact loading (fail-closed: load failures are TerminalError)
++# --------------------------------------------------------------------------- #
++
++
++def _load_pinned_json(path: Path) -> Any:
++    try:
++        return json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, ValueError) as exc:
++        raise TerminalError(
++            f"pinned contract artefact could not be loaded ({path.name}): {exc}"
++        ) from exc
++
++
++@lru_cache(maxsize=1)
++def _schema_index() -> dict[str, Any]:
++    index = _load_pinned_json(_SCHEMA_DIR / "_index.json")
++    if not isinstance(index, dict) or not isinstance(index.get("questions"), dict):
++        raise TerminalError("pinned question-schema index is malformed")
++    return index
++
++
++@lru_cache(maxsize=1)
++def _input_catalog_schema() -> dict[str, Any]:
++    schema = _load_pinned_json(contract.CONTRACT_DIR / "poc_input_catalog.v0.3.0.schema.json")
++    if not isinstance(schema, dict):
++        raise TerminalError("pinned input-catalog schema is malformed")
++    return schema
++
++
++def _registered_request_schema_path(question_id: str) -> Path:
++    """Resolve the question's registered request-schema path.
++
++    Only paths registered in the pinned index, beneath the pinned contract
++    directory, may be loaded — anything else is contract drift.
++    """
++    entry = _schema_index()["questions"].get(question_id)
++    if not isinstance(entry, dict):
++        raise TerminalError(f"{question_id} has no registered request schema")
++    filename = entry.get("request_schema")
++    if not isinstance(filename, str) or filename != f"{question_id}.request.schema.json":
++        raise TerminalError(
++            f"{question_id} request-schema registration is inconsistent: {filename!r}"
++        )
++    path = (_SCHEMA_DIR / filename).resolve()
++    pinned = contract.CONTRACT_DIR.resolve()
++    if pinned not in path.parents:
++        raise TerminalError(
++            "refusing to load a request schema from outside the pinned contract "
++            f"directory: {filename}"
++        )
++    return path
++
++
++@lru_cache(maxsize=None)
++def _request_schema(question_id: str) -> dict[str, Any]:
++    schema = _load_pinned_json(_registered_request_schema_path(question_id))
++    if not isinstance(schema, dict):
++        raise TerminalError(f"{question_id} request schema is malformed")
++    return schema
++
++
++# --------------------------------------------------------------------------- #
++# Static vocabularies (registry metric_list; catalog field mapping + enums)
++# --------------------------------------------------------------------------- #
++
++
++@lru_cache(maxsize=1)
++def _field_to_catalog_list() -> dict[str, str]:
++    mapping = _input_catalog_schema().get("x-poc-request-field-to-catalog-list")
++    if not isinstance(mapping, dict):
++        return {}
++    return {
++        str(field): str(list_name)
++        for field, list_name in mapping.items()
++        if isinstance(field, str) and isinstance(list_name, str)
++    }
++
++
++def _static_enum(list_name: str) -> list[str] | None:
++    """The embedded static enum for a catalog list, or None when the list is
++    release-derived (shape-checked only, never enum-enforced — OD-03)."""
++    if list_name.startswith("release_derived_values."):
++        return None
++    prop = _input_catalog_schema().get("properties", {}).get(list_name)
++    if isinstance(prop, dict) and isinstance(prop.get("items"), dict):
++        enum = prop["items"].get("enum")
++        if isinstance(enum, list):
++            return [str(value) for value in enum]
++    return None
++
++
++def _static_vocabulary_for_field(question_id: str, field: str) -> list[str] | None:
++    list_name = _field_to_catalog_list().get(f"{question_id}.{field}")
++    if list_name is None:
++        return None
++    return _static_enum(list_name)
++
++
++def _selector_route(question_id: str) -> tuple[str, list[str]] | None:
++    """(request field, static vocabulary) for the question's label-selector bag.
++
++    The registry's `metric_list` is authoritative where declared (VC-POC-01/04
++    → profile_metrics, VC-POC-11 → student_context_metrics); otherwise the
++    input-catalog schema's field mapping routes e.g. VC-POC-03 to `ratios` and
++    VC-POC-02/07 to `grades`.
++    """
++    entry = contract.questions().get(question_id) or {}
++    metric_list = entry.get("metric_list")
++    if metric_list:
++        values = contract.registry().get("metric_lists", {}).get(metric_list)
++        if not isinstance(values, list) or not values:
++            raise TerminalError(
++                f"{question_id} declares metric_list {metric_list!r} with no pinned values"
++            )
++        return "metrics", [str(value) for value in values]
++    field_to_list = _field_to_catalog_list()
++    for key in sorted(field_to_list):
++        prefix = f"{question_id}."
++        if not key.startswith(prefix):
++            continue
++        field = key[len(prefix):]
++        if field in _SELECTOR_BAG_FIELDS:
++            vocabulary = _static_enum(field_to_list[key])
++            if vocabulary is None:
++                raise TerminalError(
++                    f"{question_id}.{field} routes to a non-static vocabulary"
++                )
++            return field, vocabulary
++    return None
++
++
++# --------------------------------------------------------------------------- #
++# Label normalization
++# --------------------------------------------------------------------------- #
++
++
++def _normalize_label(label: Any) -> str:
++    """Unicode-safe case folding plus separator normalization.
++
++    `total_enrolments`, `Total Enrolments` and `total-enrolments` all fold to
++    `total enrolments`; Unicode letters survive the fold.
++    """
++    folded = _SEPARATOR_RE.sub(" ", str(label).casefold())
++    return folded.strip()
++
++
++def _canonical_for(label: Any, vocabulary: list[str]) -> str | None:
++    """Match a label against a pinned static vocabulary.
++
++    Direct normalized matches win; beyond that only the pinned semantic
++    aliases apply. Canonical values are returned unchanged.
++    """
++    wanted = _normalize_label(label)
++    for value in vocabulary:
++        if _normalize_label(value) == wanted:
++            return value
++    alias = _PINNED_SELECTOR_ALIASES.get(wanted)
++    if alias is not None and alias in vocabulary:
++        return alias
++    return None
++
++
++def _dedupe(values: list[Any]) -> list[Any]:
++    """Order-preserving deduplication."""
++    seen: set[Any] = set()
++    unique: list[Any] = []
++    for value in values:
++        if value not in seen:
++            seen.add(value)
++            unique.append(value)
++    return unique
++
++
++# --------------------------------------------------------------------------- #
++# Pinned-schema validation (complete draft 2020-12, local references only)
++# --------------------------------------------------------------------------- #
++
++
++@lru_cache(maxsize=1)
++def _request_validators() -> dict[str, Draft202012Validator]:
++    """Build validators from only the locally pinned, registered schemas.
++
++    The registry has no retrieval callback: an unregistered or external
++    reference therefore fails closed instead of fetching a schema at runtime.
++    """
++    schemas: dict[str, dict[str, Any]] = {}
++    resources: list[tuple[str, Resource[Any]]] = []
++    try:
++        for question_id in _schema_index()["questions"]:
++            schema = _request_schema(question_id)
++            Draft202012Validator.check_schema(schema)
++            schema_id = schema.get("$id")
++            if not isinstance(schema_id, str) or not schema_id:
++                raise TerminalError(f"{question_id} request schema has no valid $id")
++            schemas[question_id] = schema
++            resources.append((schema_id, Resource.from_contents(schema)))
++        registry = Registry().with_resources(resources)
++        return {
++            question_id: Draft202012Validator(
++                schema,
++                registry=registry,
++                format_checker=Draft202012Validator.FORMAT_CHECKER,
++            )
++            for question_id, schema in schemas.items()
++        }
++    except TerminalError:
++        raise
++    except (CannotDetermineSpecification, SchemaError, Unresolvable, ValueError) as exc:
++        raise TerminalError(f"pinned request schemas could not be resolved: {exc}") from exc
++
++
++def _instance_path(parts: Any) -> str:
++    path = "$request"
++    for part in parts:
++        path += f"[{part}]" if isinstance(part, int) else f".{part}"
++    return path
++
++
++def _schema_error_message(error: Any) -> str:
++    path = _instance_path(error.absolute_path)
++    if error.validator == "additionalProperties" and isinstance(error.instance, dict):
++        properties = error.schema.get("properties", {})
++        known = set(properties) if isinstance(properties, dict) else set()
++        unknown = sorted(key for key in error.instance if key not in known)
++        return f"{path}: unknown properties {unknown}"
++    return f"{path}: {error.message}"
++
++
++def _non_finite_paths(value: Any, path: str = "$request") -> list[str]:
++    """Reject Python-only NaN/infinities, which are not JSON numbers."""
++    if isinstance(value, float) and not math.isfinite(value):
++        return [path]
++    if isinstance(value, dict):
++        return [
++            problem
++            for key, child in value.items()
++            for problem in _non_finite_paths(child, f"{path}.{key}")
++        ]
++    if isinstance(value, list):
++        return [
++            problem
++            for index, child in enumerate(value)
++            for problem in _non_finite_paths(child, f"{path}[{index}]")
++        ]
++    return []
++
++
++def _validate_request(question_id: str, request: dict[str, Any]) -> None:
++    """Validate the planner-built request against its registered pinned schema.
++
++    Any failure — including schema load or resolution failure — is a
++    TerminalError before dispatch, never an Unsupported user outcome.
++    """
++    validator = _request_validators().get(question_id)
++    if validator is None:
++        raise TerminalError(f"{question_id} has no registered request validator")
++    problems = [f"{path}: value must be finite" for path in _non_finite_paths(request)]
++    try:
++        errors = sorted(
++            validator.iter_errors(request),
++            key=lambda error: tuple(str(part) for part in error.absolute_path),
++        )
++    except Unresolvable as exc:
++        raise TerminalError(
++            f"{question_id}: registered request schema reference could not be resolved: {exc}"
++        ) from exc
++    problems.extend(_schema_error_message(error) for error in errors)
++    if problems:
++        raise TerminalError(
++            f"{question_id}: the planner-built request does not satisfy its "
++            f"registered request schema: " + "; ".join(problems)
++        )
++
++
++# --------------------------------------------------------------------------- #
++# School identity resolution (transactional, exactly-one-match)
++# --------------------------------------------------------------------------- #
++
++
++async def _resolve_mentions(
++    question_id: str,
++    mentions: list[str],
++    client: EvidenceClient,
++    deps: Deps,
++) -> tuple[list[int], ClarificationNeeded | None]:
++    """Resolve each mention through the pinned directory, exactly one match each.
++
++    Every preflight is recorded, including failures. IDs are staged locally in
++    mention order and deduplicated without reordering; nothing is committed
++    here — the caller commits to `Deps` only after every mention resolves.
++    """
++    staged: list[int] = []
++    for mention in mentions:
++        arguments = {"search": mention, "limit": 25}
++        try:
++            records = await client.school_directory(search=mention, limit=25)
++        except Exception as exc:
++            deps.tool_calls.append(
++                ToolInvocation("search_schools", arguments, error_kind=type(exc).__name__)
++            )
++            raise
++        deps.tool_calls.append(ToolInvocation("search_schools", arguments, records))
++        if not records:
++            return [], _school_match_clarification(
++                question_id,
++                mention,
++                f"'{mention}' matched no school in the pinned directory.",
++                "I couldn't find that school. Could you check the name — or give me "
++                "the school's public ACARA ID?",
++            )
++        if len(records) > 1:
++            return [], _school_match_clarification(
++                question_id,
++                mention,
++                f"'{mention}' matched {len(records)} schools; a request needs exactly one.",
++                f"More than one school matches '{mention}'. Which one did you mean?",
++            )
++        record = records[0]
++        school_id = record.get("acara_sml_id") if isinstance(record, dict) else None
++        if (
++            not isinstance(school_id, int)
++            or isinstance(school_id, bool)
++            or school_id <= 0
++        ):
++            raise TerminalError(
++                f"{question_id}: malformed school-directory record for {mention!r}; "
++                "exactly one positive integer acara_sml_id is required"
++            )
++        if school_id not in staged:
++            staged.append(school_id)
++    return staged, None
++
++
++def _school_match_clarification(
++    question_id: str, mention: str, why_material: str, prompt_to_user: str
++) -> ClarificationNeeded:
++    return ClarificationNeeded(
++        question_id=question_id,
++        missing=[
++            MissingInput(input="acara_sml_id", why_material=why_material, allowed_values=[])
++        ],
++        prompt_to_user=prompt_to_user,
++    )
++
++
++def _adapt_explicit_school_fields(request: dict[str, Any], school_required: list[str]) -> None:
++    """Let a caller-supplied identity in either school field satisfy the
++    question's own selector field, without inventing values."""
++    if not school_required:
++        return
++    if "acara_sml_ids" in school_required:
++        if "acara_sml_ids" not in request and isinstance(request.get("acara_sml_id"), int):
++            request["acara_sml_ids"] = [request.pop("acara_sml_id")]
++    elif "acara_sml_id" in school_required:
++        if "acara_sml_id" not in request and isinstance(request.get("acara_sml_ids"), list):
++            ids = request["acara_sml_ids"]
++            if len(ids) == 1 and isinstance(ids[0], int) and not isinstance(ids[0], bool):
++                request["acara_sml_id"] = ids[0]
++                del request["acara_sml_ids"]
++            else:
++                raise TerminalError(
++                    "caller supplied multiple acara_sml_ids for a question whose schema "
++                    "takes a single acara_sml_id"
++                )
++
++
++def _attach_school_ids(
++    request: dict[str, Any], school_required: list[str], ids: list[int]
++) -> None:
++    if not ids:
++        return
++    if "acara_sml_ids" in school_required:
++        request.setdefault("acara_sml_ids", list(ids))
++    elif "acara_sml_id" in school_required:
++        request.setdefault("acara_sml_id", ids[0])
++
++
++def _explicit_id_values(request: dict[str, Any], school_required: list[str]) -> list[int]:
++    if "acara_sml_ids" in school_required:
++        value = request.get("acara_sml_ids")
++        if isinstance(value, list):
++            return [v for v in value if isinstance(v, int) and not isinstance(v, bool)]
++        return []
++    if "acara_sml_id" in school_required:
++        value = request.get("acara_sml_id")
++        if isinstance(value, int) and not isinstance(value, bool):
++            return [value]
++    return []
++
++
++def _requires_two_distinct_ids(entry: dict[str, Any]) -> bool:
++    constraints = entry.get("input_policy", {}).get("constraints", [])
++    return any("at least two" in str(constraint) for constraint in constraints)
++
++
++def _insufficient_schools_clarification(question_id: str) -> ClarificationNeeded:
++    return ClarificationNeeded(
++        question_id=question_id,
++        missing=[
++            MissingInput(
++                input="acara_sml_ids",
++                why_material="This comparison needs at least two distinct schools.",
++                allowed_values=[],
++            )
++        ],
++        prompt_to_user="Which distinct schools should be compared? Name at least two.",
++    )
++
++
++# --------------------------------------------------------------------------- #
++# Selector normalization and routing
++# --------------------------------------------------------------------------- #
++
++
++def _selector_clarification(
++    question_id: str, field: str, value: Any, vocabulary: list[str]
++) -> ClarificationNeeded:
++    return ClarificationNeeded(
++        question_id=question_id,
++        missing=[
++            MissingInput(
++                input=field,
++                why_material=f"'{value}' is not an allowed {field} value for {question_id}.",
++                allowed_values=vocabulary,
++            )
++        ],
++        prompt_to_user=(
++            f"Which {field} did you mean? Allowed values: "
++            + ", ".join(vocabulary)
++            + "."
++        ),
++    )
++
++
++def _request_field_schema(question_id: str, path: list[str]) -> dict[str, Any]:
++    """Return the registered schema node for a mapped request-field path."""
++
++    node: Any = _request_schema(question_id)
++    for part in path:
++        properties = node.get("properties") if isinstance(node, dict) else None
++        node = properties.get(part) if isinstance(properties, dict) else None
++        if not isinstance(node, dict):
++            raise TerminalError(
++                f"{question_id}: pinned selector mapping has no request-schema field "
++                f"{'.'.join(path)}"
++            )
++    return node
++
++
++def _normalize_filter_selectors(
++    question_id: str, request: dict[str, Any]
++) -> ClarificationNeeded | None:
++    """Normalize every explicitly supplied selector backed by a static pin.
++
++    Release-derived/open fields retain their values and schema validation owns
++    wrong types and unknown keys. Static scalar, list and nested-list fields are
++    canonicalized with stable-order deduplication; unknown labels clarify.
++    """
++    prefix = f"{question_id}."
++    for mapped_field, list_name in _field_to_catalog_list().items():
++        if not mapped_field.startswith(prefix) or "<keys>" in mapped_field:
++            continue
++        vocabulary = _static_enum(list_name)
++        if vocabulary is None:
++            continue
++        path = mapped_field[len(prefix):].split(".")
++        owner: Any = request
++        for part in path[:-1]:
++            if not isinstance(owner, dict):
++                raise TerminalError(
++                    f"{question_id}: invalid selector shape for {'.'.join(path)}"
++                )
++            if part not in owner:
++                owner = None
++                break
++            owner = owner[part]
++        if owner is None:
++            continue
++        if not isinstance(owner, dict):
++            raise TerminalError(
++                f"{question_id}: invalid selector shape for {'.'.join(path)}"
++            )
++        if path[-1] not in owner:
++            continue
++        field = ".".join(path)
++        value = owner[path[-1]]
++        field_schema = _request_field_schema(question_id, path)
++        expected_type = field_schema.get("type")
++        if expected_type == "string":
++            if not isinstance(value, str):
++                raise TerminalError(
++                    f"{question_id}: invalid selector shape for {field}; expected string"
++                )
++            canonical = _canonical_for(value, vocabulary)
++            if canonical is None:
++                return _selector_clarification(question_id, field, value, vocabulary)
++            owner[path[-1]] = canonical
++        elif expected_type == "array":
++            if not isinstance(value, list) or not all(
++                isinstance(item, str) for item in value
++            ):
++                raise TerminalError(
++                    f"{question_id}: invalid selector shape for {field}; "
++                    "expected an array of strings"
++                )
++            canonical_values: list[str] = []
++            for item in value:
++                canonical = _canonical_for(item, vocabulary)
++                if canonical is None:
++                    return _selector_clarification(question_id, field, item, vocabulary)
++                canonical_values.append(canonical)
++            owner[path[-1]] = _dedupe(canonical_values)
++        else:
++            raise TerminalError(
++                f"{question_id}: unsupported pinned selector shape for {field}"
++            )
++    return None
++
++
++def _route_selectors(
++    question_id: str,
++    intent: StructuredIntent,
++    request: dict[str, Any],
++    deps: Deps,
++) -> ClarificationNeeded | None:
++    """Route requested selector labels to the question's own request field.
++
++    Static vocabularies come from pinned artefacts (registry metric_list where
++    declared, otherwise the input-catalog schema's field mapping and embedded
++    enums) — never from the runtime emitter. Selectors the user named none of
++    are omitted so the emitter keeps default ownership.
++    """
++    labels = [str(label) for label in (intent.requested_metrics or []) if str(label).strip()]
++    if not labels:
++        return None
++    route = _selector_route(question_id)
++    if route is None:
++        return ClarificationNeeded(
++            question_id=question_id,
++            missing=[
++                MissingInput(
++                    input="metrics",
++                    why_material=(
++                        f"{question_id} takes no metric selector, so the requested "
++                        "labels cannot be applied to this request."
++                    ),
++                    allowed_values=[],
++                )
++            ],
++            prompt_to_user="This question does not take metric selectors. Should I answer it as asked?",
++        )
++    field, vocabulary = route
++    canonical: list[str] = []
++    for label in labels:
++        matched = _canonical_for(label, vocabulary)
++        if matched is None:
++            return ClarificationNeeded(
++                question_id=question_id,
++                missing=[
++                    MissingInput(
++                        input=field,
++                        why_material=(
++                            f"'{label}' is not an allowed {field} value for {question_id}."
++                        ),
++                        allowed_values=vocabulary,
++                    )
++                ],
++                prompt_to_user=(
++                    f"Which {field} did you mean? Allowed values: "
++                    + ", ".join(vocabulary)
++                    + "."
++                ),
++            )
++        canonical.append(matched)
++    canonical = _dedupe(canonical)
++
++    if field == "metrics":
++        # Final scope enforcement happens after filter and bag assembly so both
++        # sources receive the same rule.
++        pass
++    request[field] = canonical
++    return None
++
++
++def _enforce_metric_scope(
++    question_id: str, request: dict[str, Any], deps: Deps
++) -> ClarificationNeeded | None:
++    metrics = request.get("metrics")
++    if question_id not in {"VC-POC-01", "VC-POC-04"} or not isinstance(metrics, list):
++        return None
++    if not metrics or not all(isinstance(metric, str) for metric in metrics):
++        return None  # the pinned schema owns malformed shapes
++    admissible = [
++        metric
++        for metric in metrics
++        if request_scope_problem(
++            getattr(deps, "_scope_user_question", deps.user_question),
++            question_id,
++            {**request, "metrics": [metric]},
++        )
++        is None
++    ]
++    if not admissible:
++        vocabulary = _selector_route(question_id)
++        return ClarificationNeeded(
++            question_id=question_id,
++            missing=[
++                MissingInput(
++                    input="metrics",
++                    why_material=(
++                        "None of the explicitly selected metrics is supported by the "
++                        "scope stated in the user's request."
++                    ),
++                    allowed_values=vocabulary[1] if vocabulary else [],
++                )
++            ],
++            prompt_to_user=(
++                "Which profile metric should I use? Headcount and non-teaching "
++                "metrics must be requested explicitly."
++            ),
++        )
++    request["metrics"] = admissible
++    return None
++
++
++# --------------------------------------------------------------------------- #
++# Registry-owned explicit-filter constraints (VC-POC-09/10, OD-07)
++# --------------------------------------------------------------------------- #
++
++
++def _enforce_explicit_filter_constraints(
++    question_id: str, entry: dict[str, Any], request: dict[str, Any]
++) -> ClarificationNeeded | None:
++    """The registry-owned VC-POC-09/10 rule: a cohort definition must contain
++    at least one explicit filter — the sector default alone does not define a
++    peer group. Enforced exactly as pinned, not generalised into a condition
++    language. Absent fields are left to policy derivation."""
++    policy = entry.get("input_policy") or {}
++    required = [f for f in policy.get("required", []) if isinstance(f, str)]
++
++    if "peer_filters" in required and isinstance(request.get("peer_filters"), dict):
++        filters = request["peer_filters"]
++        if not filters:
++            return _cohort_definition_clarification(
++                question_id,
++                "peer_filters",
++                "The peer group definition is empty; at least one explicit filter "
++                "is required.",
++            )
++        default_sectors = policy.get("defaultable", {}).get("peer_filters.sectors")
++        if (
++            set(filters) == {"sectors"}
++            and isinstance(default_sectors, list)
++            and isinstance(filters.get("sectors"), list)
++            and sorted(str(s) for s in filters["sectors"])
++            == sorted(str(s) for s in default_sectors)
++        ):
++            return _cohort_definition_clarification(
++                question_id,
++                "peer_filters",
++                "The sector default alone does not define a peer group; at least one "
++                "explicit filter beyond the sector default is required.",
++            )
++
++    if "segment_filters" in required and isinstance(request.get("segment_filters"), dict):
++        if not request["segment_filters"]:
++            return _cohort_definition_clarification(
++                question_id,
++                "segment_filters",
++                "The segment definition is empty; at least one explicit filter "
++                "is required.",
++            )
++    return None
++
++
++def _cohort_definition_clarification(
++    question_id: str, field: str, why_material: str
++) -> ClarificationNeeded:
++    return ClarificationNeeded(
++        question_id=question_id,
++        missing=[MissingInput(input=field, why_material=why_material, allowed_values=[])],
++        prompt_to_user=(
++            "Which rule should define this cohort — for example a sector, school "
++            "type, enrolment band, ICSEA range, remoteness or suburb?"
++        ),
++    )
++
++
++# --------------------------------------------------------------------------- #
++# Derived missing inputs (pinned policy order)
++# --------------------------------------------------------------------------- #
++
++
++def _derive_missing_inputs(
++    question_id: str, entry: dict[str, Any], request: dict[str, Any]
++) -> list[str]:
++    """Missing required, material, then applicable conditional-material fields,
++    in pinned policy order — derived from policy and the assembled request,
++    never taken from the model's missing-input claim."""
++    policy = entry.get("input_policy") or {}
++    missing: list[str] = []
++    seen: set[str] = set()
++
++    def consider(field: str) -> None:
++        if field in seen:
++            return
++        seen.add(field)
++        if field not in request:
++            missing.append(field)
++
++    for field in policy.get("required", []):
++        if isinstance(field, str):
++            consider(field)
++    for field in policy.get("material", []):
++        if isinstance(field, str):
++            consider(field)
++
++    conditional = policy.get("conditional_material", {})
++    if not isinstance(conditional, dict):
++        raise TerminalError(
++            f"{question_id}: conditional-material policy is malformed — contract drift"
++        )
++    for field, condition in conditional.items():
++        if (
++            question_id not in _DISTANCE_CONDITION_QUESTIONS
++            or field != "distance_km"
++            or condition != _DISTANCE_CONDITION
++        ):
++            raise TerminalError(
++                f"{question_id}: unsupported conditional-material expression "
++                f"{condition!r} for {field} — contract drift, refusing to interpret it"
++            )
++        if request.get("market_definition") == "distance" and "distance_km" not in request:
++            consider(field)
++    return missing
++
++
++# --------------------------------------------------------------------------- #
++# Stage 2 entry point
++# --------------------------------------------------------------------------- #
++
++
+ async def plan_and_execute(
+     intent: StructuredIntent,
+     client: EvidenceClient,
+     deps: Deps,
+ ) -> dict[str, Any] | ClarificationNeeded | Unsupported:
+-    """Deterministic Stage 2: intent → evidence envelope or typed refusal.
++    """Deterministic Stage 2: intent → evidence envelope or typed outcome.
+ 
+     Returns:
+         dict — the evidence envelope (happy path)
+-        ClarificationNeeded — a material input is missing
+-        Unsupported — an exclusion, unknown question, or unanswerable request
++        ClarificationNeeded — a caller-suppliable input is missing or wrong
++        Unsupported — an exclusion or an unknown question
+     May raise:
+-        TerminalError — an operational stop (data_unavailable, internal)
++        TerminalError — planner/schema defects and operational stops
+     """
+     question_id = intent.question_id
+ 
+@@ -159,99 +957,131 @@ async def plan_and_execute(
+         )
+ 
+     # ------------------------------------------------------------------ #
+-    # 5. Material inputs missing → ask for clarification
++    # 5. Pinned policy and assembled request
+     # ------------------------------------------------------------------ #
+-    if intent.missing_material_inputs:
+-        material = contract.material_inputs_for(question_id)
+-        actually_missing = [inp for inp in intent.missing_material_inputs if inp in material]
+-        if actually_missing:
+-            missing_items = [
+-                MissingInput(
+-                    input=inp,
+-                    why_material=_material_why(question_id, inp),
+-                    allowed_values=[],
+-                )
+-                for inp in actually_missing
+-            ]
+-            prompt_to_user = (
+-                f"To answer this question I need "
+-                + ", ".join(f"the {inp}" for inp in actually_missing)
+-                + ". Could you provide "
+-                + ("it" if len(actually_missing) == 1 else "them")
+-                + "?"
+-            )
+-            return ClarificationNeeded(
+-                question_id=question_id,
+-                missing=missing_items,
+-                prompt_to_user=prompt_to_user,
+-            )
++    entry = contract.questions().get(question_id)
++    if entry is None:
++        raise TerminalError(
++            f"{question_id} has a registered request schema but is absent from "
++            "the pinned registry — contract drift"
++        )
++    policy = entry.get("input_policy") or {}
++    required_fields = [f for f in policy.get("required", []) if isinstance(f, str)]
++    school_required = [f for f in required_fields if f in _SCHOOL_FIELDS]
++
++    # Fresh request from explicit intent fields only; planner-owned selectors
++    # are added below. Unsupplied defaultables stay omitted — the emitter owns
++    # defaults and resolved_request.
++    request: dict[str, Any] = deepcopy(intent.filters)
++
++    scalar_clarification = _normalize_filter_selectors(question_id, request)
++    if scalar_clarification is not None:
++        return scalar_clarification
++
++    _adapt_explicit_school_fields(request, school_required)
++    identity_from_caller = any(field in request for field in school_required)
+ 
+     # ------------------------------------------------------------------ #
+-    # 6. Resolve schools
++    # 6. Transactional named-school resolution
+     # ------------------------------------------------------------------ #
+-    for school_name in intent.school_mentions:
+-        try:
+-            records = await client.school_directory(search=school_name, limit=25)
+-        except Exception as exc:
+-            deps.tool_calls.append(
+-                ToolInvocation(
+-                    "search_schools",
+-                    {"search": school_name, "limit": 25},
+-                    error_kind=type(exc).__name__,
+-                )
++    mentions = [
++        mention for mention in (intent.school_mentions or [])
++        if isinstance(mention, str) and mention.strip()
++    ]
++    if school_required and mentions:
++        resolved_ids, failure = await _resolve_mentions(question_id, mentions, client, deps)
++        if failure is not None:
++            return failure
++        if "acara_sml_id" in school_required and len(resolved_ids) > 1:
++            raise TerminalError(
++                f"{question_id}: multiple resolved schools cannot form the schema's "
++                "single acara_sml_id request"
+             )
+-            raise
++        if identity_from_caller:
++            explicit_ids = _explicit_id_values(request, school_required)
++            if sorted(resolved_ids) != sorted(explicit_ids):
++                raise TerminalError(
++                    f"{question_id}: explicit school identities {explicit_ids} conflict "
++                    f"with directory-resolved identities {resolved_ids}"
++                )
++            deps.searched = True
++        else:
++            if _requires_two_distinct_ids(entry) and len(resolved_ids) < 2:
++                return _insufficient_schools_clarification(question_id)
++            for school_id in resolved_ids:
++                if school_id not in deps.resolved_school_ids:
++                    deps.resolved_school_ids.append(school_id)
++            deps.searched = True
++            _attach_school_ids(request, school_required, resolved_ids)
++    elif school_required and identity_from_caller and "acara_sml_ids" in school_required:
++        explicit_ids = _explicit_id_values(request, school_required)
++        raw_ids = request.get("acara_sml_ids")
++        if (
++            _requires_two_distinct_ids(entry)
++            and isinstance(raw_ids, list)
++            and len(explicit_ids) == len(raw_ids)
++            and len(_dedupe(explicit_ids)) < 2
++        ):
++            return _insufficient_schools_clarification(question_id)
+ 
+-        deps.searched = True
+-        resolved = [r["acara_sml_id"] for r in records if "acara_sml_id" in r]
+-        if resolved:
+-            # Take the first match: the planner trusts the intent model to have
+-            # named an unambiguous school. Ambiguity handling (ClarificationNeeded)
+-            # is the live-model path; the planner uses best-effort resolution.
+-            best = resolved[0]
+-            if best not in deps.resolved_school_ids:
+-                deps.resolved_school_ids.append(best)
+-        deps.tool_calls.append(
+-            ToolInvocation(
+-                "search_schools",
+-                {"search": school_name, "limit": 25},
+-                records,
+-            )
+-        )
++    # ------------------------------------------------------------------ #
++    # 7. Selector normalization and routing (clarifies unnormalizable labels)
++    # ------------------------------------------------------------------ #
++    selector_clarification = _route_selectors(question_id, intent, request, deps)
++    if selector_clarification is not None:
++        return selector_clarification
++
++    metric_clarification = _enforce_metric_scope(question_id, request, deps)
++    if metric_clarification is not None:
++        return metric_clarification
++
++    # ------------------------------------------------------------------ #
++    # 8. Registry-owned explicit-filter constraints (VC-POC-09/10)
++    # ------------------------------------------------------------------ #
++    constraint_clarification = _enforce_explicit_filter_constraints(
++        question_id, entry, request
++    )
++    if constraint_clarification is not None:
++        return constraint_clarification
+ 
+     # ------------------------------------------------------------------ #
+-    # 7. Build the evidence request
++    # 9. Derive missing inputs from the pinned policy (stable order)
+     # ------------------------------------------------------------------ #
+-    request: dict[str, Any] = dict(intent.filters)
+-
+-    # Attach resolved school IDs using the right field name for this question
+-    if deps.resolved_school_ids:
+-        q_entry = contract.questions()[question_id]
+-        required = q_entry.get("input_policy", {}).get("required", [])
+-        if "acara_sml_ids" in required:
+-            request.setdefault("acara_sml_ids", deps.resolved_school_ids)
+-        elif "acara_sml_id" in required and deps.resolved_school_ids:
+-            request.setdefault("acara_sml_id", deps.resolved_school_ids[0])
+-
+-    # Map requested metrics to the request (NL labels are passed through for
+-    # now — the real emitter validates them; bad values return bad_request)
+-    if intent.requested_metrics:
+-        request.setdefault("metrics", intent.requested_metrics)
+-
+-    # Apply metric scope check for VC-POC-01 and VC-POC-04
+-    scope_problem = request_scope_problem(deps.user_question, question_id, request)
+-    if scope_problem and "metrics" in request and isinstance(request["metrics"], list):
+-        # Drop non-teaching and headcount expansions the user didn't ask for
+-        cleaned = [
+-            m for m in request["metrics"]
+-            if not (
+-                str(m).endswith("_headcount") or str(m).startswith("non_teaching_")
++    missing = _derive_missing_inputs(question_id, entry, request)
++    if missing:
++        missing_items = [
++            MissingInput(
++                input=field,
++                why_material=_material_why(question_id, field),
++                allowed_values=_static_vocabulary_for_field(question_id, field) or [],
+             )
++            for field in missing
+         ]
+-        request["metrics"] = cleaned or request["metrics"]
++        prompt_to_user = (
++            "To answer this question I need "
++            + ", ".join(f"the {field}" for field in missing)
++            + ". Could you provide "
++            + ("it" if len(missing) == 1 else "them")
++            + "?"
++        )
++        logger.debug(
++            "planner clarification",
++            extra={"subsystem": "planner", "question_id": question_id, "missing": missing},
++        )
++        return ClarificationNeeded(
++            question_id=question_id,
++            missing=missing_items,
++            prompt_to_user=prompt_to_user,
++        )
++
++    # ------------------------------------------------------------------ #
++    # 10. Pinned-schema validation before dispatch
++    # ------------------------------------------------------------------ #
++    _validate_request(question_id, request)
++    caller_identity_only = _caller_identity_only_field(request, identity_from_caller)
+ 
+     # ------------------------------------------------------------------ #
+-    # 8. Fetch evidence
++    # 11. Fetch evidence (failures recorded before branching)
+     # ------------------------------------------------------------------ #
+     arguments = {"question_id": question_id, "request": request}
+     try:
+@@ -260,7 +1090,7 @@ async def plan_and_execute(
+         deps.tool_calls.append(
+             ToolInvocation("fetch_evidence", arguments, error_kind=exc.error_kind)
+         )
+-        return _branch_evidence_error(question_id, exc)
++        return _branch_evidence_error(question_id, exc, caller_identity_only)
+     except Exception:
+         deps.tool_calls.append(
+             ToolInvocation("fetch_evidence", arguments, error_kind="operational")
+@@ -286,6 +1116,8 @@ def _material_why(question_id: str, input_name: str) -> str:
+         "segment_filters": "The segment definition determines which schools are included.",
+         "sa2_codes": "The SA2 area determines which geographic area is analysed.",
+         "zone_entity_code": "The zone entity code identifies the government zone to look up.",
++        "acara_sml_id": "The school must be identified before evidence can be fetched.",
++        "acara_sml_ids": "The schools must be identified before evidence can be fetched.",
+     }
+     return explanations.get(
+         input_name,
+@@ -293,15 +1125,36 @@ def _material_why(question_id: str, input_name: str) -> str:
+     )
+ 
+ 
++def _caller_identity_only_field(
++    request: dict[str, Any], identity_from_caller: bool
++) -> str | None:
++    """Return the sole caller-supplied ACARA identity field, if there is one."""
++    if not identity_from_caller or len(request) != 1:
++        return None
++    if isinstance(request.get("acara_sml_id"), int) and not isinstance(
++        request["acara_sml_id"], bool
++    ):
++        return "acara_sml_id"
++    ids = request.get("acara_sml_ids")
++    if isinstance(ids, list) and ids and all(
++        isinstance(value, int) and not isinstance(value, bool) for value in ids
++    ):
++        return "acara_sml_ids"
++    return None
++
++
+ def _branch_evidence_error(
+     question_id: str,
+     exc: EvidenceError,
+-) -> Unsupported:
+-    """Translate an EvidenceError into an Unsupported outcome.
++    caller_identity_only: str | None,
++) -> Unsupported | ClarificationNeeded:
++    """Translate an EvidenceError into the pipeline's typed outcomes.
+ 
+-    This mirrors `_branch_on_error_kind()` in tools.py but returns typed values
+-    instead of raising PydanticAI signals. TerminalError is re-raised (never
+-    returned as Unsupported — it is an operational stop, not an honest refusal).
++    Origin-aware: bad_request clarifies only when the validated request contains
++    nothing except caller-supplied numeric school identity. Any other
++    bad_request is planner/contract drift. excluded/unknown/unanswerable keep
++    their contract-owned refusals; data_unavailable/internal are operational
++    stops, never refusals.
+     """
+     kind = exc.error_kind
+     logger.debug(
+@@ -329,9 +1182,29 @@ def _branch_evidence_error(
+         return Unsupported(reason_kind="unanswerable", reason=exc.message)
+ 
+     if kind == "bad_request":
+-        # On a first bad_request the planner cannot repair (no model); return
+-        # out_of_scope so the caller knows the data layer rejected the request.
+-        return Unsupported(reason_kind="out_of_scope", reason=exc.message)
++        if caller_identity_only is not None:
++            return ClarificationNeeded(
++                question_id=question_id,
++                missing=[
++                    MissingInput(
++                        input=caller_identity_only,
++                        why_material=(
++                            "The data layer rejected the supplied school identity "
++                            f"({exc.message}). Confirm the school's current public "
++                            "ACARA_SML_ID."
++                        ),
++                        allowed_values=[],
++                    )
++                ],
++                prompt_to_user=(
++                    "The school identity supplied for this question was rejected by the "
++                    "data layer. Could you confirm the school?"
++                ),
++            )
++        raise TerminalError(
++            f"{question_id}: the evidence emitter returned bad_request for a "
++            f"deterministic, schema-valid request — planner/contract drift: {exc.message}"
++        )
+ 
+     # data_unavailable | internal — operational stop, not a refusal.
+     raise TerminalError(f"evidence emitter reported {kind}: {exc.message}")
+diff --git a/run.py b/run.py
+index 250a9c6..88829f0 100644
+--- a/run.py
++++ b/run.py
+@@ -187,6 +187,8 @@ async def converse(
+     (pipeline path). When `None`, the new 4-stage pipeline is used.
+     """
+     history: list[Any] | None = None
++    pipeline_turns: list[tuple[ClarificationNeeded, str]] = []
++    pipeline_user_replies: list[str] = []
+     reply = question
+     for _round in range(max_clarifications + 1):
+         if agent is not None:
+@@ -194,14 +196,41 @@ async def converse(
+                 agent, deps, reply, message_history=history, record_usage=record_usage
+             )
+         else:
+-            # Pipeline path: ask(deps, question, ...) — no agent, no message_history
+-            output = await ask(deps, reply, record_usage=record_usage)
++            # The pipeline has no PydanticAI message history. Carry the original
++            # request and each clarification exchange explicitly into the next
++            # intent interpretation so a short answer (for example "SA2") does
++            # not become a context-free new question.
++            pipeline_question = question
++            if pipeline_turns:
++                exchanges = "\n\n".join(
++                    "Clarification requested:\n"
++                    f"Question ID: {clarification.question_id or 'unknown'}\n"
++                    f"Missing inputs: {', '.join(item.input for item in clarification.missing)}\n"
++                    f"Prompt: {clarification.prompt_to_user}\n"
++                    f"User response: {answer}"
++                    for clarification, answer in pipeline_turns
++                )
++                pipeline_question = (
++                    f"Original user request:\n{question}\n\n"
++                    f"Clarification exchanges:\n{exchanges}\n\n"
++                    "Interpret the completed request using all information above."
++                )
++            # Stage 1 needs the full transcript, but deterministic scope checks
++            # may treat only actual user wording as authorization. Keep that
++            # authority channel separate from assistant prompts and metadata.
++            deps._scope_user_question = "\n".join(
++                [question, *pipeline_user_replies]
++            )
++            output = await ask(deps, pipeline_question, record_usage=record_usage)
+         if not isinstance(output, ClarificationNeeded) or ask_user is None:
+             return output
+         answer = ask_user(output)
+         if answer is None or not answer.strip():
+             return output
+         history = deps.last_messages
++        if agent is None:
++            pipeline_turns.append((output, answer.strip()))
++            pipeline_user_replies.append(answer.strip())
+         reply = answer
+     return output
+ 
+@@ -311,14 +340,13 @@ def main(argv: list[str] | None = None) -> int:
+ 
+     require_credentials()
+     client = build_client(args.stub)
+-    agent = build_agent()
+     deps = Deps(client=client)
+     ask_user = None if args.no_interactive else _prompt_on_terminal
+ 
+     try:
+         output = asyncio.run(
+             converse(
+-                agent,
++                None,
+                 deps,
+                 args.question,
+                 ask_user=ask_user,
+diff --git a/tests/unit/test_intent_boundary.py b/tests/unit/test_intent_boundary.py
+index 878761c..967849d 100644
+--- a/tests/unit/test_intent_boundary.py
++++ b/tests/unit/test_intent_boundary.py
+@@ -21,6 +21,7 @@ from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
+ from pydantic_ai.models.function import AgentInfo, FunctionModel
+ 
+ from harness.agent import ask
++from harness.errors import TerminalError
+ from harness.intent import StructuredIntent, build_intent_agent, interpret_intent
+ from harness.narration import NarrationOutput, NarrationValidationError
+ from harness.outputs import ClarificationNeeded, RenderedAnswer, Unsupported
+@@ -222,6 +223,48 @@ def test_ask_pipeline_missing_material_input_returns_clarification():
+     assert "market_definition" in missing_names
+ 
+ 
++def test_planner_clarification_bypasses_narration():
++    """Stage 4 is unreachable when deterministic Stage 2 needs user input."""
++    intent = StructuredIntent(
++        question_id="VC-POC-05",
++        filters={"acara_sml_id": 40387},
++        missing_material_inputs=[],
++    )
++
++    def narration_must_not_run(
++        messages: list[ModelMessage], info: AgentInfo
++    ) -> ModelResponse:
++        raise AssertionError("narration ran for a planner clarification")
++
++    deps = Deps(client=stub_client())
++    output = asyncio.run(
++        ask(
++            deps,
++            "q",
++            intent_override=intent,
++            narration_model=FunctionModel(narration_must_not_run),
++        )
++    )
++
++    assert isinstance(output, ClarificationNeeded)
++    assert [item.input for item in output.missing] == ["market_definition"]
++    assert deps.answer_view is None
++
++
++def test_planner_failure_is_not_unsupported():
++    """A planner/schema defect propagates; the pipeline must not render refusal."""
++    intent = StructuredIntent(
++        question_id="VC-POC-10",
++        filters={"segment_filters": {"unknown_nested_key": ["x"]}},
++    )
++    deps = Deps(client=stub_client())
++
++    with pytest.raises(TerminalError, match="unknown properties"):
++        asyncio.run(ask(deps, "q", intent_override=intent))
++
++    assert deps.answer_view is None
++
++
+ def test_ask_pipeline_stores_intent_on_deps():
+     """The intent is stored on deps.intent for downstream inspection."""
+     intent = StructuredIntent(
+diff --git a/tests/unit/test_planner.py b/tests/unit/test_planner.py
+index 96173d7..ae2a897 100644
+--- a/tests/unit/test_planner.py
++++ b/tests/unit/test_planner.py
+@@ -13,6 +13,7 @@ from __future__ import annotations
+ 
+ import asyncio
+ import sys
++from copy import deepcopy
+ from pathlib import Path
+ from typing import Any
+ 
+@@ -23,7 +24,12 @@ from harness.errors import TerminalError
+ from harness.evidence import EvidenceError, EvidenceClient
+ from harness.intent import StructuredIntent
+ from harness.outputs import ClarificationNeeded, Unsupported
+-from harness.planner import _find_exclusion_text, plan_and_execute
++from harness.planner import (
++    _derive_missing_inputs,
++    _find_exclusion_text,
++    _validate_request,
++    plan_and_execute,
++)
+ from harness.tools import Deps
+ 
+ PROJECT_ROOT = Path(__file__).resolve().parents[2]
+@@ -73,11 +79,56 @@ class _HappyClient:
+         return self._envelope
+ 
+ 
++class _DirectoryClient(_HappyClient):
++    """A recording client with deterministic per-mention directory results."""
++
++    def __init__(self, directory: dict[str, list[dict]], envelope: dict | None = None):
++        super().__init__(envelope)
++        self.directory = directory
++        self.searches: list[str] = []
++
++    async def school_directory(self, search: str, limit: int = 25) -> list[dict]:
++        self.searches.append(search)
++        return self.directory.get(search, [])
++
++
+ def run_planner(intent: StructuredIntent, client=None) -> Any:
+     deps = Deps(client=client or stub_client())
+     return asyncio.run(plan_and_execute(intent, client or stub_client(), deps)), deps
+ 
+ 
++# Smallest explicit requests permitted by each pinned request schema. Defaults
++# deliberately stay absent: they belong to the emitter.
++MINIMAL_REQUESTS = {
++    "VC-POC-REF-01": {},
++    "VC-POC-01": {"acara_sml_id": 101},
++    "VC-POC-02": {"acara_sml_id": 101},
++    "VC-POC-03": {"acara_sml_ids": [101]},
++    "VC-POC-04": {"acara_sml_ids": [101, 202]},
++    "VC-POC-05": {"acara_sml_id": 101, "market_definition": "sa2"},
++    "VC-POC-06": {"acara_sml_id": 101, "market_definition": "lga"},
++    "VC-POC-07": {
++        "acara_sml_id": 101,
++        "market_definition": "postcode",
++        "grades": ["year_1"],
++    },
++    "VC-POC-08": {"acara_sml_id": 101, "distance_km": 5},
++    "VC-POC-09": {"peer_filters": {"school_types": ["Primary"]}},
++    "VC-POC-10": {"segment_filters": {"suburbs": ["Open value"]}},
++    "VC-POC-11": {"acara_sml_ids": [101]},
++    "VC-POC-12": {"sa2_codes": ["206041122"]},
++    "VC-POC-13": {"sa2_codes": ["206041122"]},
++    "VC-POC-REF-02": {"zone_entity_code": "1234567"},
++    "VC-POC-14": {"acara_sml_id": 101},
++}
++
++AVAILABLE_MINIMAL_REQUESTS = {
++    question_id: request
++    for question_id, request in MINIMAL_REQUESTS.items()
++    if question_id != "VC-POC-14"
++}
++
++
+ # ---------------------------------------------------------------------------
+ # 1. Excluded topics
+ # ---------------------------------------------------------------------------
+@@ -301,20 +352,23 @@ def test_school_resolution_records_search():
+ # ---------------------------------------------------------------------------
+ 
+ 
+-def test_bad_request_returns_unsupported():
+-    """EvidenceError(bad_request) → Unsupported(out_of_scope)."""
++def test_invalid_explicit_identity_bad_request_clarifies():
++    """A sole caller-supplied numeric identity remains caller-correctable."""
+     intent = StructuredIntent(question_id="VC-POC-01", filters={"acara_sml_id": 40387})
+     client = _ErrorClient("bad_request", "invalid metrics: not_a_metric")
+     deps = Deps(client=client)
+     result = asyncio.run(plan_and_execute(intent, client, deps))
+-    assert isinstance(result, Unsupported)
+-    assert result.reason_kind == "out_of_scope"
+-    assert "invalid metrics" in result.reason
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == ["acara_sml_id"]
++    assert "invalid metrics" in result.missing[0].why_material
+ 
+ 
+ def test_unanswerable_returns_unsupported():
+     """EvidenceError(unanswerable) → Unsupported(unanswerable)."""
+-    intent = StructuredIntent(question_id="VC-POC-05", filters={"acara_sml_id": 99999})
++    intent = StructuredIntent(
++        question_id="VC-POC-05",
++        filters={"acara_sml_id": 99999, "market_definition": "sa2"},
++    )
+     client = _ErrorClient("unanswerable", "no published SA2 centroid for this school")
+     deps = Deps(client=client)
+     result = asyncio.run(plan_and_execute(intent, client, deps))
+@@ -362,7 +416,748 @@ def test_error_call_recorded_in_deps():
+ 
+ 
+ # ---------------------------------------------------------------------------
+-# 8. _find_exclusion_text helper
++# 8. Contract 003 acceptance: policy, identities, selectors, and schemas
++# ---------------------------------------------------------------------------
++
++
++def test_missing_market_definition_is_derived_without_model_hint():
++    intent = StructuredIntent(
++        question_id="VC-POC-05",
++        filters={"acara_sml_id": 101},
++        missing_material_inputs=["irrelevant_model_hint"],
++    )
++    client = _HappyClient()
++    deps = Deps(client=client)
++
++    result = asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == ["market_definition"]
++    assert result.missing[0].allowed_values == ["distance", "lga", "postcode", "sa2"]
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize("question_id", ["VC-POC-05", "VC-POC-06", "VC-POC-07"])
++def test_distance_is_conditional_on_distance_market(question_id):
++    base = {"acara_sml_id": 101, "market_definition": "sa2"}
++    if question_id == "VC-POC-07":
++        base["grades"] = ["year_1"]
++
++    sa2_client = _HappyClient()
++    sa2_deps = Deps(client=sa2_client)
++    sa2_result = asyncio.run(
++        plan_and_execute(StructuredIntent(question_id=question_id, filters=base), sa2_client, sa2_deps)
++    )
++    assert not isinstance(sa2_result, ClarificationNeeded)
++    assert sa2_client.fetched[0]["request"] == base
++    assert "distance_km" not in sa2_client.fetched[0]["request"]
++
++    distance_request = {**base, "market_definition": "distance"}
++    distance_client = _HappyClient()
++    distance_deps = Deps(client=distance_client)
++    distance_result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id=question_id, filters=distance_request),
++            distance_client,
++            distance_deps,
++        )
++    )
++    assert isinstance(distance_result, ClarificationNeeded)
++    assert [item.input for item in distance_result.missing] == ["distance_km"]
++    assert distance_client.fetched == []
++
++
++def test_missing_inputs_follow_pinned_policy_order():
++    client = _HappyClient()
++    deps = Deps(client=client)
++    result = asyncio.run(
++        plan_and_execute(StructuredIntent(question_id="VC-POC-07"), client, deps)
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == [
++        "acara_sml_id",
++        "market_definition",
++        "grades",
++    ]
++    assert client.fetched == []
++
++
++def test_ambiguous_school_clarifies_without_fetch():
++    client = _DirectoryClient(
++        {
++            "Alpha": [{"acara_sml_id": 101}],
++            "Springfield": [
++                {"acara_sml_id": 202},
++                {"acara_sml_id": 303},
++            ],
++        }
++    )
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-04",
++        school_mentions=["Alpha", "Springfield"],
++    )
++
++    result = asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == ["acara_sml_id"]
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++    assert [call.tool for call in deps.tool_calls] == ["search_schools", "search_schools"]
++
++
++def test_zero_school_match_clarifies_transactionally():
++    client = _DirectoryClient(
++        {
++            "Alpha": [{"acara_sml_id": 101}],
++            "Missing": [],
++        }
++    )
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-04",
++        school_mentions=["Alpha", "Missing"],
++    )
++
++    result = asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert isinstance(result, ClarificationNeeded)
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++    assert len(deps.tool_calls) == 2
++
++
++def test_named_school_ids_are_ordered_and_deduplicated():
++    client = _DirectoryClient(
++        {
++            "Beta": [{"acara_sml_id": 202}],
++            "Alpha": [{"acara_sml_id": 101}],
++        }
++    )
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-04",
++        school_mentions=["Beta", "Alpha", "Beta"],
++        requested_metrics=["ICSEA", "Total-Enrolments", "icsea"],
++    )
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.searches == ["Beta", "Alpha", "Beta"]
++    assert deps.resolved_school_ids == [202, 101]
++    assert client.fetched[0]["request"] == {
++        "acara_sml_ids": [202, 101],
++        "metrics": ["icsea", "total_enrolments"],
++    }
++
++
++def test_conflicting_explicit_and_resolved_identities_fail_without_mutation():
++    client = _DirectoryClient({"Alpha": [{"acara_sml_id": 101}]})
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-01",
++        school_mentions=["Alpha"],
++        filters={"acara_sml_id": 999},
++    )
++
++    with pytest.raises(TerminalError, match="conflict"):
++        asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++
++
++def test_duplicate_ids_leave_comparison_with_too_few_schools():
++    client = _DirectoryClient({"Alpha": [{"acara_sml_id": 101}]})
++    deps = Deps(client=client)
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(
++                question_id="VC-POC-04",
++                school_mentions=["Alpha", "Alpha"],
++            ),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == ["acara_sml_ids"]
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++
++
++def test_multiple_named_schools_fail_for_scalar_question_without_mutation():
++    client = _DirectoryClient(
++        {"Alpha": [{"acara_sml_id": 101}], "Beta": [{"acara_sml_id": 202}]}
++    )
++    deps = Deps(client=client)
++
++    with pytest.raises(TerminalError, match="single acara_sml_id"):
++        asyncio.run(
++            plan_and_execute(
++                StructuredIntent(
++                    question_id="VC-POC-01", school_mentions=["Alpha", "Beta"]
++                ),
++                client,
++                deps,
++            )
++        )
++
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++
++
++def test_mixed_valid_and_malformed_directory_records_are_ambiguous():
++    client = _DirectoryClient(
++        {"Alpha": [{"acara_sml_id": 101}, {"school_name": "Other", "acara_sml_id": None}]}
++    )
++    deps = Deps(client=client)
++
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha"]),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert "2 schools" in result.missing[0].why_material
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++
++
++def test_single_malformed_directory_record_fails_closed():
++    client = _DirectoryClient({"Alpha": [{"school_name": "Alpha", "acara_sml_id": None}]})
++    deps = Deps(client=client)
++
++    with pytest.raises(TerminalError, match="malformed school-directory record"):
++        asyncio.run(
++            plan_and_execute(
++                StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha"]),
++                client,
++                deps,
++            )
++        )
++
++    assert client.fetched == []
++    assert deps.resolved_school_ids == []
++    assert deps.searched is False
++
++
++def test_metric_normalization_and_exact_profile_request():
++    client = _HappyClient()
++    deps = Deps(client=client, user_question="Show total enrolments and teaching staff")
++    intent = StructuredIntent(
++        question_id="VC-POC-01",
++        requested_metrics=[
++            "TOTAL—ENROLMENTS",
++            "Teaching Staff",
++            "total_enrolments",
++        ],
++        filters={"acara_sml_id": 101},
++    )
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched[0]["request"] == {
++        "acara_sml_id": 101,
++        "metrics": ["total_enrolments", "teaching_fte"],
++    }
++
++
++def test_all_forbidden_profile_metrics_clarify_without_dispatch():
++    client = _HappyClient()
++    deps = Deps(client=client, user_question="Show teaching staff at Alpha")
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(
++                question_id="VC-POC-01",
++                requested_metrics=["teaching staff headcount"],
++                filters={"acara_sml_id": 101},
++            ),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert result.missing[0].input == "metrics"
++    assert client.fetched == []
++
++
++def test_profile_metric_scope_removes_only_unrequested_categories():
++    client = _HappyClient()
++    deps = Deps(
++        client=client,
++        user_question="Show total enrolments and non-teaching staff at Alpha",
++    )
++    asyncio.run(
++        plan_and_execute(
++            StructuredIntent(
++                question_id="VC-POC-01",
++                requested_metrics=[
++                    "total enrolments",
++                    "teaching staff headcount",
++                    "non teaching fte",
++                ],
++                filters={"acara_sml_id": 101},
++            ),
++            client,
++            deps,
++        )
++    )
++
++    assert client.fetched[0]["request"]["metrics"] == [
++        "total_enrolments",
++        "non_teaching_fte",
++    ]
++
++
++def test_filter_supplied_metrics_receive_the_same_scope_guard():
++    client = _HappyClient()
++    deps = Deps(client=client, user_question="Show teaching staff at Alpha")
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(
++                question_id="VC-POC-01",
++                filters={
++                    "acara_sml_id": 101,
++                    "metrics": ["teaching_staff_headcount"],
++                },
++            ),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert client.fetched == []
++
++
++def test_vc_poc_03_routes_selector_to_ratios():
++    client = _HappyClient()
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-03",
++        requested_metrics=[
++            "Students Per Teaching FTE",
++            "students-per-teaching-fte",
++        ],
++        filters={"acara_sml_ids": [101, 202]},
++    )
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched[0]["request"] == {
++        "acara_sml_ids": [101, 202],
++        "ratios": ["students_per_teaching_fte"],
++    }
++    assert "metrics" not in client.fetched[0]["request"]
++
++
++@pytest.mark.parametrize(
++    ("question_id", "labels", "expected_field", "expected_values", "filters"),
++    [
++        ("VC-POC-02", ["Year 1", "year-1"], "grades", ["year_1"], {"acara_sml_id": 101}),
++        (
++            "VC-POC-07",
++            ["Year 7"],
++            "grades",
++            ["year_7"],
++            {"acara_sml_id": 101, "market_definition": "sa2"},
++        ),
++        (
++            "VC-POC-11",
++            ["ICSEA Percentile"],
++            "metrics",
++            ["icsea_percentile"],
++            {"acara_sml_ids": [101]},
++        ),
++    ],
++)
++def test_selectors_route_through_question_specific_vocabularies(
++    question_id, labels, expected_field, expected_values, filters
++):
++    client = _HappyClient()
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id=question_id,
++        requested_metrics=labels,
++        filters=filters,
++    )
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched[0]["request"] == {
++        **filters,
++        expected_field: expected_values,
++    }
++
++
++def test_unnormalizable_selector_clarifies_with_static_vocabulary():
++    client = _HappyClient()
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-03",
++        requested_metrics=["made up ratio"],
++        filters={"acara_sml_ids": [101]},
++    )
++
++    result = asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert isinstance(result, ClarificationNeeded)
++    assert result.missing[0].input == "ratios"
++    assert result.missing[0].allowed_values == [
++        "students_per_non_teaching_fte",
++        "students_per_teaching_fte",
++        "students_per_total_staff_fte",
++    ]
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize(
++    ("question_id", "filters", "expected"),
++    [
++        (
++            "VC-POC-07",
++            {"acara_sml_id": 101, "market_definition": "sa2", "grades": ["Year 1", "year-1"]},
++            {"acara_sml_id": 101, "market_definition": "sa2", "grades": ["year_1"]},
++        ),
++        (
++            "VC-POC-12",
++            {"sa2_codes": ["206041122"], "seifa_index_type": "irsad", "seifa_measure": "score"},
++            {"sa2_codes": ["206041122"], "seifa_index_type": "IRSAD", "seifa_measure": "SCORE"},
++        ),
++        (
++            "VC-POC-10",
++            {"segment_filters": {"reported_enrolment_composition": ["Reported Both"]}},
++            {"segment_filters": {"reported_enrolment_composition": ["reported_both"]}},
++        ),
++    ],
++)
++def test_filter_supplied_static_selectors_are_normalized(question_id, filters, expected):
++    client = _HappyClient()
++    deps = Deps(client=client)
++
++    asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id=question_id, filters=filters), client, deps
++        )
++    )
++
++    assert client.fetched[0]["request"] == expected
++
++
++def test_unknown_filter_supplied_static_selector_clarifies():
++    client = _HappyClient()
++    deps = Deps(client=client)
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(
++                question_id="VC-POC-07",
++                filters={
++                    "acara_sml_id": 101,
++                    "market_definition": "sa2",
++                    "grades": ["made_up"],
++                },
++            ),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert result.missing[0].input == "grades"
++    assert "year_1" in result.missing[0].allowed_values
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize(
++    ("question_id", "filters"),
++    [
++        (
++            "VC-POC-07",
++            {"acara_sml_id": 101, "market_definition": "sa2", "grades": "year_1"},
++        ),
++        (
++            "VC-POC-07",
++            {"acara_sml_id": 101, "market_definition": "sa2", "grades": "made_up"},
++        ),
++        (
++            "VC-POC-12",
++            {"sa2_codes": ["206041122"], "seifa_index_type": ["IRSAD"]},
++        ),
++        (
++            "VC-POC-12",
++            {"sa2_codes": ["206041122"], "seifa_index_type": ["made_up"]},
++        ),
++        (
++            "VC-POC-10",
++            {"segment_filters": {"reported_enrolment_composition": "reported_both"}},
++        ),
++        (
++            "VC-POC-10",
++            {"segment_filters": {"reported_enrolment_composition": "made_up"}},
++        ),
++    ],
++)
++def test_wrong_shaped_static_selectors_fail_operationally(question_id, filters):
++    client = _HappyClient()
++
++    with pytest.raises(TerminalError, match="invalid selector shape"):
++        asyncio.run(
++            plan_and_execute(
++                StructuredIntent(question_id=question_id, filters=filters),
++                client,
++                Deps(client=client),
++            )
++        )
++
++    assert client.fetched == []
++
++
++def test_nested_selector_normalization_does_not_mutate_successful_intent():
++    client = _HappyClient()
++    intent = StructuredIntent(
++        question_id="VC-POC-10",
++        filters={
++            "segment_filters": {
++                "reported_enrolment_composition": ["Reported Both"]
++            }
++        },
++    )
++    original = deepcopy(intent.filters)
++    deps = Deps(client=client)
++    deps.intent = intent
++
++    asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert intent.filters == original
++    assert deps.intent.filters == original
++    assert client.fetched[0]["request"]["segment_filters"][
++        "reported_enrolment_composition"
++    ] == ["reported_both"]
++
++
++def test_nested_selector_normalization_does_not_mutate_intent_on_later_failure():
++    client = _HappyClient()
++    intent = StructuredIntent(
++        question_id="VC-POC-10",
++        filters={
++            "segment_filters": {
++                "reported_enrolment_composition": ["Reported Both"],
++                "invented": True,
++            }
++        },
++    )
++    original = deepcopy(intent.filters)
++    deps = Deps(client=client)
++    deps.intent = intent
++
++    with pytest.raises(TerminalError, match="unknown propert"):
++        asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert intent.filters == original
++    assert deps.intent.filters == original
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize(
++    "condition",
++    ["market_definition != distance", "market_definition < distance"],
++)
++def test_conditional_material_rejects_unknown_operators(condition):
++    entry = {
++        "input_policy": {
++            "conditional_material": {"distance_km": condition},
++        }
++    }
++    with pytest.raises(TerminalError, match="unsupported conditional-material"):
++        _derive_missing_inputs(
++            "VC-POC-05", entry, {"market_definition": "distance"}
++        )
++
++
++def test_conditional_material_is_limited_to_authorized_questions():
++    entry = {
++        "input_policy": {
++            "conditional_material": {
++                "distance_km": "market_definition equals distance"
++            },
++        }
++    }
++    with pytest.raises(TerminalError, match="unsupported conditional-material"):
++        _derive_missing_inputs(
++            "VC-POC-08", entry, {"market_definition": "distance"}
++        )
++
++
++def test_malformed_conditional_material_policy_fails_closed():
++    entry = {"input_policy": {"conditional_material": ["distance_km"]}}
++    with pytest.raises(TerminalError, match="conditional-material policy is malformed"):
++        _derive_missing_inputs("VC-POC-05", entry, {})
++
++
++@pytest.mark.parametrize("question_id, payload", MINIMAL_REQUESTS.items())
++def test_every_registered_request_schema_accepts_minimal_contract_shape(
++    question_id, payload
++):
++    _validate_request(question_id, payload)
++
++
++@pytest.mark.parametrize("question_id, payload", AVAILABLE_MINIMAL_REQUESTS.items())
++def test_every_available_question_dispatches_the_smallest_request(
++    question_id, payload
++):
++    client = _HappyClient()
++    deps = Deps(client=client)
++
++    asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id=question_id, filters=payload),
++            client,
++            deps,
++        )
++    )
++
++    assert client.fetched == [{"question_id": question_id, "request": payload}]
++
++
++@pytest.mark.parametrize("question_id, payload", AVAILABLE_MINIMAL_REQUESTS.items())
++def test_unknown_request_property_fails_before_fetch(question_id, payload):
++    client = _HappyClient()
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id=question_id,
++        filters={**payload, "unknown_contract_field": True},
++    )
++
++    with pytest.raises(TerminalError, match="unknown properties"):
++        asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize(
++    ("question_id", "payload"),
++    [
++        ("VC-POC-01", {"acara_sml_id": 0}),
++        ("VC-POC-03", {"acara_sml_ids": [101, 101]}),
++        ("VC-POC-05", {"acara_sml_id": 101, "market_definition": "distance", "distance_km": 0}),
++        ("VC-POC-12", {"sa2_codes": []}),
++        ("VC-POC-REF-02", {"zone_entity_code": "123"}),
++    ],
++)
++def test_invalid_schema_shapes_fail_before_fetch(question_id, payload):
++    client = _HappyClient()
++    deps = Deps(client=client)
++
++    with pytest.raises(TerminalError, match="request schema"):
++        asyncio.run(
++            plan_and_execute(
++                StructuredIntent(question_id=question_id, filters=payload),
++                client,
++                deps,
++            )
++        )
++
++    assert client.fetched == []
++
++
++@pytest.mark.parametrize(
++    "peer_filters",
++    [
++        None,
++        {},
++        {"sectors": ["Catholic", "Independent"]},
++        {"sectors": ["Independent", "Catholic"]},
++    ],
++)
++def test_peer_filters_require_explicit_nondefault_filter(peer_filters):
++    client = _HappyClient()
++    deps = Deps(client=client)
++    filters = {} if peer_filters is None else {"peer_filters": peer_filters}
++
++    result = asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id="VC-POC-09", filters=filters),
++            client,
++            deps,
++        )
++    )
++
++    assert isinstance(result, ClarificationNeeded)
++    assert [item.input for item in result.missing] == ["peer_filters"]
++    assert client.fetched == []
++
++
++def test_explicit_nondefault_peer_filter_is_preserved():
++    request = {
++        "peer_filters": {
++            "sectors": ["Catholic", "Independent"],
++            "school_types": ["No-match release-derived value"],
++        }
++    }
++    client = _HappyClient()
++    deps = Deps(client=client)
++
++    asyncio.run(
++        plan_and_execute(
++            StructuredIntent(question_id="VC-POC-09", filters=request),
++            client,
++            deps,
++        )
++    )
++
++    assert client.fetched[0]["request"] == request
++
++
++def test_segment_filters_reject_unknown_nested_key():
++    client = _HappyClient()
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-10",
++        filters={"segment_filters": {"not_a_filter": ["x"]}},
++    )
++
++    with pytest.raises(TerminalError, match="unknown properties"):
++        asyncio.run(plan_and_execute(intent, client, deps))
++
++    assert client.fetched == []
++
++
++def test_schema_valid_emitter_bad_request_is_terminal():
++    client = _ErrorClient("bad_request", "unexpected validated request rejection")
++    deps = Deps(client=client)
++    intent = StructuredIntent(
++        question_id="VC-POC-01",
++        requested_metrics=["total enrolments"],
++        filters={"acara_sml_id": 101},
++    )
++
++    with pytest.raises(TerminalError, match="VC-POC-01.*planner/contract drift"):
++        asyncio.run(plan_and_execute(intent, client, deps))
++
++    fetch_calls = [call for call in deps.tool_calls if call.tool == "fetch_evidence"]
++    assert len(fetch_calls) == 1
++    assert fetch_calls[0].arguments["request"] == {
++        "acara_sml_id": 101,
++        "metrics": ["total_enrolments"],
++    }
++    assert fetch_calls[0].error_kind == "bad_request"
++
++
++# ---------------------------------------------------------------------------
++# 9. _find_exclusion_text helper
+ # ---------------------------------------------------------------------------
+ 
+ 
+diff --git a/tests/unit/test_run_cli.py b/tests/unit/test_run_cli.py
+index 9bc4c2b..c320d9c 100644
+--- a/tests/unit/test_run_cli.py
++++ b/tests/unit/test_run_cli.py
+@@ -30,7 +30,9 @@ import run as cli
+ from evals import replay as replay_mod
+ from evals.schema import load_cases, load_reference_solutions
+ from harness.agent import ask, build_agent
+-from harness.evidence import EvidenceClient
++from harness.evidence import EvidenceClient, EvidenceError
++from harness.intent import StructuredIntent
++from harness.narration import NarrationOutput
+ from harness.outputs import BudgetExceeded, ClarificationNeeded, MissingInput, Unsupported
+ from harness.tools import Deps
+ 
+@@ -202,6 +204,116 @@ def test_one_clarification_round_trip_answers_the_question():
+     assert output.question_id == "VC-POC-08"
+ 
+ 
++def test_pipeline_clarification_retains_original_request_and_prior_inputs(monkeypatch):
++    """The pipeline's second intent turn sees the request, question and answer."""
++    import harness.intent as intent_mod
++    import harness.narration as narration_mod
++
++    seen_questions: list[str] = []
++
++    async def scripted_intent(question: str, model=None):
++        seen_questions.append(question)
++        if len(seen_questions) == 1:
++            return StructuredIntent(
++                question_id="VC-POC-05",
++                filters={"acara_sml_id": 40387},
++            )
++        assert "Show the market around ACARA 40387" in question
++        assert "market_definition" in question
++        assert "SA2" in question
++        return StructuredIntent(
++            question_id="VC-POC-05",
++            filters={"acara_sml_id": 40387, "market_definition": "sa2"},
++        )
++
++    async def scripted_narration(view, deps, model=None):
++        return NarrationOutput(answer="The requested market cohort is shown.")
++
++    monkeypatch.setattr(intent_mod, "interpret_intent", scripted_intent)
++    monkeypatch.setattr(narration_mod, "narrate", scripted_narration)
++    deps = Deps(client=stub_client())
++
++    output = asyncio.run(
++        cli.converse(
++            None,
++            deps,
++            "Show the market around ACARA 40387",
++            ask_user=lambda _clarification: "SA2",
++            max_clarifications=1,
++            record_usage=False,
++        )
++    )
++
++    assert output.kind == "answer"
++    assert output.question_id == "VC-POC-05"
++    assert deps.intent.question_id == "VC-POC-05"
++    assert deps.intent.filters == {"acara_sml_id": 40387, "market_definition": "sa2"}
++    assert len(seen_questions) == 2
++
++
++@pytest.mark.parametrize(
++    ("reply", "expected_fetches"),
++    [
++        ("Teaching staff, please", 0),
++        ("Teaching staff headcount, please", 1),
++    ],
++)
++def test_pipeline_metric_scope_uses_only_user_wording(
++    monkeypatch, reply, expected_fetches
++):
++    """Assistant clarification prose cannot authorize a broader metric."""
++    import harness.intent as intent_mod
++
++    calls = 0
++
++    async def scripted_intent(question: str, model=None):
++        nonlocal calls
++        calls += 1
++        if calls == 2:
++            assert "Headcount and non-teaching metrics" in question
++            assert reply in question
++        return StructuredIntent(
++            question_id="VC-POC-01",
++            requested_metrics=["teaching staff headcount"],
++            filters={"acara_sml_id": 101},
++        )
++
++    class RecordingUnanswerableClient:
++        def __init__(self):
++            self.fetched: list[dict[str, Any]] = []
++
++        async def fetch_evidence(self, question_id: str, request: dict) -> dict:
++            self.fetched.append({"question_id": question_id, "request": request})
++            raise EvidenceError("unanswerable", "synthetic stop after request capture")
++
++    monkeypatch.setattr(intent_mod, "interpret_intent", scripted_intent)
++    client = RecordingUnanswerableClient()
++    deps = Deps(client=client)
++
++    output = asyncio.run(
++        cli.converse(
++            None,
++            deps,
++            "Show teaching staff at ACARA 101",
++            ask_user=lambda _clarification: reply,
++            max_clarifications=1,
++            record_usage=False,
++        )
++    )
++
++    assert len(client.fetched) == expected_fetches
++    if expected_fetches:
++        assert client.fetched[0]["request"] == {
++            "acara_sml_id": 101,
++            "metrics": ["teaching_staff_headcount"],
++        }
++        assert isinstance(output, Unsupported)
++    else:
++        assert isinstance(output, ClarificationNeeded)
++    assert "Headcount and non-teaching metrics" not in deps._scope_user_question
++    assert reply in deps._scope_user_question
++
++
+ def test_a_non_interactive_caller_gets_the_clarification_not_a_guess():
+     """The failure this prevents: a batch caller with no human attached filling
+     in a material input to avoid an awkward exit code."""
+@@ -247,6 +359,84 @@ def test_zero_clarification_rounds_still_runs_the_question_once():
+ # --------------------------------------------------------------------------
+ 
+ 
++def test_main_uses_pipeline_path_by_default(monkeypatch, capsys):
++    """The shipping CLI passes None and never constructs the legacy agent."""
++    client = object()
++    seen: dict[str, Any] = {}
++
++    async def fake_converse(
++        agent,
++        deps,
++        question,
++        ask_user=None,
++        max_clarifications=1,
++        record_usage=True,
++    ):
++        seen.update(
++            agent=agent,
++            deps=deps,
++            question=question,
++            ask_user=ask_user,
++            max_clarifications=max_clarifications,
++            record_usage=record_usage,
++        )
++        return Unsupported(reason_kind="not_in_registry", reason="fixture refusal")
++
++    monkeypatch.setattr(cli, "configure_logging", lambda: None)
++    monkeypatch.setattr(cli, "require_credentials", lambda: None)
++    monkeypatch.setattr(cli, "build_client", lambda use_stub: client)
++    monkeypatch.setattr(
++        cli,
++        "build_agent",
++        lambda: pytest.fail("default CLI must not construct a legacy agent"),
++    )
++    monkeypatch.setattr(cli, "converse", fake_converse)
++
++    exit_code = cli.main(
++        ["--stub", "--no-interactive", "--max-clarifications", "3", "question"]
++    )
++
++    assert exit_code == cli.EXIT_UNSUPPORTED
++    assert seen["agent"] is None
++    assert seen["deps"].client is client
++    assert seen["question"] == "question"
++    assert seen["ask_user"] is None
++    assert seen["max_clarifications"] == 3
++    assert seen["record_usage"] is True
++    assert "fixture refusal" in capsys.readouterr().out
++
++
++def test_converse_preserves_explicit_legacy_agent_path(monkeypatch):
++    """Replay callers that provide an agent keep the legacy ask signature."""
++    legacy_agent = object()
++    deps = Deps(client=stub_client())
++    seen: dict[str, Any] = {}
++
++    async def fake_ask(*args, **kwargs):
++        seen["args"] = args
++        seen["kwargs"] = kwargs
++        return Unsupported(reason_kind="not_in_registry", reason="fixture refusal")
++
++    monkeypatch.setattr(cli, "ask", fake_ask)
++
++    output = asyncio.run(
++        cli.converse(
++            legacy_agent,
++            deps,
++            "question",
++            max_clarifications=0,
++            record_usage=False,
++        )
++    )
++
++    assert isinstance(output, Unsupported)
++    assert seen["args"] == (legacy_agent, deps, "question")
++    assert seen["kwargs"] == {
++        "message_history": None,
++        "record_usage": False,
++    }
++
++
+ @pytest.mark.parametrize(
+     "branch, expected",
+     [
