@@ -1,0 +1,17 @@
+# This is an evidence store: work-item artifacts, capture logs and manifests are
+# committed deliberately. Only machine-local runtime state is excluded.
+
+# macOS
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Claude Code local settings
+.claude/
+
+# Harness runtime state — the review mutation lock is a live fcntl lock whose
+# contents are a local pid/thread, rewritten on every review run.
+.review-feedback.lock
