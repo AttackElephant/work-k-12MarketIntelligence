@@ -58,7 +58,7 @@ Confirmed from the provided source of `evals/live.py`, `evals/graders.py`, `eval
 
 ## Risks, assumptions and gaps
 
-- **Assumption (load-bearing):** “isolated narration” means grading against a canonical/oracle envelope per case (the existing `stub_case` fixture) built into an `AnswerView`, not the model's own fetched envelope. If isolation instead means isolating narration from intent while still doing a live fetch, the wiring differs. Needs owner/source confirmation.
+- **Confirmed by the owner (concern C1):** “isolated narration” means grading against a canonical/oracle envelope per case (the existing `stub_case` fixture) built into an `AnswerView`, not the model's own fetched envelope and not a live fetch. Acquisition is fixed in “Planning review 1 resolutions” below.
 - **Assumption:** default (`--stage` omitted) and `end-to-end` both keep the current full-loop execution; their only difference stays the k constraint already enforced.
 - **Risk:** intent-only / narration-only runs do not fit the current `RunRecord`/`project` shape (an intent run has no rendered output; a narration run has no fetch call), forcing a small `schema.py`/`replay.py` change and risking `envelope_preservation`/`grounding` misgrading if the oracle envelope is not attributed by stage.
 - **Risk:** k-12Harness is `diff-allowlist` governance with `scope.declared_files: []` / `declared: false`; a change spanning `evals/live.py`, `evals/graders.py`, possibly `evals/schema.py`/`evals/replay.py`, and two test files may exceed an unstated allowlist.
@@ -74,6 +74,33 @@ GAP: account-quota provider authority is ambiguous — docs/decisions.md ADR-018
 GAP: k-12Harness scope governance is `diff-allowlist` with manifest `scope.declared_files: []` / `declared: false`; a multi-file change (evals/live.py, graders.py, possibly schema.py/replay.py, tests) may exceed the unstated allowlist — conflict: request.md multi-file scope vs manifest scope declaration.
 GAP: `evals/schema.RunRecord`/`evals/replay.project` cannot represent an intent-only run (no rendered output) or a narration-only run (oracle envelope, no fetch call) without a stage discriminator or synthetic envelope injection, so `last_envelope()`/`evidence_calls()`-based graders may misattribute — conflict: request.md three-stage grading vs current RunRecord/project construction.
 GAP: golden_cases.json encodes single end-to-end expectations per case; whether narration needs per-case oracle envelopes distinct from existing stub fixtures, and whether intent needs distinct expected fields, is unspecified — conflict: request.md three-stage grading vs golden_cases.json/current fixtures.
+
+## Planning review 1 resolutions
+
+These resolve PF-1..PF-4 of `reviews/001-planning-review.json`. Where they are more specific than the sections above, they govern.
+
+**PF-1 — oracle envelope: confirmed, and acquisition is fixed.** The owner confirmed the oracle-envelope interpretation (concern C1). The narration oracle is the envelope the stub emitter returns for `STUB_EMITTER_CASE=case.stub_case`, obtained through `build_client("stub", case.stub_case)` with the case's recorded request — the same offline, deterministic mechanism the golden cases were generated with. It is acquired once per case before the trial's model path runs. It is never the real emitter and never a model-driven fetch. Consequences:
+- `--stage narration --emitter real` is refused at argument validation (the stage is defined over the oracle, not the data project).
+- A case with no `stub_case` is not narration-eligible: it is excluded from a narration selection and the excluded count is printed. A narration run whose selection has no eligible case exits non-zero rather than reporting an empty success.
+- “Reading the fixture directly” is not used.
+
+**PF-2 — credential rejection and checkpoints.** “No report is written” means `main` writes no final report after a rejected credential; it does not delete a checkpoint that already exists. Expected artifact state:
+- Rejection before any trial completes: no report file and no transcripts file exist.
+- Rejection after one or more completed trials: the last checkpoint (status `running`) is left byte-for-byte unchanged and remains resumable with `--resume`; no final report is written over it.
+- The exit message is made truthful: it says whether a checkpoint exists and, if so, prints its path and the resume command, instead of always saying “No report was written”.
+`tests/unit/test_live_tier.py` covers both cases for every stage.
+
+**PF-3 — the isolation test is falsifiable.** The “wrong scripted intent” check is implemented as a perturbation plus direct assertions, not by feeding an intent into narration:
+- Two narration-stage runs of the same case use scripted models that differ only in what intent they would produce if intent interpretation were invoked (one correct, one deliberately wrong). The `AnswerView` passed to `narrate`, the narration output and every grade are identical across the two runs.
+- In a narration-stage trial, `interpret_intent` is never called and the agent's evidence tool is never invoked (spies); the only envelope in the record is the oracle acquired before the trial, and the narration graders read that envelope.
+- The same spies assert the converse for the intent stage: no evidence fetch, no `narrate` call.
+
+**PF-4 — live tests provably stay out of the default gate.** `live-eval-collect-only` only proves collection. `tests/unit/test_live_tier.py` gains a test that runs inside the contract's `full-test-suite` gate and asserts:
+- collecting `tests/live/test_live_eval.py` with the repository's default options selects zero tests (every test there is deselected by `addopts = -m "not live"`);
+- collecting it with `-m live` selects every test in the file, so no test lacks the `live` marker.
+A missing marker therefore fails the PR gate.
+
+No file is added to the scope by these resolutions: all changes fall in `evals/live.py` and `tests/unit/test_live_tier.py`, which are already listed.
 
 ## Size estimate
 
