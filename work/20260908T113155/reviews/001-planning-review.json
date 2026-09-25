@@ -1,0 +1,59 @@
+{
+  "covers": [],
+  "findings": [
+    {
+      "detail": "The plan\u2019s Risks and Planning gaps and the contract\u2019s contract_requirements all say that using the existing case.stub_case fixture as the canonical narration envelope is a load-bearing assumption needing owner confirmation. The proposed implementation nevertheless commits to that interpretation, while also leaving two materially different acquisition methods open (\u201crunning the stub emitter once or reading the fixture\u201d). If the intended isolation uses a live fetch or a different canonical fixture, narration execution, transcript attribution, grading, and tests would all be built against the wrong input. The oracle source and acquisition method must be fixed before implementation.",
+      "id": "F1",
+      "sections": [
+        "Plan \u2014 Proposed changes",
+        "Plan \u2014 Risks, assumptions and gaps",
+        "Plan \u2014 Planning gaps",
+        "Acceptance contract \u2014 observable_behaviour",
+        "Acceptance contract \u2014 contract_requirements",
+        "Acceptance contract \u2014 semantic"
+      ],
+      "severity": "blocking",
+      "summary": "The oracle-envelope semantics are still a proposal rather than an accepted specification."
+    },
+    {
+      "detail": "The contract requires an atomic checkpoint after every trial, but also says that CredentialsRejected at the first occurrence causes \u201cno report\u201d to be written. If credentials are rejected after one or more completed trials, a report/checkpoint has already been written. The supplied material does not distinguish a checkpoint from a final report or say whether an existing checkpoint must be retained, removed, or ignored. These requirements cannot both be accepted literally, and removal would also threaten resumability. Define the expected artifact state for rejection before any trial and after prior completed trials.",
+      "id": "F2",
+      "sections": [
+        "Acceptance contract \u2014 observable_behaviour",
+        "Acceptance contract \u2014 failure_behaviour",
+        "Acceptance contract \u2014 deterministic/live-tier-deterministic-tests",
+        "Plan \u2014 Bounded objective",
+        "Plan \u2014 Verification approach"
+      ],
+      "severity": "blocking",
+      "summary": "\u201cCredentialsRejected writes no report\u201d conflicts with checkpoint-after-every-completed-trial semantics."
+    },
+    {
+      "detail": "The contract requires comparing narration trials given correct and deliberately wrong scripted intents, while the same contract defines narration as build_answer_view(oracle envelope) followed directly by narrate, with no intent stage or intent input. No supplied interface explains how such an intent can be fed without adding a test-only or production dependency. As written, the check is either vacuous or unimplementable. Replace it with a falsifiable test that perturbs upstream intent-capable inputs while asserting identical narration inputs/results, or directly assert that interpret_intent and evidence fetch are never called and that grading reads the oracle envelope.",
+      "id": "F3",
+      "sections": [
+        "Acceptance contract \u2014 observable_behaviour",
+        "Acceptance contract \u2014 semantic",
+        "Plan \u2014 Verification approach",
+        "Plan \u2014 Proposed changes"
+      ],
+      "severity": "material",
+      "summary": "The defining narration-isolation test injects an intent into a stage that is specified not to execute or consume intent."
+    },
+    {
+      "detail": "The live-eval-collect-only command proves only that tests can be collected. It does not verify that the new tests carry the live marker or that the default pytest invocation excludes them, despite the expected result claiming both. A missing marker could make credentialed tests enter the PR gate while both collect-only and collection itself still succeed. Add a deterministic marker/exclusion assertion or a collection check demonstrating that the default gate does not select these tests.",
+      "id": "F4",
+      "sections": [
+        "Acceptance contract \u2014 deterministic/live-eval-collect-only",
+        "Acceptance contract \u2014 compatibility",
+        "Plan \u2014 Verification approach"
+      ],
+      "severity": "material",
+      "summary": "The collect-only acceptance check does not prove that live tests remain excluded from the default gate."
+    }
+  ],
+  "kind": "general",
+  "resolutions": {},
+  "round": 1,
+  "summary": "The plan is not ready to implement: the authoritative narration input remains explicitly unconfirmed, and parts of the operational acceptance contract are internally ambiguous or not actually verified by the named checks."
+}

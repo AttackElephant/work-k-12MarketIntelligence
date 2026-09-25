@@ -3,8 +3,8 @@ created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
   version: 0.5.0
-  commit: e9cb570881b15fb5108f031d6fe3dd11fe14f180
-  bound_at: '2026-09-25T14:12:33Z'
+  commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
+  bound_at: '2026-09-23T12:58:34Z'
   bound_by: shane
   history:
   - commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
@@ -50,70 +50,6 @@ method:
     event_seq: 4
     event_sha256: e3bc1cb14375cf811618a3ce1e7c60b5200bdb7071d93c1f2e1fdc90b4c934ca
     transition_n: 1
-    status: applied
-  - commit: e9cb570881b15fb5108f031d6fe3dd11fe14f180
-    version: 0.5.0
-    bound_at: '2026-09-25T14:12:33Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41
-    record_path: migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.json
-    previous_commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
-    previous_version: 0.5.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: Rebind to e9cb570 for the permitted_files fix in declare-scope
-    authority: shane
-    compatibility:
-      assessment: compatible
-      known: true
-      note: same method version; the work item is rebound to a new commit
-      pair:
-      - 0.5.0
-      - 0.5.0
-      plan_adoptions: []
-      work_packages:
-        contract_version: 1
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:2
-      - concerns:C1
-      - contract:v1
-      - definitions:k-12Harness:contract/PINNED.json
-      - definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md
-      - definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md
-      - definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json
-      - definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:evals/cases/golden_cases.json
-      - definitions:k-12Harness:prompts/input_catalog.snapshot.json
-      - definitions:k-12Harness:prompts/rules.md
-      - plan:A1
-      - request:A0
-      - risk:current
-    decisions: []
-    reference_exceptions: []
-    obligations: []
-    from_state: contracted
-    resulting_state: contracted
-    resume:
-    - --apply
-    - --confirm
-    - b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41
-    event_seq: 37
-    event_sha256: 0d589ad1dfb82441ec0dd7770acf4e248f8dbcdefccd30989c3c122ec0861c90
-    transition_n: 5
     status: applied
 artifact_schema_version: 0.5.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
@@ -185,21 +121,6 @@ transitions:
     evidence: 5 deterministic criteria
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
-- at: '2026-09-25T14:12:33Z'
-  transition: M1
-  event: migrate
-  from: contracted
-  to: contracted
-  by: shane
-  reason: Rebind to e9cb570 for the permitted_files fix in declare-scope
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=22, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41
-  event_seq: 37
-  obligations: []
 size_estimate:
   files: 4
   scale: medium
@@ -298,9 +219,8 @@ scope:
   dirty_explanation: the work item writes its own evidence here
   head_at_dispatch: a730fe597e11d5b783ee763ee0d3b8c3e8693d3d
   verify: null
-  declared_files:
-  - work/20260908T113155/
-  declared: true
+  declared_files: []
+  declared: false
 - id: k-12Harness
   repo: /Users/shane/Projects/k-12Harness
   role: execution
@@ -311,17 +231,8 @@ scope:
   dirty_explanation: null
   head_at_dispatch: 553d7885ba48baabd5e8a513bb3f24b165c33f48
   verify: .venv/bin/python -m pytest tests/ -q
-  declared_files:
-  - evals/graders.py
-  - evals/live.py
-  - evals/replay.py
-  - evals/schema.py
-  - harness/answer_view.py
-  - harness/intent.py
-  - harness/narration.py
-  - tests/live/test_live_eval.py
-  - tests/unit/test_live_tier.py
-  declared: true
+  declared_files: []
+  declared: false
 risk:
   initial: normal
   current: normal
@@ -405,26 +316,6 @@ artifacts:
   created_at: '2026-09-25T12:11:08Z'
   produced_by_attempt: 2
   derived_from: A2
-- status: current
-  supersedes: null
-  id: A4
-  type: planning_review
-  path: reviews/001-planning-review.json
-  version: 1
-  sha256: 979bf9fb9e8dcf992839520dd7a1d96772489f09d7a72bdf057dad97ec0a0911
-  created_at: '2026-09-25T14:13:27Z'
-  produced_by_attempt: 3
-  planning_review_round: 1
-- status: current
-  supersedes: null
-  id: A5
-  type: planning_review_plan_snapshot
-  path: reviews/001-plan-reviewed.md
-  version: 1
-  sha256: 53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23
-  created_at: '2026-09-25T14:13:27Z'
-  produced_by_attempt: 3
-  planning_review_round: 1
 attempts:
 - attempt: 1
   role: planner
@@ -554,35 +445,6 @@ attempts:
   contract: acceptance/001-contract.yaml
   headroom: 0.2734
   growth_per_turn: 0.0
-- attempt: 3
-  role: planning-review
-  state: planning-review
-  status: closed
-  opened_at: '2026-09-25T14:12:55Z'
-  planning_review_round: 1
-  planning_review_sequence: 1
-  planning_review_kind: general
-  provider: openai
-  model: gpt-5.6-sol
-  transport: codex
-  selector: role:planning-review
-  context_window: 400000
-  billing: subscription
-  model_class: frontier
-  last_verified: '2026-09-08'
-  timeout_seconds: 360.0
-  deadline_seconds: 600.0
-  streaming: auto
-  exit_code: 0
-  closed_at: '2026-09-25T14:13:27Z'
-  transport_attempts: 1
-  usage:
-    input_tokens: 20597
-    cached_input_tokens: 0
-    cache_write_input_tokens: 0
-    output_tokens: 1179
-    reasoning_output_tokens: 442
-  context_bytes: 31702
 routing:
   executor_ladder:
   - T0
@@ -613,8 +475,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 8
-  model_sessions_launched: 3
+  controller_commands: 6
+  model_sessions_launched: 2
 checkpoints: []
 acceptance:
   state: pending
@@ -634,160 +496,10 @@ review_batches: []
 review_reconciliations: []
 review_items: []
 review_actions: []
-scope_version: 3
-scope_sha256: 7b0ca023806e948723e2266340cc5cd331eebcf7902115b1e383315c4fa08435
+scope_version: 2
+scope_sha256: 3735aefe85a108ddee83bbac960c921e9795fd6dcaad929e9b26a7a402bd6f1b
 origin: null
 work_packages: []
-findings:
-- id: PF-1
-  origin: planning
-  review: PR1
-  round: 1
-  severity: blocking
-  summary: The oracle-envelope semantics are still a proposal rather than an accepted specification.
-  detail: The plan’s Risks and Planning gaps and the contract’s contract_requirements all say that using
-    the existing case.stub_case fixture as the canonical narration envelope is a load-bearing assumption
-    needing owner confirmation. The proposed implementation nevertheless commits to that interpretation,
-    while also leaving two materially different acquisition methods open (“running the stub emitter once
-    or reading the fixture”). If the intended isolation uses a live fetch or a different canonical fixture,
-    narration execution, transcript attribution, grading, and tests would all be built against the wrong
-    input. The oracle source and acquisition method must be fixed before implementation.
-  required_change: null
-  evidence: null
-  references:
-  - Plan — Proposed changes
-  - Plan — Risks, assumptions and gaps
-  - Plan — Planning gaps
-  - Acceptance contract — observable_behaviour
-  - Acceptance contract — contract_requirements
-  - Acceptance contract — semantic
-  work_package: null
-  regression: false
-  carried_into: null
-  status: open
-  raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
-- id: PF-2
-  origin: planning
-  review: PR1
-  round: 1
-  severity: blocking
-  summary: “CredentialsRejected writes no report” conflicts with checkpoint-after-every-completed-trial
-    semantics.
-  detail: The contract requires an atomic checkpoint after every trial, but also says that CredentialsRejected
-    at the first occurrence causes “no report” to be written. If credentials are rejected after one or
-    more completed trials, a report/checkpoint has already been written. The supplied material does not
-    distinguish a checkpoint from a final report or say whether an existing checkpoint must be retained,
-    removed, or ignored. These requirements cannot both be accepted literally, and removal would also
-    threaten resumability. Define the expected artifact state for rejection before any trial and after
-    prior completed trials.
-  required_change: null
-  evidence: null
-  references:
-  - Acceptance contract — observable_behaviour
-  - Acceptance contract — failure_behaviour
-  - Acceptance contract — deterministic/live-tier-deterministic-tests
-  - Plan — Bounded objective
-  - Plan — Verification approach
-  work_package: null
-  regression: false
-  carried_into: null
-  status: open
-  raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
-- id: PF-3
-  origin: planning
-  review: PR1
-  round: 1
-  severity: material
-  summary: The defining narration-isolation test injects an intent into a stage that is specified not
-    to execute or consume intent.
-  detail: The contract requires comparing narration trials given correct and deliberately wrong scripted
-    intents, while the same contract defines narration as build_answer_view(oracle envelope) followed
-    directly by narrate, with no intent stage or intent input. No supplied interface explains how such
-    an intent can be fed without adding a test-only or production dependency. As written, the check is
-    either vacuous or unimplementable. Replace it with a falsifiable test that perturbs upstream intent-capable
-    inputs while asserting identical narration inputs/results, or directly assert that interpret_intent
-    and evidence fetch are never called and that grading reads the oracle envelope.
-  required_change: null
-  evidence: null
-  references:
-  - Acceptance contract — observable_behaviour
-  - Acceptance contract — semantic
-  - Plan — Verification approach
-  - Plan — Proposed changes
-  work_package: null
-  regression: false
-  carried_into: null
-  status: open
-  raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
-- id: PF-4
-  origin: planning
-  review: PR1
-  round: 1
-  severity: material
-  summary: The collect-only acceptance check does not prove that live tests remain excluded from the default
-    gate.
-  detail: The live-eval-collect-only command proves only that tests can be collected. It does not verify
-    that the new tests carry the live marker or that the default pytest invocation excludes them, despite
-    the expected result claiming both. A missing marker could make credentialed tests enter the PR gate
-    while both collect-only and collection itself still succeed. Add a deterministic marker/exclusion
-    assertion or a collection check demonstrating that the default gate does not select these tests.
-  required_change: null
-  evidence: null
-  references:
-  - Acceptance contract — deterministic/live-eval-collect-only
-  - Acceptance contract — compatibility
-  - Plan — Verification approach
-  work_package: null
-  regression: false
-  carried_into: null
-  status: open
-  raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
+findings: []
 improvements: []
 migration_obligations: []
-planning_review:
-  rounds:
-  - id: PR1
-    number: 1
-    sequence: 1
-    kind: general
-    at: '2026-09-25T14:13:27Z'
-    attempt: 3
-    route:
-      provider: openai
-      model: gpt-5.6-sol
-      transport: codex
-      selector: role:planning-review
-      context_window: 400000
-      billing: subscription
-      model_class: frontier
-      last_verified: '2026-09-08'
-      timeout_seconds: 360.0
-      deadline_seconds: 600.0
-      streaming: auto
-    plan:
-      path: planning/001-plan.md
-      sha256: 53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23
-    plan_snapshot: reviews/001-plan-reviewed.md
-    plan_snapshot_sha256: 53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23
-    contract:
-      version: 1
-      sha256: 06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb
-    artifact: reviews/001-planning-review.json
-    artifact_id: A4
-    sha256: 979bf9fb9e8dcf992839520dd7a1d96772489f09d7a72bdf057dad97ec0a0911
-    covers: []
-    resolutions: {}
-    findings:
-    - PF-1
-    - PF-2
-    - PF-3
-    - PF-4
-    reopened: []
-    summary: 'The plan is not ready to implement: the authoritative narration input remains explicitly
-      unconfirmed, and parts of the operational acceptance contract are internally ambiguous or not actually
-      verified by the named checks.'
-    context_bytes: 31702

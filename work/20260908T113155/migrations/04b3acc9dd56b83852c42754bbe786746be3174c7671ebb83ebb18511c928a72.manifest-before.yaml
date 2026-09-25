@@ -1,0 +1,108 @@
+id: 20260908T113155
+created: '2026-09-08T11:31:55Z'
+method:
+  id: coding-harness
+  version: 0.3.0
+artifact_schema_version: 0.3.0
+request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
+  \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
+narrative: null
+class: null
+state: draft
+parent: null
+children: []
+transitions: []
+size_estimate:
+  files: null
+  subsystems: []
+  scale: null
+definitions: []
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope:
+- id: work-store
+  repo: /home/user/work-k-12MarketIntelligence
+  store_directory: work-k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: claude/method-coding-harness-review-6nqxx6
+  base_commit: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  verify: null
+  declared_files: []
+  declared: false
+risk:
+  initial: null
+  current: null
+  maximum: null
+  rationale: null
+  obligations: []
+  escalations: []
+  deescalations: []
+contract:
+  current: null
+  versions: []
+decisions: []
+constraints: []
+concerns: []
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: 9312ba86e180627d4ff592d36f375cb73a7c9c5cb50301299a9fc554eaa99f3c
+  created_at: '2026-09-08T11:31:55Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+attempts: []
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: null
+  decisions: []
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+stage_outcomes:
+  challenge:
+    performed: false
+    changed_plan: false
+    changed_contract: false
+    evidence: []
+  reconciliation:
+    performed: false
+    changed_plan: false
+    evidence: []
+  semantic_verification:
+    performed: false
+    material_finding: false
+    evidence: []
+effort:
+  controller_commands: 0
+  model_sessions_launched: 0
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+lock:
+  owner: null
+  acquired_at: null
+  released_at: null
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []

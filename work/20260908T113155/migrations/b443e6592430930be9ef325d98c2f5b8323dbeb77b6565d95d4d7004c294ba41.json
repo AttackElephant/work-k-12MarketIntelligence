@@ -1,0 +1,502 @@
+{
+  "record": {
+    "authority": "shane",
+    "compatibility": {
+      "assessment": "compatible",
+      "known": true,
+      "note": "same method version; the work item is rebound to a new commit",
+      "pair": [
+        "0.5.0",
+        "0.5.0"
+      ],
+      "plan_adoptions": [],
+      "schema_stages": [
+        "already at artifact schema 0.5.0"
+      ],
+      "work_packages": {
+        "contract_version": 1,
+        "representation": "implicit-single"
+      }
+    },
+    "computed_from": {
+      "ledger_tip": {
+        "seq": 36,
+        "sha256": "2546ec8479d9c29a433887d082e4da4fc11b8e7005888214759a864470551d21"
+      },
+      "manifest_sha256": "2463a4f08acf3d746cb659e6b427f620e24048a7749cc01a00eedb57aca970af"
+    },
+    "decisions": [],
+    "dispositions": {
+      "decide": [],
+      "invalidate": [],
+      "regenerate": [],
+      "retain": [
+        "attempts:1",
+        "attempts:2",
+        "concerns:C1",
+        "contract:v1",
+        "definitions:k-12Harness:contract/PINNED.json",
+        "definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md",
+        "definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json",
+        "definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json",
+        "definitions:k-12Harness:docs/decisions.md",
+        "definitions:k-12Harness:evals/cases/golden_cases.json",
+        "definitions:k-12Harness:prompts/input_catalog.snapshot.json",
+        "definitions:k-12Harness:prompts/rules.md",
+        "plan:A1",
+        "request:A0",
+        "risk:current"
+      ]
+    },
+    "evidence": [
+      {
+        "detail": {
+          "artifact": "A0",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "request:A0",
+        "integrity": "verified",
+        "integrity_detail": "request.md: sha256 verified",
+        "kind": "request",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "request.md",
+        "supports": [
+          "draft"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/PINNED.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/PINNED.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/PINNED.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/POC_CONTRACT_V0.3_SPEC.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/POC_EVIDENCE_CONTRACT.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/POC_EVIDENCE_CONTRACT.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_evidence_error.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_evidence_error.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_input_catalog.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_input_catalog.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_question_registry.v0.3.0.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_question_registry.v0.3.0.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_school_directory.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_school_directory.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/_index.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/_index.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:docs/decisions.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:docs/decisions.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "docs/decisions.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:evals/cases/golden_cases.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:evals/cases/golden_cases.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "evals/cases/golden_cases.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:prompts/input_catalog.snapshot.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:prompts/input_catalog.snapshot.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "prompts/input_catalog.snapshot.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:prompts/rules.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:prompts/rules.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "prompts/rules.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "artifact": "A1",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "plan:A1",
+        "integrity": "verified",
+        "integrity_detail": "planning/001-plan.md: sha256 verified",
+        "kind": "plan",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "planning/001-plan.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "artifact": "A2",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "contract:v1",
+        "integrity": "verified",
+        "integrity_detail": "acceptance/001-contract.yaml: sha256 verified",
+        "kind": "contract",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "acceptance/001-contract.yaml",
+        "supports": [
+          "contracted"
+        ]
+      },
+      {
+        "detail": {
+          "current": "normal",
+          "obligations": [
+            "planning",
+            "contract",
+            "planning_review",
+            "deterministic",
+            "semantic"
+          ],
+          "rationale_recorded": true
+        },
+        "disposition": "retain",
+        "id": "risk:current",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "risk",
+        "proposed": "retain",
+        "proposed_reason": "risk level and rationale are recorded",
+        "reason": "risk level and rationale are recorded",
+        "ref": "risk",
+        "supports": [
+          "classified"
+        ]
+      },
+      {
+        "detail": {
+          "blocking": false,
+          "status": "resolved"
+        },
+        "disposition": "retain",
+        "id": "concerns:C1",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "concerns",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "C1",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "planner",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:1",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 1",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "contract",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:2",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 2",
+        "supports": []
+      }
+    ],
+    "kind": "coding-harness.migration",
+    "obligations": [],
+    "previous": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "196bee59710ba5de09a46992ae5ea72095fd54b5",
+      "method_id": "coding-harness",
+      "method_version": "0.5.0"
+    },
+    "reason": "Rebind to e9cb570 for the permitted_files fix in declare-scope",
+    "record_version": 1,
+    "reference_integrity": {
+      "event_references_checked": 20,
+      "exceptions": [],
+      "failures": []
+    },
+    "resume": {
+      "arguments": [
+        "--apply",
+        "--confirm",
+        "{record_sha256}"
+      ]
+    },
+    "state": {
+      "basis": "every supporting evidence item is retained",
+      "current": "contracted",
+      "resulting": "contracted"
+    },
+    "target": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "e9cb570881b15fb5108f031d6fe3dd11fe14f180",
+      "method_id": "coding-harness",
+      "method_version": "0.5.0"
+    },
+    "work_item": "20260908T113155"
+  },
+  "sha256": "b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41"
+}

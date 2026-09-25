@@ -1,0 +1,120 @@
+contract_version: 0.1.0
+artifact_version: 1
+work_item: 20260908T113155
+observable_behaviour:
+  - "`evals/live.py` executes a genuinely isolated intent stage: when invoked with `--stage intent`, it runs only Stage 1 (`harness.intent.interpret_intent`, NL -> StructuredIntent) with no evidence fetch and no rendering, and grades it with a decision-scoped grader set only."
+  - "`evals/live.py` executes a genuinely isolated narration stage: when invoked with `--stage narration`, it builds an AnswerView via `harness.answer_view.build_answer_view` over a fixed/oracle envelope per case (NOT the model's own fetched envelope), calls `harness.narration.narrate`, and grades it with rendering/grounding/limitations graders only, so narration quality is scored independently of intent quality."
+  - "`--stage end-to-end` and `--stage` omitted continue to run the existing full trial (`ask(build_agent(), deps, phrasing)`) with the full grader set, unchanged except for the k=1 constraint already enforced for end-to-end."
+  - "The `stage` value now reaches execution and grading (threaded through `run_suite` -> `run_trial`), rather than only affecting report metadata and k/pressure validation as it does today."
+  - "A narration-stage trial fed a deliberately wrong scripted intent still passes/fails purely on the oracle envelope's rendering, proving isolation of narration from intent."
+  - "Quota-aware interruption, resumability and completed-trial aggregation are preserved for every stage: QuotaExceeded -> SuiteInterruption(kind=quota_exhausted) -> break; CredentialsRejected stops with no report; checkpoint-after-every-trial with atomic .tmp+.replace; --resume skips completed trials via _trial_key/done; pass@k and pass^k computed over completed trials only."
+required_outputs:
+  - repo: k-12Harness
+    path: evals/live.py
+    reason: "Thread `stage` into run_suite/run_trial and branch execution for intent-only, narration-only, and end-to-end trials while preserving quota/resume/checkpoint/accounting semantics."
+  - repo: k-12Harness
+    path: evals/graders.py
+    reason: "Add stage-scoped grader selection (INTENT_GRADERS, NARRATION_GRADERS from the existing decision/rendering partition) and a grade_case(case, record, stage=None) dispatch; stage=None preserves GRADERS_BY_DIRECTION exactly."
+  - repo: k-12Harness
+    path: evals/schema.py
+    reason: "Contingent minimal stage discriminator so an intent-only run (no rendered output) and a narration-only run (oracle envelope, no fetch) can be represented and attributed correctly. Modify only if isolation cannot be achieved without it."
+  - repo: k-12Harness
+    path: evals/replay.py
+    reason: "Contingent adjustment to project()/RunRecord construction so last_envelope()/evidence_calls() graders read the oracle envelope for narration and do not misfire on intent-only runs. Modify only if required."
+  - repo: k-12Harness
+    path: tests/unit/test_live_tier.py
+    reason: "Extend deterministic offline tests (scripted model) for per-stage execution, narration/intent isolation, per-stage checkpoint/resume, per-stage pass@k/pass^k, quota interruption, and CredentialsRejected-writes-no-report."
+  - repo: k-12Harness
+    path: tests/live/test_live_eval.py
+    reason: "Add manual/credentialed coverage of the three-stage surface; remains live-marked and excluded from the PR gate."
+permitted_files:
+  - repo: k-12Harness
+    path: harness/intent.py
+    reason: "No logic change expected; a thin eval-facing helper may be added only if a stage cannot be invoked in isolation from the current signature (ADR-014 one-owner rule)."
+  - repo: k-12Harness
+    path: harness/narration.py
+    reason: "No logic change expected; a thin eval-facing helper may be added only if narration cannot be invoked in isolation. Production narration logic must not move into the eval runner."
+  - repo: k-12Harness
+    path: harness/answer_view.py
+    reason: "No logic change expected; reuse existing build_answer_view. A thin helper only if strictly required for oracle-envelope wiring."
+  - repo: work-store
+    path: work/20260908T113155/
+    reason: "Append-only evidence store for this work item; the controller writes verification logs, capture, and acceptance evidence here."
+deterministic:
+  - id: full-test-suite
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/ -q"
+    expected: "The manifest verification command passes: the offline suite exits zero with no failures and no unexpected passes. Live-marked tests remain excluded from this gate (ADR-007)."
+    expect:
+      exit_code: 0
+      stdout_excludes: "failed"
+  - id: contract-pin-unchanged
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/unit/test_contract_pin.py -q"
+    expected: "The contract pin test still passes: no vendored contract file under contract/ changed and the registry version still equals settings.CONTRACT_VERSION (ADR-008)."
+    expect:
+      exit_code: 0
+      stdout_excludes: "failed"
+  - id: live-tier-deterministic-tests
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/unit/test_live_tier.py -q"
+    expected: "The deterministic (scripted-model) live-tier tests pass, covering per-stage execution and grading, narration/intent isolation, per-stage checkpoint/resume without repeating completed trials, per-stage pass@k/pass^k over completed trials only, quota interruption leaving a resumable checkpoint, and CredentialsRejected writing no report."
+    expect:
+      exit_code: 0
+      stdout_excludes: "failed"
+  - id: graders-tests
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/unit/test_graders.py -q"
+    expected: "The adversarial grader tests still pass: existing graders' pass/fail rules are unchanged and every grader still carries a load-bearing mutation (ADR-013). Stage-scoped selection does not weaken any grader."
+    expect:
+      exit_code: 0
+      stdout_excludes: "failed"
+  - id: live-eval-collect-only
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/live/test_live_eval.py --collect-only -q"
+    expected: "The new three-stage manual coverage collects cleanly and remains live-marked so it is excluded from the default PR gate (ADR-007)."
+    expect:
+      exit_code: 0
+must_not_change:
+  - "Any vendored contract file under contract/ (registry, schemas, PINNED.json); the v0.3.0 evidence contract is out of scope and pinned by hash (ADR-008)."
+  - "tests/unit/test_contract_pin.py and the contract pin it enforces."
+  - "The pass/fail rule of any existing grader in evals/graders.py; only stage-scoped selection may be added (ADR-013)."
+  - "Production decision, fetch, rendering-gate, and assembly logic in harness/agent.py, harness/rendering.py, harness/outputs.py; the eval runner must not duplicate or reimplement stage-owner logic (ADR-014)."
+  - "Credential/transport semantics: CredentialsRejected stops the suite with no report; a 500/timeout remains an ordinary failed trial; classification stays status-based via classify (ADR-016)."
+  - "cost_complete semantics: it requires that something was actually priced, and remains False by design under the claude_account transport (ADR-016, ADR-019)."
+  - "The _trial_key = (case_id, phrasing, trial) definition and the checkpoint stage-guard that forbids resuming across a different stage."
+  - "The deterministic stub-tier pass/fail rules and golden-case authoring format (beyond any per-stage oracle wiring narration requires)."
+failure_behaviour:
+  - "On QuotaExceeded during any stage, the runner raises/records SuiteInterruption(kind=quota_exhausted, reset_at=...) and breaks, leaving a resumable checkpoint written atomically after the last completed trial."
+  - "On a rejected credential in any stage, run_trial surfaces CredentialsRejected (via classify -> AuthError), main stops at the first occurrence, and no report is written (ADR-016)."
+  - "A 500, timeout, or other ordinary error in any stage is recorded as a failed TrialResult, not folded into an infrastructure stop and not scored as a credential/auth failure (ADR-016)."
+  - "An intent-only trial performs no evidence fetch and no rendering; a narration-only trial performs no live fetch and narrates over the oracle envelope only. A stage that cannot be executed in isolation must fail loudly rather than silently falling back to the full end-to-end path."
+  - "A resume whose recorded stage differs from the requested stage remains rejected rather than silently mixing cross-stage trials."
+compatibility:
+  - "Live tier stays manual/nightly and never becomes a PR gate; it reports pass@k (capability) and pass^k (reliability) separately for each stage (ADR-007, ADR-015)."
+  - "Grading reads the transcript / the envelope the tool actually returned (for narration, the oracle envelope), never the model's account of its own work (ADR-013)."
+  - "Limitations render verbatim and the harness assigns no grade; narration and end-to-end grading must continue to enforce this (ADR-009)."
+  - "Default (--stage omitted) and end-to-end both keep the current full-loop execution; their only difference remains the k=1 constraint already enforced for end-to-end."
+  - "Account-plan (claude_account) usage is reported without a manufactured USD figure; cost_complete remains False there, and spend_usd(deps.last_messages) still applies where a model call occurred (ADR-018, ADR-019)."
+compatibility_baselines: []
+contract_requirements:
+  - "The manifest declares no explicit allowlist for k-12Harness (governance diff-allowlist, scope.declared_files: [], declared: false). The permitted change set is exactly the files in required_outputs plus permitted_files; a change exceeding this set is a scope escape requiring human review, not silent expansion."
+  - "CONFLICT (request vs current source): request.md assumes the three stages are executed, but evals/live.py today ships an inert --stage surface (parsed, validated, checkpointed, resume-guarded) whose value never reaches run_suite/run_trial/grading. The work is to wire the existing flag into execution and grading, NOT to add a new flag."
+  - "GAP (no defining authority): 'genuinely isolated' stage semantics, oracle-narration input, and per-stage grader sets have no schema/ADR that specifies them exactly. They are interpreted from the request plus ADR-013's transcript/envelope isolation principle and the existing four-stage pipeline; this interpretation is a proposal for human confirmation."
+  - "ASSUMPTION (load-bearing, needs owner confirmation): 'isolated narration' means grading against a canonical/oracle envelope per case (the existing case.stub_case fixture) built into an AnswerView, not the model's own fetched envelope. If isolation instead means isolating narration from intent while still performing a live fetch, the wiring differs and the contract must be revised."
+  - "GAP (no defining source for operational guarantees): request.md requires 'quota-aware checkpointing, resumability, completed-trial semantics' but docs/decisions.md ADR-016 defines only credential/transport-failure handling; quota-exhaustion signalling and checkpoint format are otherwise undefined and are preserved from current source behaviour as-is."
+  - "GAP (provider authority ambiguous): ADR-018 (codex_account) and ADR-019 (claude_account, superseding) both appear in the pack; the governing quota transport is taken to be claude_account per ADR-019, but the exact QuotaExceeded raise site is unconfirmed from available source."
+  - "CONSTRAINT (RunRecord shape): evals/schema.RunRecord / evals/replay.project cannot currently represent an intent-only run (no rendered output) or a narration-only run (oracle envelope, no fetch). Any change here must be the smallest that lets existing graders read the oracle envelope for narration and prevents last_envelope()/evidence_calls() misattribution; it must not alter end-to-end RunRecord shape or grading."
+semantic:
+  - "Isolation (the defining check): a narration-stage trial given a wrong scripted intent scores identically to one given a correct intent, because grounding, limitations_verbatim, confidence_unchanged, and no_forecast_framing all read the oracle envelope, not the intent."
+  - "An intent-stage trial is graded only by decision-scoped graders (question_match, request_match, school_resolved_through_directory, clarification_correct, refusal_is_contract_sourced); rendering/grounding graders do not run and no evidence is fetched."
+  - "grade_case(..., stage=None) reproduces the current GRADERS_BY_DIRECTION behaviour exactly for end-to-end/default trials, so existing reference solutions and mutations remain load-bearing (ADR-013)."
+  - "Per-stage completed-trial accounting: summarise/aggregate/completed_reports count each completed stage-scoped trial exactly once and match a hand-computed trial matrix per stage; pass@k/pass^k are reported separately per stage."
+  - "The eval runner reuses the harness's public stage entry points (interpret_intent, build_answer_view, narrate) rather than duplicating decision or render logic (ADR-014)."
+out_of_scope:
+  - "Changing the v0.3.0 evidence contract, registry, schemas, or PINNED.json (pinned; adoption of a new contract version is a separate deliberate change)."
+  - "Production agent decision logic and the four-stage pipeline in harness/agent.py beyond exposing existing entry points for isolated invocation."
+  - "The deterministic stub-tier pass/fail rules and the golden-case authoring format, except any per-stage oracle-envelope wiring narration requires."
+  - "Adding or redesigning the --stage CLI surface (parsing/validation/checkpoint/resume-guard already exist); the work is wiring the existing value into execution and grading."
+  - "Wiring the FastAPI server layer (server/), the demo surface, and any change to live-tier scheduling (it stays manual, never a PR gate)."
+  - "Altering _trial_key composition or introducing cross-stage trial mixing on resume."
