@@ -120,7 +120,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: contracted
+state: executing
 parent: null
 children: []
 transitions:
@@ -200,6 +200,50 @@ transitions:
   migration_record_sha256: b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41
   event_seq: 37
   obligations: []
+- at: '2026-09-25T22:51:36Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: next step
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no applicable review feedback batches
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-25T22:56:12Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: latest readiness transition has no review batch and no late feedback exists
+  - guard: scope_revalidated
+    evidence: revalidated work-store@5beac5b462de (evidence, branch only), k-12Harness@553d7885ba48
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''contract'', ''planning'']'
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: headroom_guard_passed
+    evidence: headroom 0.3843 (76859 of 200000 tokens)
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   scale: medium
@@ -637,13 +681,127 @@ attempts:
   - PF-2
   - PF-3
   - PF-4
+- attempt: 5
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-25T22:56:12Z'
+  provider: anthropic
+  model: claude-sonnet-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-23'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-25T23:04:53Z'
+  prompt_path: capture/prompts/005-executor.md
+  prompt_sha256: 38d9be5137c1cffe41c01cf979acae966d0ef5b07963eab199765845945e6553
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.168 (Claude Code)
+    actual_changed_paths:
+    - evals/graders.py
+    - evals/live.py
+    - tests/unit/test_live_tier.py
+    ignored_paths_created: []
+    reported_reads:
+    - /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113155/planning/001-plan.md
+    - /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113155/acceptance/001-contract.yaml
+    - contract/PINNED.json
+    - docs/decisions.md
+    - evals/live.py
+    - harness/intent.py
+    - harness/narration.py
+    - harness/answer_view.py
+    - evals/schema.py
+    - evals/replay.py
+    - harness/agent.py
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    - evals/graders.py
+    - harness/tools.py
+    - evals/cases/golden_cases.json
+    - harness/planner.py
+    - harness/outputs.py
+    - .
+    - tests
+    - tests/unit/test_intent_boundary.py
+    - harness/usage.py
+    - evals/cases/reference_solutions.json
+    - harness/rendering.py
+    - tests/unit/test_planner.py
+    reported_writes:
+    - evals/graders.py
+    - evals/live.py
+    - tests/unit/test_live_tier.py
+    shell_commands: []
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 58
+    total_cost_usd: 3.2575723500000007
+    malformed_events: 0
+    returncode: 0
+  transport_attempts: 1
+  usage:
+    input_tokens: 95
+    cache_creation_input_tokens: 188789
+    cache_read_input_tokens: 6117342
+    output_tokens: 47504
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 188789
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 1280
+      cache_read_input_tokens: 188361
+      cache_creation_input_tokens: 428
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 428
+      type: message
+    speed: standard
+  elapsed_seconds: 520.4757256670273
+  read_context_files: 17
+  effective_context_sha256: 677b8ab342d90e7ba4b54da4382198315b66429729de840d494859ea55cb51e9
+  native_log_bytes: 2497366
 routing:
   executor_ladder:
   - T0
   - T1
   - T2
-  current_tier: null
-  decisions: []
+  current_tier: T0
+  decisions:
+  - at: '2026-09-25T22:56:12Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: anthropic
+    model: claude-sonnet-5
+    transport: claude
+    selector: tier:T0
+    context_window: 200000
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-09-23'
+    effort: medium
+    timeout_seconds: 1200.0
+    deadline_seconds: 1260.0
+    transient_retries: 3
+    streaming: auto
   frontier_execution:
     authorised: false
     authorised_by: null
@@ -667,8 +825,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 12
-  model_sessions_launched: 4
+  controller_commands: 14
+  model_sessions_launched: 5
 checkpoints: []
 acceptance:
   state: pending
@@ -676,9 +834,10 @@ acceptance:
   gates_satisfied: []
 escapes: []
 lock:
-  owner: null
-  acquired_at: null
-  released_at: null
+  owner: shane@Mimir.local
+  acquired_at: '2026-09-25T22:56:12Z'
+  released_at: '2026-09-25T23:04:53Z'
+  attempt: 5
 capture:
   event_log: capture/events.jsonl
   sessions: []
@@ -967,3 +1126,4 @@ planning_review:
     summary: All four open findings are resolved by concrete clarifications and test changes in the supplied
       delta. The remediation introduces no new blocking or material findings.
     context_bytes: 25298
+continuations: []

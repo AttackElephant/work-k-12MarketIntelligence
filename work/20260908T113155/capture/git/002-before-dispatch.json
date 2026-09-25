@@ -1,0 +1,33 @@
+{
+  "base": "a730fe597e11d5b783ee763ee0d3b8c3e8693d3d",
+  "branch": "main",
+  "captured_at": "2026-09-25T22:56:12Z",
+  "head": "5beac5b462de15553df0c26c7e433e8cf88eae75",
+  "label": "before-dispatch",
+  "repo": "/Users/shane/Projects/work/k-12MarketIntelligence",
+  "status_porcelain": [
+    " M work/20260908T113155/capture/events.jsonl",
+    " M work/20260908T113155/manifest.yaml"
+  ],
+  "tracked_changes_from_base": [
+    "models.yaml",
+    "work/20260908T113155/acceptance/001-contract-review.md",
+    "work/20260908T113155/acceptance/001-contract.yaml",
+    "work/20260908T113155/capture/events.jsonl",
+    "work/20260908T113155/capture/git/001-planning-base.json",
+    "work/20260908T113155/capture/imports/001-planner-001.log",
+    "work/20260908T113155/capture/imports/002-contract-002.log",
+    "work/20260908T113155/capture/inventories/001-artifact-inventory.json",
+    "work/20260908T113155/manifest.yaml",
+    "work/20260908T113155/migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.json",
+    "work/20260908T113155/migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.manifest-before.yaml",
+    "work/20260908T113155/migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.json",
+    "work/20260908T113155/migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.manifest-before.yaml",
+    "work/20260908T113155/planning/001-plan.md",
+    "work/20260908T113155/reviews/001-plan-reviewed.md",
+    "work/20260908T113155/reviews/001-planning-review.json",
+    "work/20260908T113155/reviews/002-plan-reviewed.md",
+    "work/20260908T113155/reviews/002-planning-review.json"
+  ],
+  "untracked": []
+}

@@ -1,0 +1,86 @@
+{
+  "captured_at": "2026-09-25T23:04:53Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract-review.md",
+      "execution/005-executor.md",
+      "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.json",
+      "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.manifest-before.yaml",
+      "reviews/001-plan-reviewed.md",
+      "reviews/001-planning-review.json",
+      "reviews/002-plan-reviewed.md",
+      "reviews/002-planning-review.json"
+    ],
+    "changed": [
+      "planning/001-plan.md"
+    ],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "7792e3635064ba7b88b634b54b1b9702f786b53f5ef2c37cf09435cd1e40dc07",
+      "size": 11567
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb",
+      "size": 13942
+    },
+    "execution/005-executor.md": {
+      "kind": "file",
+      "sha256": "9b9e6373564e313050bc0d6310daead6b583db58777bad28146fee1863162beb",
+      "size": 3496
+    },
+    "migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.json": {
+      "kind": "file",
+      "sha256": "f29968eddf99dbf8d3676b7088a9d7112763c5ff5c82cdbc94bbe32039fec4f5",
+      "size": 3118
+    },
+    "migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "ca0623ee1ddedd9b18772ab6e3c0d9ca56ab87fcadf05079fd0be2bb9a1e9d95",
+      "size": 2342
+    },
+    "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.json": {
+      "kind": "file",
+      "sha256": "4b1ba5c11ee18a58d8dcc0161ecb599493edef5c320778a5a69e579bd4e0ec19",
+      "size": 18157
+    },
+    "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "2463a4f08acf3d746cb659e6b427f620e24048a7749cc01a00eedb57aca970af",
+      "size": 16136
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7",
+      "size": 20134
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "9312ba86e180627d4ff592d36f375cb73a7c9c5cb50301299a9fc554eaa99f3c",
+      "size": 202
+    },
+    "reviews/001-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23",
+      "size": 16782
+    },
+    "reviews/001-planning-review.json": {
+      "kind": "file",
+      "sha256": "979bf9fb9e8dcf992839520dd7a1d96772489f09d7a72bdf057dad97ec0a0911",
+      "size": 4721
+    },
+    "reviews/002-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7",
+      "size": 20134
+    },
+    "reviews/002-planning-review.json": {
+      "kind": "file",
+      "sha256": "555c8436778bfc51e641a7e5fd78f77e4c94eeac23472cdd247b13a25fd8bbb5",
+      "size": 1833
+    }
+  }
+}
