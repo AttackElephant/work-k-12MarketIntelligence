@@ -425,6 +425,26 @@ artifacts:
   created_at: '2026-09-25T14:13:27Z'
   produced_by_attempt: 3
   planning_review_round: 1
+- status: current
+  supersedes: null
+  id: A6
+  type: planning_review
+  path: reviews/002-planning-review.json
+  version: 2
+  sha256: 555c8436778bfc51e641a7e5fd78f77e4c94eeac23472cdd247b13a25fd8bbb5
+  created_at: '2026-09-25T14:25:39Z'
+  produced_by_attempt: 4
+  planning_review_round: 2
+- status: current
+  supersedes: null
+  id: A7
+  type: planning_review_plan_snapshot
+  path: reviews/002-plan-reviewed.md
+  version: 2
+  sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+  created_at: '2026-09-25T14:25:39Z'
+  produced_by_attempt: 4
+  planning_review_round: 2
 attempts:
 - attempt: 1
   role: planner
@@ -583,6 +603,40 @@ attempts:
     output_tokens: 1179
     reasoning_output_tokens: 442
   context_bytes: 31702
+- attempt: 4
+  role: planning-review
+  state: planning-review
+  status: closed
+  opened_at: '2026-09-25T14:25:13Z'
+  planning_review_round: 2
+  planning_review_sequence: 2
+  planning_review_kind: targeted
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planning-review
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-25T14:25:39Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 18596
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 1152
+    reasoning_output_tokens: 834
+  context_bytes: 25298
+  covers:
+  - PF-1
+  - PF-2
+  - PF-3
+  - PF-4
 routing:
   executor_ladder:
   - T0
@@ -613,8 +667,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 8
-  model_sessions_launched: 3
+  controller_commands: 12
+  model_sessions_launched: 4
 checkpoints: []
 acceptance:
   state: pending
@@ -664,9 +718,24 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: open
+  status: dispositioned
   raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
+  disposition:
+    kind: remediate
+    rationale: 'Plan: owner confirmation C1 recorded; oracle acquisition fixed to the stub emitter via
+      case.stub_case, emitter real refused for narration, ineligible cases excluded loudly.'
+    authorised_by: shane
+    at: '2026-09-25T14:25:12Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-25T14:25:12Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: 'The delta records owner confirmation of the oracle-envelope interpretation and fixes a
+      single acquisition method: `build_client("stub", case.stub_case)` using the recorded request. It
+      expressly rejects both the real emitter and direct fixture reading, and defines loud handling for
+      ineligible cases.'
 - id: PF-2
   origin: planning
   review: PR1
@@ -692,9 +761,24 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: open
+  status: dispositioned
   raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
+  disposition:
+    kind: remediate
+    rationale: 'Plan: no final report on rejection; existing checkpoint kept unchanged and resumable;
+      truthful exit message; both cases tested per stage.'
+    authorised_by: shane
+    at: '2026-09-25T14:25:12Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-25T14:25:12Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: 'The delta distinguishes final reports from resumable checkpoints and defines both artifact
+      states: rejection before any completed trial leaves no report or transcript, while later rejection
+      preserves the last running checkpoint byte-for-byte without writing a final report. It also specifies
+      truthful messaging and tests both cases for every stage.'
 - id: PF-3
   origin: planning
   review: PR1
@@ -719,9 +803,24 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: open
+  status: dispositioned
   raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
+  disposition:
+    kind: remediate
+    rationale: 'Plan: isolation test replaced by intent-perturbation equality plus spies proving interpret_intent
+      and evidence fetch are never called in narration.'
+    authorised_by: shane
+    at: '2026-09-25T14:25:13Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-25T14:25:13Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: The delta replaces the impossible intent injection with a falsifiable perturbation test
+      and direct spies. It requires identical narration inputs, outputs, and grades across models with
+      different latent intents, while proving that `interpret_intent` and evidence fetching are never
+      invoked and that graders use the oracle envelope.
 - id: PF-4
   origin: planning
   review: PR1
@@ -743,9 +842,23 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: open
+  status: dispositioned
   raised_at: '2026-09-25T14:13:27Z'
-  disposition: null
+  disposition:
+    kind: remediate
+    rationale: 'Plan: unit test in the full-test-suite gate proves default options select zero live tests
+      and -m live selects all of them.'
+    authorised_by: shane
+    at: '2026-09-25T14:25:13Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-25T14:25:13Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: The delta adds a deterministic unit assertion that repository-default collection selects
+      zero live tests and `-m live` selects every test in the live file. This directly detects either
+      accidental default-gate inclusion or a missing live marker.
 improvements: []
 migration_obligations: []
 planning_review:
@@ -791,3 +904,66 @@ planning_review:
       unconfirmed, and parts of the operational acceptance contract are internally ambiguous or not actually
       verified by the named checks.'
     context_bytes: 31702
+  - id: PR2
+    number: 2
+    sequence: 2
+    kind: targeted
+    at: '2026-09-25T14:25:39Z'
+    attempt: 4
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:planning-review
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+    plan:
+      path: planning/001-plan.md
+      sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+    plan_snapshot: reviews/002-plan-reviewed.md
+    plan_snapshot_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+    contract:
+      version: 1
+      sha256: 06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb
+    artifact: reviews/002-planning-review.json
+    artifact_id: A6
+    sha256: 555c8436778bfc51e641a7e5fd78f77e4c94eeac23472cdd247b13a25fd8bbb5
+    covers:
+    - PF-1
+    - PF-2
+    - PF-3
+    - PF-4
+    resolutions:
+      PF-1:
+        state: resolved
+        rationale: 'The delta records owner confirmation of the oracle-envelope interpretation and fixes
+          a single acquisition method: `build_client("stub", case.stub_case)` using the recorded request.
+          It expressly rejects both the real emitter and direct fixture reading, and defines loud handling
+          for ineligible cases.'
+      PF-2:
+        state: resolved
+        rationale: 'The delta distinguishes final reports from resumable checkpoints and defines both
+          artifact states: rejection before any completed trial leaves no report or transcript, while
+          later rejection preserves the last running checkpoint byte-for-byte without writing a final
+          report. It also specifies truthful messaging and tests both cases for every stage.'
+      PF-3:
+        state: resolved
+        rationale: The delta replaces the impossible intent injection with a falsifiable perturbation
+          test and direct spies. It requires identical narration inputs, outputs, and grades across models
+          with different latent intents, while proving that `interpret_intent` and evidence fetching are
+          never invoked and that graders use the oracle envelope.
+      PF-4:
+        state: resolved
+        rationale: The delta adds a deterministic unit assertion that repository-default collection selects
+          zero live tests and `-m live` selects every test in the live file. This directly detects either
+          accidental default-gate inclusion or a missing live marker.
+    findings: []
+    reopened: []
+    summary: All four open findings are resolved by concrete clarifications and test changes in the supplied
+      delta. The remediation introduces no new blocking or material findings.
+    context_bytes: 25298

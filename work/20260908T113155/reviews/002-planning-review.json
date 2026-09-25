@@ -1,0 +1,30 @@
+{
+  "covers": [
+    "PF-1",
+    "PF-2",
+    "PF-3",
+    "PF-4"
+  ],
+  "findings": [],
+  "kind": "targeted",
+  "resolutions": {
+    "PF-1": {
+      "rationale": "The delta records owner confirmation of the oracle-envelope interpretation and fixes a single acquisition method: `build_client(\"stub\", case.stub_case)` using the recorded request. It expressly rejects both the real emitter and direct fixture reading, and defines loud handling for ineligible cases.",
+      "state": "resolved"
+    },
+    "PF-2": {
+      "rationale": "The delta distinguishes final reports from resumable checkpoints and defines both artifact states: rejection before any completed trial leaves no report or transcript, while later rejection preserves the last running checkpoint byte-for-byte without writing a final report. It also specifies truthful messaging and tests both cases for every stage.",
+      "state": "resolved"
+    },
+    "PF-3": {
+      "rationale": "The delta replaces the impossible intent injection with a falsifiable perturbation test and direct spies. It requires identical narration inputs, outputs, and grades across models with different latent intents, while proving that `interpret_intent` and evidence fetching are never invoked and that graders use the oracle envelope.",
+      "state": "resolved"
+    },
+    "PF-4": {
+      "rationale": "The delta adds a deterministic unit assertion that repository-default collection selects zero live tests and `-m live` selects every test in the live file. This directly detects either accidental default-gate inclusion or a missing live marker.",
+      "state": "resolved"
+    }
+  },
+  "round": 2,
+  "summary": "All four open findings are resolved by concrete clarifications and test changes in the supplied delta. The remediation introduces no new blocking or material findings."
+}
