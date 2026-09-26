@@ -3,8 +3,8 @@ created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
   version: 0.5.0
-  commit: 6ace286cce3a352ac99d44d21c57d13b0cc0f685
-  bound_at: '2026-09-26T22:07:23Z'
+  commit: 50a2869a6caf2d1b521d7835dc36a8350f621e43
+  bound_at: '2026-09-26T11:29:49Z'
   bound_by: shane
   history:
   - commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
@@ -521,121 +521,6 @@ method:
     event_seq: 134
     event_sha256: 1330a48e78838a109ee22112b2cce778d8596021f0baae9becdccc4627e8e9b5
     transition_n: 22
-    status: applied
-  - commit: 6ace286cce3a352ac99d44d21c57d13b0cc0f685
-    version: 0.5.0
-    bound_at: '2026-09-26T22:07:23Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: 33d55dc317780aaa816cad9a7f60e4421abad9e525ed3b430fe95b63a435c191
-    record_path: migrations/33d55dc317780aaa816cad9a7f60e4421abad9e525ed3b430fe95b63a435c191.json
-    previous_commit: 50a2869a6caf2d1b521d7835dc36a8350f621e43
-    previous_version: 0.5.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: 'adopt PR 21: contract entry-shape normaliser (verifier crash)'
-    authority: shane
-    compatibility:
-      assessment: conditional
-      known: true
-      note: same method version; the work item is rebound to a new commit
-      pair:
-      - 0.5.0
-      - 0.5.0
-      plan_adoptions: []
-      work_packages:
-        contract_version: 4
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:10
-      - attempts:11
-      - attempts:12
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - attempts:6
-      - attempts:7
-      - attempts:8
-      - attempts:9
-      - candidate:current
-      - checkpoints:1
-      - concerns:C1
-      - continuations:C001
-      - continuations:C002
-      - continuations:C003
-      - continuations:C004
-      - contract:v1
-      - contract:v2
-      - contract:v3
-      - contract:v4
-      - declared_scope:current
-      - definitions:k-12Harness:contract/PINNED.json
-      - definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md
-      - definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md
-      - definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json
-      - definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:evals/cases/golden_cases.json
-      - definitions:k-12Harness:prompts/input_catalog.snapshot.json
-      - definitions:k-12Harness:prompts/rules.md
-      - deterministic_runs:V001
-      - deterministic_runs:V002
-      - deterministic_runs:V003
-      - deterministic_runs:V004
-      - findings:PF-1
-      - findings:PF-2
-      - findings:PF-3
-      - findings:PF-4
-      - plan:A1
-      - request:A0
-      - risk:current
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-1
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-2
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-3
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-4
-    - by: shane
-      disposition: retain
-      evidence: plan:A1
-    reference_exceptions:
-    - artefacts:
-      - planning/001-plan.md
-      forced_to_decide:
-      - plan:A1
-      integrity: unverified
-      reason: remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the
-        plan planning review 2 read clean
-      reference: plan:A1
-    obligations: []
-    from_state: checkpointed
-    resulting_state: checkpointed
-    resume:
-    - --apply
-    - --confirm
-    - 33d55dc317780aaa816cad9a7f60e4421abad9e525ed3b430fe95b63a435c191
-    event_seq: 191
-    event_sha256: 63ec972a7982542ddb2f6fa061b8fc90a8e7374cd49f40368fccb6108d43cce0
-    transition_n: 32
     status: applied
 artifact_schema_version: 0.5.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
@@ -1277,21 +1162,6 @@ transitions:
     evidence: checkpoint at 2026-09-26T13:45:20Z across 2 repository scope(s)
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
-- at: '2026-09-26T22:07:23Z'
-  transition: M1
-  event: migrate
-  from: checkpointed
-  to: checkpointed
-  by: shane
-  reason: 'adopt PR 21: contract entry-shape normaliser (verifier crash)'
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=50, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: 33d55dc317780aaa816cad9a7f60e4421abad9e525ed3b430fe95b63a435c191
-  event_seq: 191
-  obligations: []
 size_estimate:
   files: 4
   scale: medium
@@ -2872,7 +2742,7 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 44
+  controller_commands: 43
   model_sessions_launched: 12
 checkpoints:
 - at: '2026-09-26T13:45:20Z'
