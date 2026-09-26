@@ -3,8 +3,8 @@ created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
   version: 0.5.0
-  commit: 3e8230c1605825c8fc3e0412a17c3b119a305844
-  bound_at: '2026-09-26T09:53:52Z'
+  commit: dfc9967d2d5c8df4bd85723430c5e48553d66d56
+  bound_at: '2026-09-26T00:46:24Z'
   bound_by: shane
   history:
   - commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
@@ -311,108 +311,6 @@ method:
     event_sha256: ad81c03332d0d3a950eda8c8ba0f0c4f5f24287e15905909b014a67039387ac3
     transition_n: 10
     status: applied
-  - commit: 3e8230c1605825c8fc3e0412a17c3b119a305844
-    version: 0.5.0
-    bound_at: '2026-09-26T09:53:52Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: 7ae79d751a07031097ab164f08ece76f95da3dd302e81958c958d139653b4229
-    record_path: migrations/7ae79d751a07031097ab164f08ece76f95da3dd302e81958c958d139653b4229.json
-    previous_commit: dfc9967d2d5c8df4bd85723430c5e48553d66d56
-    previous_version: 0.5.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: 'adopt PR 18: guidance channel and criteria dry run'
-    authority: shane
-    compatibility:
-      assessment: conditional
-      known: true
-      note: same method version; the work item is rebound to a new commit
-      pair:
-      - 0.5.0
-      - 0.5.0
-      plan_adoptions: []
-      work_packages:
-        contract_version: 2
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - attempts:6
-      - attempts:7
-      - candidate:current
-      - concerns:C1
-      - continuations:C001
-      - contract:v1
-      - contract:v2
-      - declared_scope:current
-      - definitions:k-12Harness:contract/PINNED.json
-      - definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md
-      - definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md
-      - definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json
-      - definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:evals/cases/golden_cases.json
-      - definitions:k-12Harness:prompts/input_catalog.snapshot.json
-      - definitions:k-12Harness:prompts/rules.md
-      - deterministic_runs:V001
-      - deterministic_runs:V002
-      - findings:PF-1
-      - findings:PF-2
-      - findings:PF-3
-      - findings:PF-4
-      - plan:A1
-      - request:A0
-      - risk:current
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-1
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-2
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-3
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-4
-    - by: shane
-      disposition: retain
-      evidence: plan:A1
-    reference_exceptions:
-    - artefacts:
-      - planning/001-plan.md
-      forced_to_decide:
-      - plan:A1
-      integrity: unverified
-      reason: remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the
-        plan planning review 2 read clean
-      reference: plan:A1
-    obligations: []
-    from_state: executed
-    resulting_state: executed
-    resume:
-    - --apply
-    - --confirm
-    - 7ae79d751a07031097ab164f08ece76f95da3dd302e81958c958d139653b4229
-    event_seq: 107
-    event_sha256: 7f9f3b498399d308300224b478c45e48486f066f630cde7e1ec9f7a910d25378
-    transition_n: 16
-    status: applied
 artifact_schema_version: 0.5.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
@@ -710,21 +608,6 @@ transitions:
     evidence: no open migration obligations
   continuation: C001
   candidate_start_sha256: 6414f76e6b07543dbd47393d0b54c2c0ee4abe876d2a7e31ab30a8640051abdf
-- at: '2026-09-26T09:53:52Z'
-  transition: M1
-  event: migrate
-  from: executed
-  to: executed
-  by: shane
-  reason: 'adopt PR 18: guidance channel and criteria dry run'
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=37, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: 7ae79d751a07031097ab164f08ece76f95da3dd302e81958c958d139653b4229
-  event_seq: 107
-  obligations: []
 size_estimate:
   files: 4
   scale: medium
@@ -1663,7 +1546,7 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 24
+  controller_commands: 23
   model_sessions_launched: 7
 checkpoints: []
 acceptance:
