@@ -1,0 +1,158 @@
+{
+  "captured_at": "2026-09-26T00:57:39Z",
+  "changes": {
+    "added": [
+      "acceptance/002-contract-review.md",
+      "execution/007-executor.md"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "7792e3635064ba7b88b634b54b1b9702f786b53f5ef2c37cf09435cd1e40dc07",
+      "size": 11567
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb",
+      "size": 13942
+    },
+    "acceptance/002-contract-review.md": {
+      "kind": "file",
+      "sha256": "f6253643832d548f3f749b611ca76a0af5d0868ab904caa6e40a31b2c4ee0adc",
+      "size": 11910
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d",
+      "size": 14091
+    },
+    "continuation/C001/k-12harness-staged.patch": {
+      "kind": "file",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "continuation/C001/k-12harness-unstaged.patch": {
+      "kind": "file",
+      "sha256": "a4b208c2d7c8eb88a03e883ceafe6714905e5aed0f796aac1fcd8bf7ea44abd0",
+      "size": 29325
+    },
+    "continuation/C001/k-12harness-untracked.tar": {
+      "kind": "file",
+      "sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652",
+      "size": 10240
+    },
+    "continuation/C001/receipt.json": {
+      "kind": "file",
+      "sha256": "ab51fe3b6e6f32368685f4a5f84c770437354397381b2b070e4fabeb083bb4a7",
+      "size": 2993
+    },
+    "execution/005-executor.md": {
+      "kind": "file",
+      "sha256": "9b9e6373564e313050bc0d6310daead6b583db58777bad28146fee1863162beb",
+      "size": 3496
+    },
+    "execution/007-executor.md": {
+      "kind": "file",
+      "sha256": "5e9ebde0d2b060836e48c4bc1b4458bfdb55e7b9813cec8a68fe8c13329b9cee",
+      "size": 3314
+    },
+    "migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.json": {
+      "kind": "file",
+      "sha256": "f29968eddf99dbf8d3676b7088a9d7112763c5ff5c82cdbc94bbe32039fec4f5",
+      "size": 3118
+    },
+    "migrations/04b3acc9dd56b83852c42754bbe786746be3174c7671ebb83ebb18511c928a72.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "ca0623ee1ddedd9b18772ab6e3c0d9ca56ab87fcadf05079fd0be2bb9a1e9d95",
+      "size": 2342
+    },
+    "migrations/b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff.json": {
+      "kind": "file",
+      "sha256": "77f2ca7ed12bcb5d7ea6b5974eaf591c655ca48374be2d8f23f960037afde244",
+      "size": 25843
+    },
+    "migrations/b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "4dd125dfcd3b0dbac46701011a661f3fe71ea45312c2d73a79285ae6b8a1ace0",
+      "size": 48042
+    },
+    "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.json": {
+      "kind": "file",
+      "sha256": "4b1ba5c11ee18a58d8dcc0161ecb599493edef5c320778a5a69e579bd4e0ec19",
+      "size": 18157
+    },
+    "migrations/b443e6592430930be9ef325d98c2f5b8323dbeb77b6565d95d4d7004c294ba41.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "2463a4f08acf3d746cb659e6b427f620e24048a7749cc01a00eedb57aca970af",
+      "size": 16136
+    },
+    "migrations/da3f4f8c480791f5a2ed77290a71d25dce3322b206cbb520eaf61d9eb6af7e92.json": {
+      "kind": "file",
+      "sha256": "0f32f1d293bcfc112a5856c8f3cd495f8e075d2f480797bc08f5dce55bcd9af5",
+      "size": 25128
+    },
+    "migrations/da3f4f8c480791f5a2ed77290a71d25dce3322b206cbb520eaf61d9eb6af7e92.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "eb41890021b9e6d5a0910c048b0addf36468f468177826e68e7700c63d4f3533",
+      "size": 39095
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7",
+      "size": 20134
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "9312ba86e180627d4ff592d36f375cb73a7c9c5cb50301299a9fc554eaa99f3c",
+      "size": 202
+    },
+    "reviews/001-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23",
+      "size": 16782
+    },
+    "reviews/001-planning-review.json": {
+      "kind": "file",
+      "sha256": "979bf9fb9e8dcf992839520dd7a1d96772489f09d7a72bdf057dad97ec0a0911",
+      "size": 4721
+    },
+    "reviews/002-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7",
+      "size": 20134
+    },
+    "reviews/002-planning-review.json": {
+      "kind": "file",
+      "sha256": "555c8436778bfc51e641a7e5fd78f77e4c94eeac23472cdd247b13a25fd8bbb5",
+      "size": 1833
+    },
+    "verification/V001/001-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "f0d1d8a3d30aa2068033464fb60bb8a3636ee3ac2bac36af7ec9c1ad3db2a458",
+      "size": 2527
+    },
+    "verification/V001/002-contract-pin-unchanged.log": {
+      "kind": "file",
+      "sha256": "9ec29d6ea6fd9e4443db74bac61ad890b96b15258b62eab42e654fbba1f5635f",
+      "size": 321
+    },
+    "verification/V001/003-live-tier-deterministic-tests.log": {
+      "kind": "file",
+      "sha256": "3474919ba887906bad797a8ca5a2ead59d7690436301b566c8cd08af5c8e437a",
+      "size": 319
+    },
+    "verification/V001/004-graders-tests.log": {
+      "kind": "file",
+      "sha256": "3bd1174017c686c6c36a6909907b04568cb8ab9b93d0cdeb639c7cdb5d298f36",
+      "size": 1627
+    },
+    "verification/V001/005-live-eval-collect-only.log": {
+      "kind": "file",
+      "sha256": "c21b89320a458fa79743204525b19d5143439c5672d13e08275a8a23dd070eb7",
+      "size": 282
+    }
+  }
+}

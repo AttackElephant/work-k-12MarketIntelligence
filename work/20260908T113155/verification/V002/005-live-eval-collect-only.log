@@ -1,0 +1,18 @@
+started: 2026-09-26T01:07:49Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/live/test_live_eval.py", "--collect-only", "-m", "live", "-q"]
+
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[answer/VC-POC-REF-01]
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[clarify/peer_filters]
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[refuse/finance]
+tests/live/test_live_eval.py::test_the_frozen_prompt_is_actually_cached
+tests/live/test_live_eval.py::test_stage_intent_survives_a_live_run
+tests/live/test_live_eval.py::test_stage_narration_survives_a_live_run
+tests/live/test_live_eval.py::test_stage_end_to_end_survives_a_live_run
+tests/live/test_live_eval.py::test_a_live_run_stays_inside_the_control_envelope
+
+8 tests collected in 0.30s
+
+ended: 2026-09-26T01:07:50Z
+exit_code: 0
+duration_seconds: 0.508
