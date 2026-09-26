@@ -316,7 +316,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: executed
+state: ready
 parent: null
 children: []
 transitions:
@@ -495,6 +495,63 @@ transitions:
   migration_record_sha256: b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff
   event_seq: 73
   obligations: []
+- at: '2026-09-26T00:47:45Z'
+  transition: F25
+  event: contract-defect
+  from: executed
+  to: requires_recontract
+  by: shane
+  reason: 'pytest exits 5 on every candidate: addopts -m ''not live'' deselects every test in tests/live/test_live_eval.py,
+    so --collect-only selects nothing. The criterion cannot pass without breaking the live-marked obligation
+    it checks.'
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (226 characters)
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: contract_defect_prepared
+    evidence: contract defect C001 names live-eval-collect-only; candidate 6414f76e6b07 is held for the
+      next dispatch
+  - guard: attempt_closed
+    evidence: 5 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+  continuation: C001
+  candidate_sha256: 6414f76e6b07543dbd47393d0b54c2c0ee4abe876d2a7e31ab30a8640051abdf
+- at: '2026-09-26T00:50:49Z'
+  transition: F20
+  event: recontract
+  from: requires_recontract
+  to: contracted
+  by: shane@Mimir.local
+  reason: v2 corrects live-eval-collect-only only; all other obligations unchanged (diffed)
+  guards:
+  - guard: new_contract_version
+    evidence: contract v2 supersedes 1 version(s)
+  - guard: contract_current_and_intact
+    evidence: contract v2 intact (7f0fe01bf4c9)
+  - guard: contract_deterministic_criteria
+    evidence: 5 deterministic criteria
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-26T00:52:46Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: planning review clean for the unchanged plan; contract v2 adopted
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no applicable review feedback batches
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   scale: medium
@@ -593,8 +650,7 @@ scope:
   dirty_explanation: the work item writes its own evidence here
   head_at_dispatch: a730fe597e11d5b783ee763ee0d3b8c3e8693d3d
   verify: null
-  declared_files:
-  - work/20260908T113155/
+  declared_files: []
   declared: true
 - id: k-12Harness
   repo: /Users/shane/Projects/k-12Harness
@@ -633,16 +689,27 @@ risk:
   escalations: []
   deescalations: []
 contract:
-  current: 1
+  current: 2
   versions:
   - version: 1
     path: acceptance/001-contract.yaml
     artifact: A2
     sha256: 06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb
-    status: current
+    status: superseded
     reason: initial acceptance contract
     plan_sha256: 53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23
     recorded_at: '2026-09-25T12:11:08Z'
+  - version: 2
+    path: acceptance/002-contract.yaml
+    artifact: A8
+    sha256: 7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d
+    status: current
+    reason: 'Correct live-eval-collect-only only: select the live tests explicitly (tests/live/test_live_eval.py
+      --collect-only -m live -q, exit 0) so it proves the file collects and every test is live-marked.
+      Drop the work-store permitted_files entry, which validation now refuses. Keep every other obligation
+      unchanged.'
+    plan_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+    recorded_at: '2026-09-26T00:49:56Z'
 decisions: []
 constraints: []
 concerns:
@@ -681,7 +748,7 @@ artifacts:
   sha256: 53bcd7c0bfcb6694a0d59be588c3d432435b9cafee5950637aa81ab7fa808c23
   created_at: '2026-09-23T13:45:35Z'
   produced_by_attempt: 1
-- status: current
+- status: superseded
   supersedes: null
   id: A2
   type: acceptance_contract
@@ -690,7 +757,7 @@ artifacts:
   sha256: 06744a806983c315365651b453cbfff1bd552c4f500b465e5e3e34f542885ceb
   created_at: '2026-09-25T12:11:08Z'
   produced_by_attempt: 2
-- status: current
+- status: superseded
   supersedes: null
   id: A3
   type: contract_review_view
@@ -740,6 +807,25 @@ artifacts:
   created_at: '2026-09-25T14:25:39Z'
   produced_by_attempt: 4
   planning_review_round: 2
+- status: current
+  supersedes: null
+  id: A8
+  type: acceptance_contract
+  path: acceptance/002-contract.yaml
+  version: 2
+  sha256: 7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d
+  created_at: '2026-09-26T00:49:56Z'
+  produced_by_attempt: 6
+- status: current
+  supersedes: null
+  id: A9
+  type: contract_review_view
+  path: acceptance/002-contract-review.md
+  version: 2
+  sha256: f6253643832d548f3f749b611ca76a0af5d0868ab904caa6e40a31b2c4ee0adc
+  created_at: '2026-09-26T00:49:56Z'
+  produced_by_attempt: 6
+  derived_from: A8
 attempts:
 - attempt: 1
   role: planner
@@ -1030,6 +1116,57 @@ attempts:
   read_context_files: 17
   effective_context_sha256: 677b8ab342d90e7ba4b54da4382198315b66429729de840d494859ea55cb51e9
   native_log_bytes: 2497366
+- attempt: 6
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-26T00:47:55Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T00:49:56Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 3
+    cache_creation_input_tokens: 123767
+    cache_read_input_tokens: 111862
+    output_tokens: 12249
+  initial_input_tokens: 70320
+  peak_input_tokens: 70320
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/001-plan.md
+  - root2:acceptance/001-contract.yaml
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  contract: acceptance/002-contract.yaml
+  headroom: 0.3516
+  growth_per_turn: 0.0
 routing:
   executor_ladder:
   - T0
@@ -1163,8 +1300,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 17
-  model_sessions_launched: 5
+  controller_commands: 21
+  model_sessions_launched: 6
 checkpoints: []
 acceptance:
   state: pending
@@ -1185,8 +1322,8 @@ review_batches: []
 review_reconciliations: []
 review_items: []
 review_actions: []
-scope_version: 3
-scope_sha256: 7b0ca023806e948723e2266340cc5cd331eebcf7902115b1e383315c4fa08435
+scope_version: 4
+scope_sha256: 3380c01d59de23f3406156dab9748c656aab7d17cd1177728aacf93b92dc99e6
 origin: null
 work_packages: []
 findings:
@@ -1464,4 +1601,18 @@ planning_review:
     summary: All four open findings are resolved by concrete clarifications and test changes in the supplied
       delta. The remediation introduces no new blocking or material findings.
     context_bytes: 25298
-continuations: []
+continuations:
+- id: C001
+  path: continuation/C001/receipt.json
+  sha256: ab51fe3b6e6f32368685f4a5f84c770437354397381b2b070e4fabeb083bb4a7
+  status: held
+  prepared_at: '2026-09-26T00:47:45Z'
+  source_state: executed
+  kind: contract-defect
+  candidate_sha256: 6414f76e6b07543dbd47393d0b54c2c0ee4abe876d2a7e31ab30a8640051abdf
+  budget_anchor_event: 54
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 74
+  event_sha256: 1d5fe66bc52a8ced9a88ef61cc3acce0e1e05948df3754fd168862e009f127ee
+  held_at: '2026-09-26T00:47:45Z'

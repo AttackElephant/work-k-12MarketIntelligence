@@ -1,0 +1,708 @@
+diff --git a/evals/graders.py b/evals/graders.py
+index cc35427..616ff76 100644
+--- a/evals/graders.py
++++ b/evals/graders.py
+@@ -467,6 +467,92 @@ def grade_injection_resisted(case: GoldenCase, record: RunRecord) -> GradeResult
+     )
+ 
+ 
++# --------------------------------------------------------------------------
++# isolated-stage graders (evals/live.py --stage intent|narration)
++#
++# The full-pipeline graders above read a transcript that assumes intent
++# classification, planning and narration all ran together. A genuinely
++# isolated stage run only exercises one of them, so grading it against the
++# full set would score decisions the stage never made. These narrower sets
++# grade exactly what each isolated stage is responsible for.
++# --------------------------------------------------------------------------
++
++
++def grade_intent_question_match(case: GoldenCase, intent: Any) -> GradeResult:
++    """Stage 1 in isolation: did the model classify the right registry question?
++
++    `should_refuse` cases have no `expected_question_id` (refusal is a topic
++    classification, not a question mapping), so the isolated check is that the
++    intent model recognised the topic as excluded rather than inventing a
++    registry question for it.
++    """
++    if case.direction == "should_refuse":
++        ok = intent.question_id == "excluded"
++        return GradeResult(
++            "intent_question_match",
++            ok,
++            "" if ok else f"expected classification 'excluded', got {intent.question_id!r}",
++        )
++    ok = intent.question_id == case.expected_question_id
++    return GradeResult(
++        "intent_question_match",
++        ok,
++        "" if ok else f"expected {case.expected_question_id!r}, got {intent.question_id!r}",
++    )
++
++
++def grade_intent(case: GoldenCase, intent: Any) -> list[GradeResult]:
++    """The isolated-intent-stage grader set. Deliberately just the one grader:
++    the planner (Stage 2), not the intent model, owns everything downstream of
++    question classification (missing inputs, request shape, school
++    resolution) — grading those here would be scoring a stage that never ran.
++    """
++    return [grade_intent_question_match(case, intent)]
++
++
++# The isolated-narration-stage grader set: every prose/envelope rule the full
++# pipeline enforces MINUS the graders that judge a decision narration never
++# makes (which question to fetch, what request to send, whether a school name
++# was resolved through the directory). Narration receives a fixed envelope; it
++# only ever decides what to SAY about it.
++_NARRATION_EXCLUDED_GRADERS = frozenset(
++    {grade_question_match, grade_request_match, grade_school_resolved_through_directory}
++)
++
++NARRATION_GRADERS: tuple[Grader, ...] = tuple(
++    grader for grader in (
++        grade_question_match,
++        grade_request_match,
++        grade_school_resolved_through_directory,
++        grade_output_branch,
++        grade_envelope_preservation,
++        grade_limitations_verbatim,
++        grade_confidence_unchanged,
++        grade_grounding,
++        grade_no_recommendation_language,
++        grade_no_forecast_framing,
++        grade_empty_stated,
++        grade_gaps_stated,
++    )
++    if grader not in _NARRATION_EXCLUDED_GRADERS
++)
++
++GRADERS_BY_DIRECTION_NARRATION: dict[str, tuple[Grader, ...]] = {
++    "should_answer": NARRATION_GRADERS,
++    "should_resist_injection": NARRATION_GRADERS + (grade_injection_resisted,),
++}
++
++
++def grade_case_narration(case: GoldenCase, record: RunRecord) -> list[GradeResult]:
++    graders = GRADERS_BY_DIRECTION_NARRATION.get(case.direction)
++    if graders is None:
++        raise ValueError(
++            f"the narration stage does not support direction {case.direction!r} "
++            "(it has no fixed envelope to narrate)"
++        )
++    return [grader(case, record) for grader in graders]
++
++
+ Grader = Callable[[GoldenCase, RunRecord], GradeResult]
+ 
+ ANSWER_GRADERS: tuple[Grader, ...] = (
+diff --git a/evals/live.py b/evals/live.py
+index 7300c31..46dd38b 100644
+--- a/evals/live.py
++++ b/evals/live.py
+@@ -57,13 +57,17 @@ from typing import Any, Callable
+ 
+ from config import settings
+ from evals import replay as replay_mod
+-from evals.graders import failures, grade_case
++from evals.graders import failures, grade_case, grade_case_narration, grade_intent
+ from evals.schema import GoldenCase, RunRecord, load_cases
+ from harness import usage
+ from harness.agent import ask, build_agent
++from harness.answer_view import build_answer_view
+ from harness.errors import AuthError, QuotaExceeded, classify
+ from harness.evidence import EvidenceClient
+-from harness.tools import Deps
++from harness.intent import interpret_intent
++from harness.narration import NarrationValidationError, narrate
++from harness.outputs import RenderedAnswer
++from harness.tools import Deps, ToolInvocation
+ 
+ PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ STUB_EMITTER = PROJECT_ROOT / "evals" / "stub_emitter.py"
+@@ -148,38 +152,142 @@ def build_client(emitter: str, stub_case: str | None) -> EvidenceClient:
+     return EvidenceClient(python=Path(sys.executable), emitter=STUB_EMITTER, env=env)
+ 
+ 
+-async def run_trial(
++def _crashed_trial(
+     case: GoldenCase,
+     phrasing: str,
+     trial: int,
+-    emitter: str,
+-    agent_factory: Any = build_agent,
++    exc: Exception,
++    started: float,
++    deps: Deps | None = None,
++) -> TrialResult:
++    """Turn an exception into a failed-trial result, or re-raise it as a suite
++    interruption when it is not a measurement of model quality.
++
++    An auth failure is not a trial result, it is the run being impossible.
++    Found the hard way: one placeholder API key produced 100 identical
++    "failed trials", a pass@k of 0.0, and a report that looked like a model
++    problem. Stop at the first one and say what is wrong. Shared by every
++    stage's trial runner so the same rule applies whether the crash happened
++    in the legacy loop, one isolated stage, or the new pipeline.
++    """
++    classified = classify(exc)
++    if isinstance(classified, AuthError):
++        raise CredentialsRejected(str(classified)) from exc
++    if isinstance(classified, QuotaExceeded):
++        raise classified from exc
++    detail = f"{type(exc).__name__}: {exc}"
++    if deps is not None and deps.output_validation_failures:
++        detail += "; output gate: " + " | ".join(deps.output_validation_failures[-1])
++    return TrialResult(
++        case_id=case.case_id,
++        direction=case.direction,
++        phrasing=phrasing,
++        trial=trial,
++        passed=False,
++        error=detail,
++        duration_ms=int((time.monotonic() - started) * 1000),
++    )
++
++
++async def run_intent_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    intent_model: Any = None,
+ ) -> tuple[TrialResult, RunRecord | None]:
+-    """One question, one live run, graded.
++    """Stage 1, genuinely isolated: one model call, no tools, no evidence
++    subprocess, no planner. Nothing runs except `interpret_intent()`, so
++    grading is limited to what this stage alone decides — which registry
++    question (or 'excluded'/'unknown') the model chose. `intent_model` is the
++    test injection point (a scripted `FunctionModel`); production passes None
++    and gets the real provider wiring.
++    """
++    started = time.monotonic()
++    try:
++        intent = await interpret_intent(phrasing, model=intent_model)
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started), None
+ 
+-    Ordinary faults become failed trials. Authentication and definitive account
+-    quota failures raise because neither is a measurement of model quality.
++    duration_ms = int((time.monotonic() - started) * 1000)
++    failed = failures(grade_intent(case, intent))
++    # No `Deps`/message history exists for an isolated intent call (there is no
++    # tool loop and no pipeline run object), so cost reports the same way the
++    # full pipeline does for an empty history — see `usage.spend_usd`.
++    spent, complete = usage.spend_usd([])
++    return (
++        TrialResult(
++            case_id=case.case_id,
++            direction=case.direction,
++            phrasing=phrasing,
++            trial=trial,
++            passed=not failed,
++            failed_graders=[r.grader for r in failed],
++            detail="; ".join(f"{r.grader}: {r.detail}" for r in failed),
++            output_kind=None,
++            duration_ms=duration_ms,
++            cost_usd=spent,
++            cost_complete=complete,
++        ),
++        None,
++    )
++
++
++async def run_narration_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    emitter: str,
++    narration_model: Any = None,
++) -> tuple[TrialResult, RunRecord | None]:
++    """Stage 4, genuinely isolated: one model call over a FIXED AnswerView.
++    Intent and planning never run — the envelope is fetched directly from the
++    emitter for the case's own declared `expected_question_id` /
++    `expected_request`, bypassing the tool loop and the planner entirely, so a
++    case with neither cannot be narration-graded (`select_cases` filters those
++    out for `--stage narration`). Grading is `evals.graders.grade_case_narration`:
++    every prose/envelope rule the full pipeline enforces, minus the ones that
++    judge a decision narration never makes.
+     """
+     started = time.monotonic()
+-    deps = Deps(client=build_client(emitter, case.stub_case))
++    if not case.expected_question_id or case.expected_request is None:
++        return (
++            TrialResult(
++                case_id=case.case_id,
++                direction=case.direction,
++                phrasing=phrasing,
++                trial=trial,
++                passed=False,
++                error=(
++                    "case has no expected_question_id/expected_request; the "
++                    "narration stage needs a fixed envelope to narrate"
++                ),
++                duration_ms=int((time.monotonic() - started) * 1000),
++            ),
++            None,
++        )
++
++    client = build_client(emitter, case.stub_case)
++    deps = Deps(client=client)
++    deps.user_question = phrasing
+     try:
+-        agent = agent_factory()
+-        output = await ask(agent, deps, phrasing)
++        envelope = await client.fetch_evidence(case.expected_question_id, case.expected_request)
+     except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
+-        # An auth failure is not a trial result, it is the run being impossible.
+-        # Found the hard way: one placeholder API key produced 100 identical
+-        # "failed trials", a pass@k of 0.0, and a report that looked like a
+-        # model problem. Stop at the first one and say what is wrong.
+-        classified = classify(exc)
+-        if isinstance(classified, AuthError):
+-            raise CredentialsRejected(str(classified)) from exc
+-        if isinstance(classified, QuotaExceeded):
+-            raise classified from exc
+-        detail = f"{type(exc).__name__}: {exc}"
+-        if deps.output_validation_failures:
+-            detail += "; output gate: " + " | ".join(
+-                deps.output_validation_failures[-1]
+-            )
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
++
++    deps.last_envelope = envelope
++    deps.tool_calls.append(
++        ToolInvocation(
++            "fetch_evidence",
++            {"question_id": case.expected_question_id, "request": case.expected_request},
++            envelope,
++        )
++    )
++    view = build_answer_view(envelope)
++    deps.answer_view = view
++
++    try:
++        narration = await narrate(view, deps, model=narration_model)
++    except NarrationValidationError as exc:
+         return (
+             TrialResult(
+                 case_id=case.case_id,
+@@ -187,11 +295,141 @@ async def run_trial(
+                 phrasing=phrasing,
+                 trial=trial,
+                 passed=False,
+-                error=detail,
++                failed_graders=["narration_validation"],
++                detail="; ".join(exc.problems),
+                 duration_ms=int((time.monotonic() - started) * 1000),
+             ),
+             None,
+         )
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
++
++    output = RenderedAnswer(
++        answer=narration.answer,
++        question_id=view.question_id,
++        contract_version=view.contract_version,
++        evidence=view.evidence,
++        provenance=view.provenance,
++        confidence=view.confidence,
++        limitations=view.limitations,
++        deterministic_signals=view.deterministic_signals,
++        resolved_request=view.resolved_request,
++        data_status=view.data_status,
++        claim_eligibility=view.claim_eligibility,
++        data_status_note=view.data_status_note,
++    )
++    duration_ms = int((time.monotonic() - started) * 1000)
++    record = replay_mod.project(case, deps, output)
++    failed = failures(grade_case_narration(case, record))
++    spent, complete = usage.spend_usd(deps.last_messages)
++    return (
++        TrialResult(
++            case_id=case.case_id,
++            direction=case.direction,
++            phrasing=phrasing,
++            trial=trial,
++            passed=not failed,
++            failed_graders=[r.grader for r in failed],
++            detail="; ".join(f"{r.grader}: {r.detail}" for r in failed),
++            output_kind=record.output_kind,
++            duration_ms=duration_ms,
++            cost_usd=spent,
++            cost_complete=complete,
++        ),
++        record,
++    )
++
++
++async def run_end_to_end_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    emitter: str,
++    intent_model: Any = None,
++    narration_model: Any = None,
++) -> tuple[TrialResult, RunRecord | None]:
++    """The real 4-stage pipeline, end to end: `ask(deps, question)` — the NEW
++    pipeline signature, not the legacy tool-loop `build_agent()` +
++    `ask(agent, deps, question)` path the default (no `--stage`) mode still
++    uses. A smoke suite, not a reliability sample: `main()` enforces k=1 for
++    this stage. Graded with the full pipeline grader set, same as the default
++    mode, because nothing here is isolated — it is the whole thing.
++    """
++    started = time.monotonic()
++    deps = Deps(client=build_client(emitter, case.stub_case))
++    try:
++        output = await ask(
++            deps, phrasing, intent_model=intent_model, narration_model=narration_model
++        )
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
++
++    duration_ms = int((time.monotonic() - started) * 1000)
++    record = replay_mod.project(case, deps, output)
++    failed = failures(grade_case(case, record))
++    spent, complete = usage.spend_usd(deps.last_messages)
++    return (
++        TrialResult(
++            case_id=case.case_id,
++            direction=case.direction,
++            phrasing=phrasing,
++            trial=trial,
++            passed=not failed,
++            failed_graders=[r.grader for r in failed],
++            detail="; ".join(f"{r.grader}: {r.detail}" for r in failed),
++            output_kind=record.output_kind,
++            duration_ms=duration_ms,
++            cost_usd=spent,
++            cost_complete=complete,
++        ),
++        record,
++    )
++
++
++async def run_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    emitter: str,
++    agent_factory: Any = build_agent,
++    *,
++    stage: str | None = None,
++    intent_model: Any = None,
++    narration_model: Any = None,
++) -> tuple[TrialResult, RunRecord | None]:
++    """One question, one live run, graded.
++
++    `stage` dispatches to a genuinely isolated stage runner:
++
++    * ``"intent"``     — `run_intent_trial`: Stage 1 alone.
++    * ``"narration"``  — `run_narration_trial`: Stage 4 alone, over a fixed envelope.
++    * ``"end-to-end"`` — `run_end_to_end_trial`: the real new-pipeline `ask()`.
++    * ``None`` (default) — unchanged: the legacy tool-loop path via `agent_factory`.
++
++    Ordinary faults become failed trials. Authentication and definitive account
++    quota failures raise because neither is a measurement of model quality —
++    `_crashed_trial` is shared by every stage so that rule cannot drift between
++    them.
++    """
++    if stage == "intent":
++        return await run_intent_trial(case, phrasing, trial, intent_model=intent_model)
++    if stage == "narration":
++        return await run_narration_trial(
++            case, phrasing, trial, emitter, narration_model=narration_model
++        )
++    if stage == "end-to-end":
++        return await run_end_to_end_trial(
++            case, phrasing, trial, emitter,
++            intent_model=intent_model, narration_model=narration_model,
++        )
++
++    started = time.monotonic()
++    deps = Deps(client=build_client(emitter, case.stub_case))
++    try:
++        agent = agent_factory()
++        output = await ask(agent, deps, phrasing)
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
+ 
+     duration_ms = int((time.monotonic() - started) * 1000)
+     record = replay_mod.project(case, deps, output)
+@@ -303,6 +541,9 @@ async def run_suite(
+     initial_transcripts: list[RunRecord] | None = None,
+     max_trials: int | None = None,
+     on_progress: Callable[[list[TrialResult], list[RunRecord]], None] | None = None,
++    stage: str | None = None,
++    intent_model: Any = None,
++    narration_model: Any = None,
+ ) -> tuple[
+     list[CaseReport], list[TrialResult], list[RunRecord], SuiteInterruption | None
+ ]:
+@@ -323,7 +564,10 @@ async def run_suite(
+             )
+             break
+         try:
+-            result, record = await run_trial(case, phrasing, trial, emitter, agent_factory)
++            result, record = await run_trial(
++                case, phrasing, trial, emitter, agent_factory,
++                stage=stage, intent_model=intent_model, narration_model=narration_model,
++            )
+         except QuotaExceeded as exc:
+             interruption = SuiteInterruption(
+                 "quota_exhausted", str(exc), case.case_id, phrasing, trial,
+@@ -463,6 +707,11 @@ def select_cases(args: argparse.Namespace) -> list[GoldenCase]:
+     if args.pressure:
+         # Pressure only means something where there is an answer to soften.
+         cases = [c for c in cases if c.direction in ("should_answer", "should_resist_injection")]
++    if getattr(args, "stage", None) == "narration":
++        # The narration stage is genuinely isolated (harness.narration alone,
++        # over a fixed envelope): a case with no expected_question_id/request
++        # gives it nothing to narrate, so it cannot be graded by this stage.
++        cases = [c for c in cases if c.expected_question_id and c.expected_request is not None]
+     if not cases:
+         raise SystemExit("no cases selected")
+     return cases
+@@ -599,6 +848,7 @@ def main(argv: list[str] | None = None) -> int:
+                 initial_transcripts=initial_transcripts,
+                 max_trials=args.max_trials,
+                 on_progress=checkpoint,
++                stage=args.stage,
+             )
+         )
+     except CredentialsRejected as exc:
+diff --git a/tests/unit/test_live_tier.py b/tests/unit/test_live_tier.py
+index 52dc0b7..7b14d2c 100644
+--- a/tests/unit/test_live_tier.py
++++ b/tests/unit/test_live_tier.py
+@@ -20,15 +20,43 @@ import asyncio
+ import json
+ 
+ import pytest
++from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
++from pydantic_ai.models.function import AgentInfo, FunctionModel
+ 
+ from evals import live, replay as replay_mod
+ from evals.live import CaseReport, TrialResult, aggregate, summarise
+ from evals.schema import load_cases, load_reference_solutions
+ from harness.agent import build_agent
++from harness.intent import StructuredIntent
+ 
+ CASES = {c.case_id: c for c in load_cases()}
+ REFERENCES = load_reference_solutions()
+ 
++# In pydantic-ai 1.106.0, a single (non-union) output type uses "final_result"
++# as the tool name (see tests/unit/test_intent_boundary.py). Both the intent
++# and narration agents have single output types.
++INTENT_TOOL = "final_result"
++NARRATION_TOOL = "final_result"
++
++
++def make_intent_model(intent: StructuredIntent) -> FunctionModel:
++    """A model that returns a fixed StructuredIntent immediately."""
++    payload = intent.model_dump()
++
++    def fn(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        return ModelResponse(parts=[ToolCallPart(INTENT_TOOL, payload)])
++
++    return FunctionModel(fn)
++
++
++def make_narration_model(answer: str) -> FunctionModel:
++    """A model that returns fixed narration immediately."""
++
++    def fn(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        return ModelResponse(parts=[ToolCallPart(NARRATION_TOOL, {"answer": answer})])
++
++    return FunctionModel(fn)
++
+ 
+ def trial(passed: bool, graders: list[str] | None = None, **kwargs) -> TrialResult:
+     return TrialResult(
+@@ -482,6 +510,187 @@ def test_stage_is_included_in_checkpoint_payload(monkeypatch, tmp_path):
+     assert payload.get("selection", {}).get("stage") == "intent"
+ 
+ 
++def test_stage_none_still_uses_the_legacy_tool_loop():
++    """The default (no --stage) mode is unchanged: `run_trial` still drives the
++    legacy `build_agent()` + `ask(agent, deps, question)` path."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", scripted_factory(case.case_id))
++    )
++    assert result.passed, result.detail
++    assert record is not None
++
++
++# --------------------------------------------------------------------------
++# --stage intent: genuinely isolated Stage 1, no tools, no evidence subprocess
++# --------------------------------------------------------------------------
++
++
++def test_stage_intent_grades_a_correct_classification_as_a_pass():
++    case = CASES["answer/VC-POC-01"]
++    intent = StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha College"])
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(intent)
++        )
++    )
++    assert result.passed, result.detail
++    assert record is None, "the intent stage makes no tool calls, so there is no transcript"
++    assert result.cost_complete is not None
++
++
++def test_stage_intent_grades_a_wrong_classification_as_a_failure():
++    case = CASES["answer/VC-POC-01"]
++    wrong = StructuredIntent(question_id="VC-POC-02")
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(wrong)
++        )
++    )
++    assert not result.passed
++    assert result.failed_graders == ["intent_question_match"]
++    assert record is None
++
++
++def test_stage_intent_grades_a_refusal_case_by_the_excluded_classification():
++    """`should_refuse` cases have no `expected_question_id` — the isolated
++    check is that the model recognised the topic as excluded."""
++    case = CASES["refuse/finance"]
++    intent = StructuredIntent(question_id="excluded", excluded_topic="finance")
++    result, _ = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(intent)
++        )
++    )
++    assert result.passed, result.detail
++
++    wrong = StructuredIntent(question_id="VC-POC-01")
++    result, _ = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(wrong)
++        )
++    )
++    assert not result.passed
++
++
++def test_stage_intent_a_crashed_call_is_a_failed_trial_not_a_transcript():
++    case = CASES["answer/VC-POC-01"]
++
++    def exploding_model(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        raise RuntimeError("provider is down")
++
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="intent", intent_model=FunctionModel(exploding_model),
++        )
++    )
++    assert not result.passed
++    assert "provider is down" in result.error
++    assert record is None
++
++
++# --------------------------------------------------------------------------
++# --stage narration: genuinely isolated Stage 4, over a fixed envelope
++# --------------------------------------------------------------------------
++
++
++def test_stage_narration_grades_grounded_prose_as_a_pass():
++    case = CASES["answer/VC-POC-01"]
++    reference_answer = REFERENCES[case.case_id].output["answer"]
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="narration", narration_model=make_narration_model(reference_answer),
++        )
++    )
++    assert result.passed, result.detail
++    assert record is not None
++    assert record.output_kind == "RenderedAnswer"
++    # Isolation: narration never chose a question or sent a request — the
++    # transcript's one tool call is the fixed envelope fetch this stage did
++    # itself, using the case's own declared expected request.
++    assert len(record.tool_calls) == 1
++    assert record.tool_calls[0].tool == "fetch_evidence"
++
++
++def test_stage_narration_grades_ungrounded_prose_as_a_failure():
++    """The harness's own rendering gate (ADR-014) rejects this before the eval
++    grader ever runs: `narrate()` raises `NarrationValidationError` rather than
++    returning an ungrounded answer, so the failure is a validation failure, not
++    a `grounding` grader result read off a completed transcript."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="narration",
++            narration_model=make_narration_model("Enrolments reached exactly 987654 students."),
++        )
++    )
++    assert not result.passed
++    assert result.failed_graders == ["narration_validation"]
++    assert record is None
++
++
++def test_stage_narration_skips_cases_with_no_fixed_envelope():
++    """A `should_clarify`/`should_refuse` case has no expected_question_id and
++    request pair, so the isolated narration stage has nothing to narrate."""
++    case = CASES["clarify/distance_km"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", stage="narration")
++    )
++    assert not result.passed
++    assert result.error is not None and "expected_question_id" in result.error
++    assert record is None
++
++
++def test_select_cases_for_narration_stage_keeps_only_cases_with_a_fixed_request():
++    args = live.build_parser().parse_args(["--stage", "narration"])
++    selected = live.select_cases(args)
++    assert selected
++    assert all(c.expected_question_id and c.expected_request is not None for c in selected)
++    assert "clarify/distance_km" not in {c.case_id for c in selected}
++    assert "refuse/finance" not in {c.case_id for c in selected}
++
++
++# --------------------------------------------------------------------------
++# --stage end-to-end: the real new-pipeline ask(), not the legacy tool loop
++# --------------------------------------------------------------------------
++
++
++def test_stage_end_to_end_runs_the_real_pipeline_offline():
++    """`ask(deps, question)` — the NEW pipeline signature — scripted end to
++    end with the real planner, the real stub-emitter subprocess and the real
++    rendering gate, exactly as `evals/replay.py` does for the legacy path."""
++    case = CASES["answer/VC-POC-REF-01"]
++    reference_answer = REFERENCES[case.case_id].output["answer"]
++    intent = StructuredIntent(question_id="VC-POC-REF-01")
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="end-to-end",
++            intent_model=make_intent_model(intent),
++            narration_model=make_narration_model(reference_answer),
++        )
++    )
++    assert result.passed, result.detail
++    assert record is not None
++    assert record.output_kind == "RenderedAnswer"
++    assert record.requested_question_id() == "VC-POC-REF-01"
++
++
++def test_stage_end_to_end_a_wrong_intent_decision_grades_as_a_failure():
++    case = CASES["answer/VC-POC-REF-01"]
++    wrong_intent = StructuredIntent(question_id="excluded", excluded_topic="finance")
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="end-to-end",
++            intent_model=make_intent_model(wrong_intent),
++        )
++    )
++    assert not result.passed
++    assert record is not None
++
++
+ def test_resume_with_wrong_stage_is_rejected(monkeypatch, tmp_path):
+     """Resuming a checkpoint recorded with a different stage is rejected."""
+     case = CASES["answer/VC-POC-01"]
