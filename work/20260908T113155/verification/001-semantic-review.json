@@ -1,0 +1,19 @@
+{
+  "classification": "blocker",
+  "covers": [],
+  "findings": [
+    {
+      "evidence": "In evals/graders.py, INTENT_GRADERS contains only grade_intent_question_match. The accompanying comment explicitly says request shape, missing inputs, and school resolution are not graded. This contradicts semantic-2, which requires intent-only grading by question_match, request_match, school_resolved_through_directory, clarification_correct, and refusal_is_contract_sourced. Consequently, an intent with the expected question_id but an incorrect request, unresolved school, wrong clarification behavior, or unsupported refusal can pass. The new tests reinforce this weakened behavior by testing only question classification, rather than preserving the required decision-scoped checks.",
+      "id": "intent-grader-set-incomplete",
+      "regression": false,
+      "required_change": "Implement the complete intent-stage grader set required by semantic-2, adapting those five checks to StructuredIntent without changing their pass/fail meaning. Add adversarial tests proving that each required intent property independently fails when mutated, while still proving that rendering/grounding graders and evidence fetching do not run.",
+      "severity": "blocker",
+      "summary": "The intent stage is graded only on question_id instead of the contractually required decision-scoped criteria."
+    }
+  ],
+  "kind": "general",
+  "resolutions": {},
+  "review": "S1",
+  "round": 1,
+  "summary": "The isolated execution paths are implemented, but the intent-stage grading materially violates the contract: it replaces the required decision-scoped grader set with a single question-id check, allowing incorrect structured intents to pass."
+}

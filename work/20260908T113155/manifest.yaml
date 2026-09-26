@@ -1778,6 +1778,15 @@ artifacts:
   flagged: []
   created_at: '2026-09-26T11:32:40Z'
   produced_by_attempt: 10
+- status: current
+  supersedes: null
+  id: A16
+  type: semantic_review
+  path: verification/001-semantic-review.json
+  version: 1
+  sha256: a3991cc388526a67a763af99f600d10793b8bc2e02fe4171bc95152e11cf4e3e
+  created_at: '2026-09-26T22:53:38Z'
+  produced_by_attempt: 14
 attempts:
 - attempt: 1
   role: planner
@@ -2585,6 +2594,34 @@ attempts:
   failure_kind: transport
   failure_reason: harness_error
   context_bytes: 56954
+- attempt: 14
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-09-26T22:53:22Z'
+  semantic_round: 1
+  semantic_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T22:53:38Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 27576
+    cached_input_tokens: 10624
+    cache_write_input_tokens: 0
+    output_tokens: 608
+    reasoning_output_tokens: 312
+  context_bytes: 56954
 routing:
   executor_ladder:
   - T0
@@ -3010,7 +3047,64 @@ verification:
       log_sha256: f1b78ce0828c3c9eb1511a80b589d0434171288122c504cabecb59add83c7755
     expectations_not_evaluated: []
     ended_at: '2026-09-26T13:43:13Z'
-  semantic_reviews: []
+  semantic_reviews:
+  - id: S1
+    at: '2026-09-26T22:53:38Z'
+    work_item: 20260908T113155
+    work_package: null
+    round: 1
+    kind: general
+    covers: []
+    classification: blocker
+    outcome: revise
+    material_finding: false
+    binding:
+      contract_version: 4
+      contract_sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+      execution_cycle:
+        transition_event: 180
+        transition_sha256: 2ebddc967189bf52225158cefd56dace03ec274bcd96b5d1debfd76533041f4c
+      candidate_sha256: 6f54afabee1dc7a33dd2325e5f08fd9f01ea3bb76098217e0fd240394cbbdb33
+      verified_candidate_sha256: 38669883c1c43aef6510381a98074c888923b38269be706fa2d87fb18a4d9c7f
+      checkpoint_at: '2026-09-26T13:45:20Z'
+      checkpoint_commits:
+      - repo: work-store
+        commit: b62b8ff593fb6472f2a8f338b45f726adbadfc90
+      - repo: k-12Harness
+        commit: 1b3284534ce9c57a547ee4f5291cf01c983977af
+      work_package: null
+    verifier:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+      role: verifier
+      attempt: 14
+      independent_of_executor: true
+      independence_basis: a different provider/model from the executor
+      executor_route:
+        provider: anthropic
+        model: claude-sonnet-5
+        tier: T0
+        attempt: 12
+      independence_authorised_by: null
+    artifact: verification/001-semantic-review.json
+    artifact_id: A16
+    sha256: a3991cc388526a67a763af99f600d10793b8bc2e02fe4171bc95152e11cf4e3e
+    summary: 'The isolated execution paths are implemented, but the intent-stage grading materially violates
+      the contract: it replaces the required decision-scoped grader set with a single question-id check,
+      allowing incorrect structured intents to pass.'
+    resolutions: {}
+    findings:
+    - SF-1
+    carried_forward: []
   semantic_attempts:
   - round: 1
     kind: general
@@ -3045,12 +3139,13 @@ stage_outcomes:
     changed_plan: false
     evidence: []
   semantic_verification:
-    performed: false
+    performed: true
     material_finding: false
-    evidence: []
+    evidence:
+    - A16
 effort:
   controller_commands: 45
-  model_sessions_launched: 13
+  model_sessions_launched: 14
 checkpoints:
 - at: '2026-09-26T13:45:20Z'
   message: 'feat(evals): execute and grade isolated intent, narration and end-to-end stages in live.py'
@@ -3293,6 +3388,32 @@ findings:
     rationale: The delta adds a deterministic unit assertion that repository-default collection selects
       zero live tests and `-m live` selects every test in the live file. This directly detects either
       accidental default-gate inclusion or a missing live marker.
+- id: SF-1
+  origin: semantic
+  review: S1
+  round: 1
+  severity: blocker
+  summary: The intent stage is graded only on question_id instead of the contractually required decision-scoped
+    criteria.
+  detail: null
+  required_change: Implement the complete intent-stage grader set required by semantic-2, adapting those
+    five checks to StructuredIntent without changing their pass/fail meaning. Add adversarial tests proving
+    that each required intent property independently fails when mutated, while still proving that rendering/grounding
+    graders and evidence fetching do not run.
+  evidence: In evals/graders.py, INTENT_GRADERS contains only grade_intent_question_match. The accompanying
+    comment explicitly says request shape, missing inputs, and school resolution are not graded. This
+    contradicts semantic-2, which requires intent-only grading by question_match, request_match, school_resolved_through_directory,
+    clarification_correct, and refusal_is_contract_sourced. Consequently, an intent with the expected
+    question_id but an incorrect request, unresolved school, wrong clarification behavior, or unsupported
+    refusal can pass. The new tests reinforce this weakened behavior by testing only question classification,
+    rather than preserving the required decision-scoped checks.
+  references: []
+  work_package: null
+  regression: false
+  carried_into: null
+  status: open
+  raised_at: '2026-09-26T22:53:38Z'
+  disposition: null
 improvements: []
 migration_obligations: []
 planning_review:
