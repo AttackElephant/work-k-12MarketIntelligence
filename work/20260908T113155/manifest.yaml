@@ -527,7 +527,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: executed
+state: ready
 parent: null
 children: []
 transitions:
@@ -962,6 +962,70 @@ transitions:
   migration_record_sha256: 810429109a50450803dac4064913cb3296eb885042185386799ef1a77c041df4
   event_seq: 134
   obligations: []
+- at: '2026-09-26T11:30:07Z'
+  transition: F25
+  event: contract-defect
+  from: executed
+  to: requires_recontract
+  by: shane
+  reason: Contract v3 permits evals/graders.py but not tests/unit/test_graders.py. The plan adds public
+    grade_* graders and ADR-013 test_every_grader_has_at_least_one_mutation requires a mutation per public
+    grader, so no correct implementation fits the v3 scope; attempt 7 escaped the test by renaming the
+    graders private.
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (312 characters)
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: contract_defect_prepared
+    evidence: contract defect C003 names scope omits k-12Harness:tests/unit/test_graders.py; candidate
+      c8b1f305fd0d is held for the next dispatch
+  - guard: attempt_closed
+    evidence: 9 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+  continuation: C003
+  candidate_sha256: c8b1f305fd0dff0bf6b8ed930a92dbed52108aa027feb151aadddf2a4b3a3499
+  defective_criteria: []
+  missing_files:
+  - k-12Harness:tests/unit/test_graders.py
+- at: '2026-09-26T12:47:19Z'
+  transition: F20
+  event: recontract
+  from: requires_recontract
+  to: contracted
+  by: shane@Mimir.local
+  reason: v4 permits tests/unit/test_graders.py (ADR-013 enforcing test); criteria commands unchanged;
+    base dry run clean
+  guards:
+  - guard: new_contract_version
+    evidence: contract v4 supersedes 3 version(s)
+  - guard: contract_current_and_intact
+    evidence: contract v4 intact (83681f913a8c)
+  - guard: contract_deterministic_criteria
+    evidence: 5 deterministic criteria
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-26T12:47:41Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: scope corrected to include the ADR-013 enforcing test; plan and planning review unchanged
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: contract_dry_run_current
+    evidence: contract v4 dry-run at the base commit
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no applicable review feedback batches
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   scale: medium
@@ -1081,6 +1145,7 @@ scope:
   - harness/intent.py
   - harness/narration.py
   - tests/live/test_live_eval.py
+  - tests/unit/test_graders.py
   - tests/unit/test_live_tier.py
   declared: true
 risk:
@@ -1099,7 +1164,7 @@ risk:
   escalations: []
   deescalations: []
 contract:
-  current: 3
+  current: 4
   versions:
   - version: 1
     path: acceptance/001-contract.yaml
@@ -1124,12 +1189,22 @@ contract:
     path: acceptance/003-contract.yaml
     artifact: A10
     sha256: 0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad
-    status: current
+    status: superseded
     reason: 'Change only the pytest summary patterns: replace stdout_excludes ''failed'' with ''\d+ failed''
       in every criterion that uses it, because a bare ''failed'' matches the base''s ''1 xfailed''. Keep
       every other obligation unchanged.'
     plan_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
     recorded_at: '2026-09-26T09:55:47Z'
+  - version: 4
+    path: acceptance/004-contract.yaml
+    artifact: A13
+    sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+    status: current
+    reason: 'add k-12Harness:tests/unit/test_graders.py to permitted_files (or required_outputs): the
+      plan adds public grade_* graders and ADR-013 requires a mutation for each in that file. Keep every
+      other section and criterion of v3 unchanged.'
+    plan_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+    recorded_at: '2026-09-26T11:32:28Z'
 decisions: []
 constraints: []
 concerns:
@@ -1246,7 +1321,7 @@ artifacts:
   created_at: '2026-09-26T00:49:56Z'
   produced_by_attempt: 6
   derived_from: A8
-- status: current
+- status: superseded
   supersedes: null
   id: A10
   type: acceptance_contract
@@ -1255,7 +1330,7 @@ artifacts:
   sha256: 0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad
   created_at: '2026-09-26T09:55:47Z'
   produced_by_attempt: 8
-- status: current
+- status: superseded
   supersedes: null
   id: A11
   type: contract_review_view
@@ -1265,7 +1340,7 @@ artifacts:
   created_at: '2026-09-26T09:55:47Z'
   produced_by_attempt: 8
   derived_from: A10
-- status: current
+- status: superseded
   supersedes: null
   id: A12
   type: contract_dry_run
@@ -1276,6 +1351,36 @@ artifacts:
   flagged: []
   created_at: '2026-09-26T09:55:58Z'
   produced_by_attempt: 8
+- status: current
+  supersedes: null
+  id: A13
+  type: acceptance_contract
+  path: acceptance/004-contract.yaml
+  version: 4
+  sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+  created_at: '2026-09-26T11:32:28Z'
+  produced_by_attempt: 10
+- status: current
+  supersedes: null
+  id: A14
+  type: contract_review_view
+  path: acceptance/004-contract-review.md
+  version: 4
+  sha256: 66e4d90b25285cffcc049a385244c0457bb2856b2bef6e6643f933a3c1e2ecde
+  created_at: '2026-09-26T11:32:28Z'
+  produced_by_attempt: 10
+  derived_from: A13
+- status: current
+  supersedes: null
+  id: A15
+  type: contract_dry_run
+  path: acceptance/004-dry-run.json
+  version: 4
+  sha256: 3848a80ded3e667a440d8aedb813d49713292ef5171b77693b838cd4eb82d1c4
+  contract_sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+  flagged: []
+  created_at: '2026-09-26T11:32:40Z'
+  produced_by_attempt: 10
 attempts:
 - attempt: 1
   role: planner
@@ -1848,6 +1953,57 @@ attempts:
   read_context_files: 17
   effective_context_sha256: e00e06a5dd9d40258875510cbaeecf0af7e563776963bfd2613f75da50a14d75
   native_log_bytes: 2953457
+- attempt: 10
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-26T11:30:37Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T11:32:28Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 3
+    cache_creation_input_tokens: 138276
+    cache_read_input_tokens: 129381
+    output_tokens: 9384
+  initial_input_tokens: 80197
+  peak_input_tokens: 80197
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/001-plan.md
+  - root2:acceptance/003-contract.yaml
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  contract: acceptance/004-contract.yaml
+  headroom: 0.401
+  growth_per_turn: 0.0
 routing:
   executor_ladder:
   - T0
@@ -2099,8 +2255,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 31
-  model_sessions_launched: 9
+  controller_commands: 36
+  model_sessions_launched: 10
 checkpoints: []
 acceptance:
   state: pending
@@ -2121,8 +2277,8 @@ review_batches: []
 review_reconciliations: []
 review_items: []
 review_actions: []
-scope_version: 4
-scope_sha256: 3380c01d59de23f3406156dab9748c656aab7d17cd1177728aacf93b92dc99e6
+scope_version: 5
+scope_sha256: c90500a142c9a0e486ecc978fe5f9e6d95ebf12963a3d676a2809d7491372c3e
 origin: null
 work_packages: []
 findings:
@@ -2433,3 +2589,17 @@ continuations:
   held_at: '2026-09-26T09:54:15Z'
   activated_at: '2026-09-26T09:58:55Z'
   completed_at: '2026-09-26T10:09:30Z'
+- id: C003
+  path: continuation/C003/receipt.json
+  sha256: cfeae9d724c8124e444df18495b6231a711f009bf29bedc9da7d5b83fe7a0b66
+  status: held
+  prepared_at: '2026-09-26T11:30:06Z'
+  source_state: executed
+  kind: contract-defect
+  candidate_sha256: c8b1f305fd0dff0bf6b8ed930a92dbed52108aa027feb151aadddf2a4b3a3499
+  budget_anchor_event: 124
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 135
+  event_sha256: 1bba3964e83653933dc0734f0b9ba781304d50da558a5eaa8ec1db0db7c4a09a
+  held_at: '2026-09-26T11:30:07Z'

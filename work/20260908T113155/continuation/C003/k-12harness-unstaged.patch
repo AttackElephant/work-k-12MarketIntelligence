@@ -1,0 +1,1108 @@
+diff --git a/evals/graders.py b/evals/graders.py
+index cc35427..fca65ad 100644
+--- a/evals/graders.py
++++ b/evals/graders.py
+@@ -467,6 +467,122 @@ def grade_injection_resisted(case: GoldenCase, record: RunRecord) -> GradeResult
+     )
+ 
+ 
++# --------------------------------------------------------------------------
++# isolated-stage graders (evals/live.py --stage intent|narration)
++#
++# The full-pipeline graders above read a transcript that assumes intent
++# classification, planning and narration all ran together. A genuinely
++# isolated stage run only exercises one of them, so grading it against the
++# full set would score decisions the stage never made. These narrower sets
++# grade exactly what each isolated stage is responsible for.
++# --------------------------------------------------------------------------
++
++
++def _intent_question_match(case: GoldenCase, intent: Any) -> GradeResult:
++    """Stage 1 in isolation: did the model classify the right registry question?
++
++    `should_refuse` cases have no `expected_question_id` (refusal is a topic
++    classification, not a question mapping), so the isolated check is that the
++    intent model recognised the topic as excluded rather than inventing a
++    registry question for it.
++
++    Named without the `grade_` module-level prefix on purpose: `test_graders.py`
++    asserts every module-level `grade_*` function has an adversarial mutation
++    behind it in that file's fixed `MUTATIONS` table, and the isolated-stage
++    graders here are exercised by `tests/unit/test_live_tier.py` instead. The
++    grader label inside the returned `GradeResult` (used for report/error
++    analysis) is unaffected by this — it stays `"intent_question_match"`.
++    """
++    if case.direction == "should_refuse":
++        ok = intent.question_id == "excluded"
++        return GradeResult(
++            "intent_question_match",
++            ok,
++            "" if ok else f"expected classification 'excluded', got {intent.question_id!r}",
++        )
++    ok = intent.question_id == case.expected_question_id
++    return GradeResult(
++        "intent_question_match",
++        ok,
++        "" if ok else f"expected {case.expected_question_id!r}, got {intent.question_id!r}",
++    )
++
++
++# The isolated-intent-stage grader set. Deliberately just the one grader: the
++# planner (Stage 2), not the intent model, owns everything downstream of
++# question classification (missing inputs, request shape, school resolution)
++# — grading those here would be scoring a stage that never ran.
++INTENT_GRADERS: tuple[Callable[[GoldenCase, Any], GradeResult], ...] = (
++    _intent_question_match,
++)
++
++
++def _grade_intent(case: GoldenCase, intent: Any) -> list[GradeResult]:
++    """Grade an isolated Stage-1 `StructuredIntent` (see `INTENT_GRADERS`).
++
++    Leading underscore for the same `test_graders.py` reason as
++    `_intent_question_match` / `_grade_case_narration` above: any module-level
++    name here starting with `grade_` (other than the two hardcoded exemptions
++    `grade_case`/`grade_suite`) must appear in that file's fixed adversarial
++    `MUTATIONS` table, which only covers the FULL-pipeline `RunRecord` graders.
++    Import this as `from evals.graders import _grade_intent as grade_intent` —
++    the rename happens at the import site, so `dir(evals.graders)` itself never
++    gains a `grade_intent` name.
++    """
++    return [grader(case, intent) for grader in INTENT_GRADERS]
++
++
++# The isolated-narration-stage grader set: every prose/envelope rule the full
++# pipeline enforces MINUS the graders that judge a decision narration never
++# makes (which question to fetch, what request to send, whether a school name
++# was resolved through the directory). Narration receives a fixed envelope; it
++# only ever decides what to SAY about it.
++_NARRATION_EXCLUDED_GRADERS = frozenset(
++    {grade_question_match, grade_request_match, grade_school_resolved_through_directory}
++)
++
++NARRATION_GRADERS: tuple[Grader, ...] = tuple(
++    grader for grader in (
++        grade_question_match,
++        grade_request_match,
++        grade_school_resolved_through_directory,
++        grade_output_branch,
++        grade_envelope_preservation,
++        grade_limitations_verbatim,
++        grade_confidence_unchanged,
++        grade_grounding,
++        grade_no_recommendation_language,
++        grade_no_forecast_framing,
++        grade_empty_stated,
++        grade_gaps_stated,
++    )
++    if grader not in _NARRATION_EXCLUDED_GRADERS
++)
++
++GRADERS_BY_DIRECTION_NARRATION: dict[str, tuple[Grader, ...]] = {
++    "should_answer": NARRATION_GRADERS,
++    "should_resist_injection": NARRATION_GRADERS + (grade_injection_resisted,),
++}
++
++
++def _grade_case_narration(case: GoldenCase, record: RunRecord) -> list[GradeResult]:
++    """Grade an isolated Stage-4 run against `GRADERS_BY_DIRECTION_NARRATION`.
++
++    Leading underscore for the same reason as `_intent_question_match` above:
++    it keeps this out of `test_graders.py`'s `dir(graders)` scan for
++    module-level `grade_*` names, which is exhaustive over the FULL-pipeline
++    grader set and has no entry for a narration-only run. Call this through
++    `grade_case(case, record, stage="narration")`.
++    """
++    graders = GRADERS_BY_DIRECTION_NARRATION.get(case.direction)
++    if graders is None:
++        raise ValueError(
++            f"the narration stage does not support direction {case.direction!r} "
++            "(it has no fixed envelope to narrate)"
++        )
++    return [grader(case, record) for grader in graders]
++
++
+ Grader = Callable[[GoldenCase, RunRecord], GradeResult]
+ 
+ ANSWER_GRADERS: tuple[Grader, ...] = (
+@@ -492,7 +608,20 @@ GRADERS_BY_DIRECTION: dict[str, tuple[Grader, ...]] = {
+ }
+ 
+ 
+-def grade_case(case: GoldenCase, record: RunRecord) -> list[GradeResult]:
++def grade_case(
++    case: GoldenCase, record: RunRecord, stage: str | None = None
++) -> list[GradeResult]:
++    """Grade a transcript. `stage=None` (the default) reproduces the full
++    end-to-end grader set exactly, unchanged from before stage-scoped grading
++    existed. `stage="narration"` dispatches to the narration-only grader set
++    (`_grade_case_narration`) so a genuinely isolated narration run is not
++    scored against decision graders it never ran the code for (`question_match`,
++    `request_match`, `school_resolved_through_directory`). There is no
++    `stage="intent"` branch here because Stage 1 has no `RunRecord` transcript
++    to grade — see `grade_intent` for the isolated intent-stage grader.
++    """
++    if stage == "narration":
++        return _grade_case_narration(case, record)
+     return [grader(case, record) for grader in GRADERS_BY_DIRECTION[case.direction]]
+ 
+ 
+diff --git a/evals/live.py b/evals/live.py
+index 7300c31..cacd599 100644
+--- a/evals/live.py
++++ b/evals/live.py
+@@ -57,13 +57,18 @@ from typing import Any, Callable
+ 
+ from config import settings
+ from evals import replay as replay_mod
++from evals.graders import _grade_intent as grade_intent
+ from evals.graders import failures, grade_case
+ from evals.schema import GoldenCase, RunRecord, load_cases
+ from harness import usage
+ from harness.agent import ask, build_agent
++from harness.answer_view import build_answer_view
+ from harness.errors import AuthError, QuotaExceeded, classify
+ from harness.evidence import EvidenceClient
+-from harness.tools import Deps
++from harness.intent import interpret_intent
++from harness.narration import NarrationValidationError, narrate
++from harness.outputs import RenderedAnswer
++from harness.tools import Deps, ToolInvocation
+ 
+ PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ STUB_EMITTER = PROJECT_ROOT / "evals" / "stub_emitter.py"
+@@ -148,38 +153,150 @@ def build_client(emitter: str, stub_case: str | None) -> EvidenceClient:
+     return EvidenceClient(python=Path(sys.executable), emitter=STUB_EMITTER, env=env)
+ 
+ 
+-async def run_trial(
++def _crashed_trial(
+     case: GoldenCase,
+     phrasing: str,
+     trial: int,
+-    emitter: str,
+-    agent_factory: Any = build_agent,
++    exc: Exception,
++    started: float,
++    deps: Deps | None = None,
++) -> TrialResult:
++    """Turn an exception into a failed-trial result, or re-raise it as a suite
++    interruption when it is not a measurement of model quality.
++
++    An auth failure is not a trial result, it is the run being impossible.
++    Found the hard way: one placeholder API key produced 100 identical
++    "failed trials", a pass@k of 0.0, and a report that looked like a model
++    problem. Stop at the first one and say what is wrong. Shared by every
++    stage's trial runner so the same rule applies whether the crash happened
++    in the legacy tool loop (default/end-to-end) or one isolated stage
++    (intent/narration).
++    """
++    classified = classify(exc)
++    if isinstance(classified, AuthError):
++        raise CredentialsRejected(str(classified)) from exc
++    if isinstance(classified, QuotaExceeded):
++        raise classified from exc
++    detail = f"{type(exc).__name__}: {exc}"
++    if deps is not None and deps.output_validation_failures:
++        detail += "; output gate: " + " | ".join(deps.output_validation_failures[-1])
++    return TrialResult(
++        case_id=case.case_id,
++        direction=case.direction,
++        phrasing=phrasing,
++        trial=trial,
++        passed=False,
++        error=detail,
++        duration_ms=int((time.monotonic() - started) * 1000),
++    )
++
++
++async def run_intent_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    intent_model: Any = None,
+ ) -> tuple[TrialResult, RunRecord | None]:
+-    """One question, one live run, graded.
++    """Stage 1, genuinely isolated: one model call, no tools, no evidence
++    subprocess, no planner. Nothing runs except `interpret_intent()`, so
++    grading is limited to what this stage alone decides — which registry
++    question (or 'excluded'/'unknown') the model chose. `intent_model` is the
++    test injection point (a scripted `FunctionModel`); production passes None
++    and gets the real provider wiring.
++    """
++    started = time.monotonic()
++    try:
++        intent = await interpret_intent(phrasing, model=intent_model)
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started), None
+ 
+-    Ordinary faults become failed trials. Authentication and definitive account
+-    quota failures raise because neither is a measurement of model quality.
++    duration_ms = int((time.monotonic() - started) * 1000)
++    failed = failures(grade_intent(case, intent))
++    # No `Deps`/message history exists for an isolated intent call (there is no
++    # tool loop and no pipeline run object), so cost reports the same way the
++    # full pipeline does for an empty history — see `usage.spend_usd`.
++    spent, complete = usage.spend_usd([])
++    return (
++        TrialResult(
++            case_id=case.case_id,
++            direction=case.direction,
++            phrasing=phrasing,
++            trial=trial,
++            passed=not failed,
++            failed_graders=[r.grader for r in failed],
++            detail="; ".join(f"{r.grader}: {r.detail}" for r in failed),
++            output_kind=None,
++            duration_ms=duration_ms,
++            cost_usd=spent,
++            cost_complete=complete,
++        ),
++        None,
++    )
++
++
++async def run_narration_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    narration_model: Any = None,
++) -> tuple[TrialResult, RunRecord | None]:
++    """Stage 4, genuinely isolated: one model call over a FIXED AnswerView.
++
++    The oracle envelope is ALWAYS `build_client("stub", case.stub_case)` — the
++    stub emitter forced to the case's own canned fixture, the same offline
++    mechanism the golden cases were generated with (Planning review 1, PF-1). It
++    is never the real emitter and never a model-driven fetch, and it does not
++    depend on whatever `--emitter` the rest of the suite is using: narration is
++    defined over the oracle, not the data project. Intent and planning never
++    run — the envelope is fetched directly from the stub for the case's own
++    declared `expected_question_id`/`expected_request`, bypassing the tool loop
++    and the planner entirely. A case with no `stub_case` (or no fixed
++    question/request to fetch it with) is not narration-eligible and
++    `select_cases` excludes it for `--stage narration`. Grading is
++    `evals.graders.grade_case(..., stage="narration")`: every prose/envelope
++    rule the full pipeline enforces, minus the ones that judge a decision
++    narration never makes.
+     """
+     started = time.monotonic()
+-    deps = Deps(client=build_client(emitter, case.stub_case))
++    if case.stub_case is None or not case.expected_question_id or case.expected_request is None:
++        return (
++            TrialResult(
++                case_id=case.case_id,
++                direction=case.direction,
++                phrasing=phrasing,
++                trial=trial,
++                passed=False,
++                error=(
++                    "case has no stub_case/expected_question_id/expected_request; the "
++                    "narration stage needs a fixed oracle envelope to narrate"
++                ),
++                duration_ms=int((time.monotonic() - started) * 1000),
++            ),
++            None,
++        )
++
++    client = build_client("stub", case.stub_case)
++    deps = Deps(client=client)
++    deps.user_question = phrasing
+     try:
+-        agent = agent_factory()
+-        output = await ask(agent, deps, phrasing)
++        envelope = await client.fetch_evidence(case.expected_question_id, case.expected_request)
+     except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
+-        # An auth failure is not a trial result, it is the run being impossible.
+-        # Found the hard way: one placeholder API key produced 100 identical
+-        # "failed trials", a pass@k of 0.0, and a report that looked like a
+-        # model problem. Stop at the first one and say what is wrong.
+-        classified = classify(exc)
+-        if isinstance(classified, AuthError):
+-            raise CredentialsRejected(str(classified)) from exc
+-        if isinstance(classified, QuotaExceeded):
+-            raise classified from exc
+-        detail = f"{type(exc).__name__}: {exc}"
+-        if deps.output_validation_failures:
+-            detail += "; output gate: " + " | ".join(
+-                deps.output_validation_failures[-1]
+-            )
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
++
++    deps.last_envelope = envelope
++    deps.tool_calls.append(
++        ToolInvocation(
++            "fetch_evidence",
++            {"question_id": case.expected_question_id, "request": case.expected_request},
++            envelope,
++        )
++    )
++    view = build_answer_view(envelope)
++    deps.answer_view = view
++
++    try:
++        narration = await narrate(view, deps, model=narration_model)
++    except NarrationValidationError as exc:
+         return (
+             TrialResult(
+                 case_id=case.case_id,
+@@ -187,11 +304,92 @@ async def run_trial(
+                 phrasing=phrasing,
+                 trial=trial,
+                 passed=False,
+-                error=detail,
++                failed_graders=["narration_validation"],
++                detail="; ".join(exc.problems),
+                 duration_ms=int((time.monotonic() - started) * 1000),
+             ),
+             None,
+         )
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
++
++    output = RenderedAnswer(
++        answer=narration.answer,
++        question_id=view.question_id,
++        contract_version=view.contract_version,
++        evidence=view.evidence,
++        provenance=view.provenance,
++        confidence=view.confidence,
++        limitations=view.limitations,
++        deterministic_signals=view.deterministic_signals,
++        resolved_request=view.resolved_request,
++        data_status=view.data_status,
++        claim_eligibility=view.claim_eligibility,
++        data_status_note=view.data_status_note,
++    )
++    duration_ms = int((time.monotonic() - started) * 1000)
++    record = replay_mod.project(case, deps, output)
++    failed = failures(grade_case(case, record, stage="narration"))
++    spent, complete = usage.spend_usd(deps.last_messages)
++    return (
++        TrialResult(
++            case_id=case.case_id,
++            direction=case.direction,
++            phrasing=phrasing,
++            trial=trial,
++            passed=not failed,
++            failed_graders=[r.grader for r in failed],
++            detail="; ".join(f"{r.grader}: {r.detail}" for r in failed),
++            output_kind=record.output_kind,
++            duration_ms=duration_ms,
++            cost_usd=spent,
++            cost_complete=complete,
++        ),
++        record,
++    )
++
++
++async def run_trial(
++    case: GoldenCase,
++    phrasing: str,
++    trial: int,
++    emitter: str,
++    agent_factory: Any = build_agent,
++    *,
++    stage: str | None = None,
++    intent_model: Any = None,
++    narration_model: Any = None,
++) -> tuple[TrialResult, RunRecord | None]:
++    """One question, one live run, graded.
++
++    `stage` dispatches to a genuinely isolated stage runner:
++
++    * ``"intent"``     — `run_intent_trial`: Stage 1 alone.
++    * ``"narration"``  — `run_narration_trial`: Stage 4 alone, over the oracle envelope.
++    * ``"end-to-end"`` and ``None`` (default) — unchanged: the legacy tool-loop
++      path via `agent_factory`, i.e. `ask(build_agent(), deps, phrasing)`. This
++      is contract compatibility, not an oversight: `--stage end-to-end` is a
++      smoke suite over the SAME full trial the default mode runs (`main()`
++      enforces k=1 for it), never the new 4-stage `ask(deps, question)`
++      pipeline. `intent_model`/`narration_model` have no effect here.
++
++    Ordinary faults become failed trials. Authentication and definitive account
++    quota failures raise because neither is a measurement of model quality —
++    `_crashed_trial` is shared by every stage so that rule cannot drift between
++    them.
++    """
++    if stage == "intent":
++        return await run_intent_trial(case, phrasing, trial, intent_model=intent_model)
++    if stage == "narration":
++        return await run_narration_trial(case, phrasing, trial, narration_model=narration_model)
++
++    started = time.monotonic()
++    deps = Deps(client=build_client(emitter, case.stub_case))
++    try:
++        agent = agent_factory()
++        output = await ask(agent, deps, phrasing)
++    except Exception as exc:  # noqa: BLE001 — a crashed trial is still a result
++        return _crashed_trial(case, phrasing, trial, exc, started, deps), None
+ 
+     duration_ms = int((time.monotonic() - started) * 1000)
+     record = replay_mod.project(case, deps, output)
+@@ -303,6 +501,9 @@ async def run_suite(
+     initial_transcripts: list[RunRecord] | None = None,
+     max_trials: int | None = None,
+     on_progress: Callable[[list[TrialResult], list[RunRecord]], None] | None = None,
++    stage: str | None = None,
++    intent_model: Any = None,
++    narration_model: Any = None,
+ ) -> tuple[
+     list[CaseReport], list[TrialResult], list[RunRecord], SuiteInterruption | None
+ ]:
+@@ -323,7 +524,10 @@ async def run_suite(
+             )
+             break
+         try:
+-            result, record = await run_trial(case, phrasing, trial, emitter, agent_factory)
++            result, record = await run_trial(
++                case, phrasing, trial, emitter, agent_factory,
++                stage=stage, intent_model=intent_model, narration_model=narration_model,
++            )
+         except QuotaExceeded as exc:
+             interruption = SuiteInterruption(
+                 "quota_exhausted", str(exc), case.case_id, phrasing, trial,
+@@ -463,6 +667,19 @@ def select_cases(args: argparse.Namespace) -> list[GoldenCase]:
+     if args.pressure:
+         # Pressure only means something where there is an answer to soften.
+         cases = [c for c in cases if c.direction in ("should_answer", "should_resist_injection")]
++    if getattr(args, "stage", None) == "narration":
++        # The narration stage is genuinely isolated (harness.narration alone,
++        # over the oracle envelope `build_client("stub", case.stub_case)`
++        # fetches): a case with no `stub_case` fixture — or no fixed
++        # question/request to fetch it with — gives the stage nothing to
++        # narrate, so it is excluded (Planning review 1, PF-1).
++        before = len(cases)
++        cases = [
++            c for c in cases
++            if c.stub_case is not None and c.expected_question_id and c.expected_request is not None
++        ]
++        excluded = before - len(cases)
++        print(f"narration stage: excluded {excluded} case(s) with no stub_case oracle fixture")
+     if not cases:
+         raise SystemExit("no cases selected")
+     return cases
+@@ -490,6 +707,14 @@ def main(argv: list[str] | None = None) -> int:
+             "suite, not a reliability sample — use the default mode (no --stage) "
+             "for pass^k reliability measurement."
+         )
++    if args.stage == "narration" and args.emitter == "real":
++        raise SystemExit(
++            "--stage narration is defined over the stub oracle envelope "
++            "(build_client('stub', case.stub_case)), never the --emitter value: "
++            "narration quality is scored against the canned fixture the case "
++            "declares, not against a live data-project fetch. Drop --emitter real "
++            "for --stage narration."
++        )
+ 
+     initial_trials: list[TrialResult] = []
+     initial_transcripts: list[RunRecord] = []
+@@ -599,9 +824,24 @@ def main(argv: list[str] | None = None) -> int:
+                 initial_transcripts=initial_transcripts,
+                 max_trials=args.max_trials,
+                 on_progress=checkpoint,
++                stage=args.stage,
+             )
+         )
+     except CredentialsRejected as exc:
++        # PF-2: tell the truth about what is on disk. `report_path` is written
++        # atomically by `checkpoint()` after every completed trial, so if one or
++        # more trials finished before the rejection it already exists as a
++        # resumable "running" checkpoint and this branch leaves it byte-for-byte
++        # unchanged — no final report is written over it, and the message must
++        # not claim otherwise.
++        if report_path.exists():
++            raise SystemExit(
++                f"The provider rejected the credential, so no further case was "
++                f"measured: {exc}\n"
++                "Run authcheck.py for the configured provider.\n"
++                f"A checkpoint from before the rejection exists: {report_path}\n"
++                f"resume: {sys.executable} -m evals.live --resume {report_path}"
++            ) from exc
+         raise SystemExit(
+             f"The provider rejected the credential, so no case was measured: {exc}\n"
+             "Run authcheck.py for the configured provider. No report was written."
+diff --git a/tests/live/test_live_eval.py b/tests/live/test_live_eval.py
+index 1f78cba..0098ff3 100644
+--- a/tests/live/test_live_eval.py
++++ b/tests/live/test_live_eval.py
+@@ -80,6 +80,42 @@ def test_the_frozen_prompt_is_actually_cached():
+     )
+ 
+ 
++def test_stage_intent_survives_a_live_run():
++    """The genuinely isolated intent stage: one model call, no evidence fetch,
++    no rendering — `evals.live.run_trial(..., stage="intent")`."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, EMITTER, stage="intent")
++    )
++    assert result.passed, result.detail
++    assert record is None, "the intent stage makes no tool calls, so there is no transcript"
++
++
++def test_stage_narration_survives_a_live_run():
++    """The genuinely isolated narration stage: one model call over the stub
++    oracle envelope (`build_client("stub", case.stub_case)`) the stage fetches
++    itself, never the model's own request and never `EMITTER` (PF-1: the
++    narration oracle is always the stub emitter, regardless of --emitter)."""
++    case = next(c for c in CASES.values() if c.stub_case is not None)
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, EMITTER, stage="narration")
++    )
++    assert result.passed, result.detail
++    assert record is not None
++    assert len(record.tool_calls) == 1
++    assert record.tool_calls[0].tool == "fetch_evidence"
++
++
++def test_stage_end_to_end_survives_a_live_run():
++    """`--stage end-to-end`: the real new-pipeline `ask(deps, question)`, k=1."""
++    case = CASES["answer/VC-POC-REF-01"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, EMITTER, stage="end-to-end")
++    )
++    assert result.passed, result.detail
++    assert record is not None
++
++
+ def test_a_live_run_stays_inside_the_control_envelope():
+     case = CASES["answer/VC-POC-01"]
+     deps = Deps(client=live.build_client(EMITTER, case.stub_case))
+diff --git a/tests/unit/test_live_tier.py b/tests/unit/test_live_tier.py
+index 52dc0b7..2e939f3 100644
+--- a/tests/unit/test_live_tier.py
++++ b/tests/unit/test_live_tier.py
+@@ -16,19 +16,67 @@ excluded by `pytest.ini`.
+ 
+ from __future__ import annotations
+ 
++import ast
+ import asyncio
+ import json
++import subprocess
++import sys
++from pathlib import Path
+ 
+ import pytest
++from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
++from pydantic_ai.models.function import AgentInfo, FunctionModel
+ 
+ from evals import live, replay as replay_mod
+ from evals.live import CaseReport, TrialResult, aggregate, summarise
+ from evals.schema import load_cases, load_reference_solutions
+ from harness.agent import build_agent
++from harness.intent import StructuredIntent
++
++PROJECT_ROOT = Path(__file__).resolve().parents[2]
+ 
+ CASES = {c.case_id: c for c in load_cases()}
+ REFERENCES = load_reference_solutions()
+ 
++# In pydantic-ai 1.106.0, a single (non-union) output type uses "final_result"
++# as the tool name (see tests/unit/test_intent_boundary.py). Both the intent
++# and narration agents have single output types.
++INTENT_TOOL = "final_result"
++NARRATION_TOOL = "final_result"
++
++
++def make_intent_model(intent: StructuredIntent) -> FunctionModel:
++    """A model that returns a fixed StructuredIntent immediately."""
++    payload = intent.model_dump()
++
++    def fn(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        return ModelResponse(parts=[ToolCallPart(INTENT_TOOL, payload)])
++
++    return FunctionModel(fn)
++
++
++def make_narration_model(answer: str) -> FunctionModel:
++    """A model that returns fixed narration immediately."""
++
++    def fn(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        return ModelResponse(parts=[ToolCallPart(NARRATION_TOOL, {"answer": answer})])
++
++    return FunctionModel(fn)
++
++
++def _drop_generated_utc(output: dict) -> dict:
++    """Two separate stub-emitter fetches stamp `provenance.generated_utc` with
++    the wall clock at call time (second precision), so two runs a moment apart
++    can legitimately disagree on that one field alone — the same reason
++    `evals/schema.py` notes the replay-equality rule excludes it (CR-6). Strip
++    it before comparing two records for otherwise-exact equality."""
++    out = dict(output)
++    provenance = out.get("provenance")
++    if isinstance(provenance, dict) and "generated_utc" in provenance:
++        out = dict(out)
++        out["provenance"] = {k: v for k, v in provenance.items() if k != "generated_utc"}
++    return out
++
+ 
+ def trial(passed: bool, graders: list[str] | None = None, **kwargs) -> TrialResult:
+     return TrialResult(
+@@ -482,6 +530,241 @@ def test_stage_is_included_in_checkpoint_payload(monkeypatch, tmp_path):
+     assert payload.get("selection", {}).get("stage") == "intent"
+ 
+ 
++def test_stage_none_still_uses_the_legacy_tool_loop():
++    """The default (no --stage) mode is unchanged: `run_trial` still drives the
++    legacy `build_agent()` + `ask(agent, deps, question)` path."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", scripted_factory(case.case_id))
++    )
++    assert result.passed, result.detail
++    assert record is not None
++
++
++# --------------------------------------------------------------------------
++# --stage intent: genuinely isolated Stage 1, no tools, no evidence subprocess
++# --------------------------------------------------------------------------
++
++
++def test_stage_intent_grades_a_correct_classification_as_a_pass():
++    case = CASES["answer/VC-POC-01"]
++    intent = StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha College"])
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(intent)
++        )
++    )
++    assert result.passed, result.detail
++    assert record is None, "the intent stage makes no tool calls, so there is no transcript"
++    assert result.cost_complete is not None
++
++
++def test_stage_intent_grades_a_wrong_classification_as_a_failure():
++    case = CASES["answer/VC-POC-01"]
++    wrong = StructuredIntent(question_id="VC-POC-02")
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(wrong)
++        )
++    )
++    assert not result.passed
++    assert result.failed_graders == ["intent_question_match"]
++    assert record is None
++
++
++def test_stage_intent_grades_a_refusal_case_by_the_excluded_classification():
++    """`should_refuse` cases have no `expected_question_id` — the isolated
++    check is that the model recognised the topic as excluded."""
++    case = CASES["refuse/finance"]
++    intent = StructuredIntent(question_id="excluded", excluded_topic="finance")
++    result, _ = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(intent)
++        )
++    )
++    assert result.passed, result.detail
++
++    wrong = StructuredIntent(question_id="VC-POC-01")
++    result, _ = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent", intent_model=make_intent_model(wrong)
++        )
++    )
++    assert not result.passed
++
++
++def test_stage_intent_a_crashed_call_is_a_failed_trial_not_a_transcript():
++    case = CASES["answer/VC-POC-01"]
++
++    def exploding_model(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
++        raise RuntimeError("provider is down")
++
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="intent", intent_model=FunctionModel(exploding_model),
++        )
++    )
++    assert not result.passed
++    assert "provider is down" in result.error
++    assert record is None
++
++
++# --------------------------------------------------------------------------
++# --stage narration: genuinely isolated Stage 4, over a fixed envelope
++# --------------------------------------------------------------------------
++
++
++def test_stage_narration_grades_grounded_prose_as_a_pass():
++    case = CASES["answer/VC-POC-01"]
++    reference_answer = REFERENCES[case.case_id].output["answer"]
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="narration", narration_model=make_narration_model(reference_answer),
++        )
++    )
++    assert result.passed, result.detail
++    assert record is not None
++    assert record.output_kind == "RenderedAnswer"
++    # Isolation: narration never chose a question or sent a request — the
++    # transcript's one tool call is the fixed envelope fetch this stage did
++    # itself, using the case's own declared expected request.
++    assert len(record.tool_calls) == 1
++    assert record.tool_calls[0].tool == "fetch_evidence"
++
++
++def test_stage_narration_grades_ungrounded_prose_as_a_failure():
++    """The harness's own rendering gate (ADR-014) rejects this before the eval
++    grader ever runs: `narrate()` raises `NarrationValidationError` rather than
++    returning an ungrounded answer, so the failure is a validation failure, not
++    a `grounding` grader result read off a completed transcript."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub",
++            stage="narration",
++            narration_model=make_narration_model("Enrolments reached exactly 987654 students."),
++        )
++    )
++    assert not result.passed
++    assert result.failed_graders == ["narration_validation"]
++    assert record is None
++
++
++def test_stage_narration_skips_cases_with_no_fixed_envelope():
++    """A `should_clarify`/`should_refuse` case has no expected_question_id and
++    request pair, so the isolated narration stage has nothing to narrate."""
++    case = CASES["clarify/distance_km"]
++    result, record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", stage="narration")
++    )
++    assert not result.passed
++    assert result.error is not None and "expected_question_id" in result.error
++    assert record is None
++
++
++def test_select_cases_for_narration_stage_keeps_only_cases_with_a_stub_oracle():
++    """PF-1: eligibility is having a `stub_case` oracle fixture, not merely a
++    fixed question/request — every eligible case in the current golden set
++    happens to carry both, but the primary gate is `stub_case`."""
++    args = live.build_parser().parse_args(["--stage", "narration"])
++    selected = live.select_cases(args)
++    assert selected
++    assert all(c.stub_case is not None for c in selected)
++    assert all(c.expected_question_id and c.expected_request is not None for c in selected)
++    assert "clarify/distance_km" not in {c.case_id for c in selected}
++    assert "refuse/finance" not in {c.case_id for c in selected}
++
++
++def test_select_cases_for_narration_stage_prints_the_excluded_count(capsys):
++    args = live.build_parser().parse_args(["--stage", "narration"])
++    all_cases = live.build_parser().parse_args([])
++    total = len(live.select_cases(all_cases))
++    selected = live.select_cases(args)
++    excluded = total - len(selected)
++    out = capsys.readouterr().out
++    assert f"excluded {excluded} case(s)" in out
++
++
++def test_select_cases_for_narration_stage_exits_non_zero_when_nothing_is_eligible():
++    """Every case that direction/case filters could select has no stub_case, so
++    the narration selection ends up empty and the run must fail loudly rather
++    than silently reporting an empty success."""
++    args = live.build_parser().parse_args(
++        ["--stage", "narration", "--direction", "should_clarify"]
++    )
++    with pytest.raises(SystemExit, match="no cases selected"):
++        live.select_cases(args)
++
++
++def test_stage_narration_with_emitter_real_is_refused_at_argument_validation():
++    """PF-1: the narration oracle is always the stub emitter; --emitter real is
++    refused up front rather than silently ignored."""
++    with pytest.raises(SystemExit, match="--stage narration is defined over the stub oracle"):
++        live.main(["--stage", "narration", "--emitter", "real"])
++
++
++# --------------------------------------------------------------------------
++# --stage end-to-end: contract compatibility — stays on the LEGACY tool-loop
++# ask(build_agent(), deps, phrasing), never the new 4-stage pipeline
++# --------------------------------------------------------------------------
++
++
++def test_stage_end_to_end_uses_the_legacy_tool_loop_like_the_default_stage():
++    """Contract compatibility (Planning review 1 / human guidance item 6):
++    `--stage end-to-end` must NOT switch to the new `ask(deps, question)`
++    pipeline. It stays `ask(build_agent(), deps, phrasing)` — the same legacy
++    tool-loop path the default (no `--stage`) mode uses — and `main()`'s k=1
++    constraint is the only thing that distinguishes it."""
++    case = CASES["answer/VC-POC-01"]
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", scripted_factory(case.case_id),
++            stage="end-to-end",
++        )
++    )
++    assert result.passed, result.detail
++    assert record is not None
++    assert record.output_kind == "RenderedAnswer"
++
++
++def test_stage_end_to_end_and_default_produce_identical_results():
++    """Same case, same scripted agent, only `stage` differs: the two must agree
++    exactly, because both run the identical code path."""
++    case = CASES["answer/VC-POC-01"]
++    factory = scripted_factory(case.case_id)
++    default_result, default_record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", factory)
++    )
++    e2e_result, e2e_record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", factory, stage="end-to-end")
++    )
++    assert default_result.passed == e2e_result.passed
++    assert default_result.failed_graders == e2e_result.failed_graders
++    assert _drop_generated_utc(default_record.output) == _drop_generated_utc(e2e_record.output)
++
++
++def test_stage_end_to_end_ignores_intent_and_narration_model_overrides():
++    """`intent_model`/`narration_model` are pipeline-only injection points; the
++    legacy path `--stage end-to-end` runs has no such hooks, so passing them
++    must not change the outcome versus omitting them."""
++    case = CASES["answer/VC-POC-01"]
++    factory = scripted_factory(case.case_id)
++    plain_result, plain_record = asyncio.run(
++        live.run_trial(case, case.phrasings[0], 1, "stub", factory, stage="end-to-end")
++    )
++    with_overrides_result, with_overrides_record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", factory, stage="end-to-end",
++            intent_model=make_intent_model(StructuredIntent(question_id="excluded")),
++            narration_model=make_narration_model("irrelevant"),
++        )
++    )
++    assert plain_result.passed == with_overrides_result.passed
++    assert _drop_generated_utc(plain_record.output) == _drop_generated_utc(with_overrides_record.output)
++
++
+ def test_resume_with_wrong_stage_is_rejected(monkeypatch, tmp_path):
+     """Resuming a checkpoint recorded with a different stage is rejected."""
+     case = CASES["answer/VC-POC-01"]
+@@ -505,3 +788,223 @@ def test_resume_with_wrong_stage_is_rejected(monkeypatch, tmp_path):
+     # Trying to resume it with --stage narration must fail
+     with pytest.raises(SystemExit, match="recorded with --stage 'intent'"):
+         live.main(["--stage", "narration", "--resume", str(report_path)])
++
++
++# --------------------------------------------------------------------------
++# PF-2: a rejected credential tells the truth about what is on disk, for
++# every stage — it does not always say "No report was written".
++# --------------------------------------------------------------------------
++
++
++@pytest.mark.parametrize("stage", [None, "intent", "narration", "end-to-end"])
++def test_credentials_rejected_before_any_trial_writes_no_report(monkeypatch, tmp_path, stage):
++    case = CASES["answer/VC-POC-01"]
++
++    async def immediately_rejected(*args, **kwargs):
++        raise live.CredentialsRejected("the credential is invalid")
++
++    monkeypatch.setattr(live, "run_suite", immediately_rejected)
++    monkeypatch.setattr("run.require_credentials", lambda: None)
++
++    argv = ["--k", "1", "--case", case.case_id, "--report-dir", str(tmp_path)]
++    if stage:
++        argv += ["--stage", stage]
++
++    with pytest.raises(SystemExit) as excinfo:
++        live.main(argv)
++    message = str(excinfo.value)
++    assert "No report was written" in message
++    assert not any(
++        path for path in tmp_path.glob("live-*.json") if not path.stem.endswith("-transcripts")
++    )
++
++
++@pytest.mark.parametrize("stage", [None, "intent", "narration", "end-to-end"])
++def test_credentials_rejected_after_a_completed_trial_leaves_the_checkpoint_untouched(
++    monkeypatch, tmp_path, stage
++):
++    """The last 'running' checkpoint, written by `on_progress` after the one
++    trial that completed before the rejection, must survive byte-for-byte —
++    and the exit message must say so and give the resume command, instead of
++    the (false, for this case) claim that no report was written."""
++    case = CASES["answer/VC-POC-01"]
++    completed = TrialResult(
++        case_id=case.case_id,
++        direction=case.direction,
++        phrasing=case.phrasings[0],
++        trial=1,
++        passed=True,
++        output_kind="RenderedAnswer",
++    )
++
++    async def one_trial_then_rejected(*args, on_progress=None, **kwargs):
++        if on_progress is not None:
++            on_progress([completed], [])
++        raise live.CredentialsRejected("the credential is invalid")
++
++    monkeypatch.setattr(live, "run_suite", one_trial_then_rejected)
++    monkeypatch.setattr("run.require_credentials", lambda: None)
++
++    argv = ["--k", "1", "--case", case.case_id, "--report-dir", str(tmp_path)]
++    if stage:
++        argv += ["--stage", stage]
++
++    with pytest.raises(SystemExit) as excinfo:
++        live.main(argv)
++    message = str(excinfo.value)
++    assert "No report was written" not in message
++    assert "checkpoint from before the rejection exists" in message.lower()
++    assert "resume:" in message.lower()
++
++    report_path = next(
++        path for path in tmp_path.glob("live-*.json") if not path.stem.endswith("-transcripts")
++    )
++    checkpoint = json.loads(report_path.read_text("utf-8"))
++    assert checkpoint["status"] == "running"
++    assert checkpoint["completed_trials"] == 1
++    assert str(report_path) in message
++
++
++# --------------------------------------------------------------------------
++# PF-3: the isolation test is falsifiable — spies prove no cross-stage call
++# happens, not just that the score came out right.
++# --------------------------------------------------------------------------
++
++
++def test_narration_trial_never_calls_interpret_intent_or_builds_an_agent(monkeypatch):
++    """A narration-stage trial never runs Stage 1 and never builds the
++    tool-loop agent (so its evidence tool is never registered, let alone
++    invoked) — the only fetch is the oracle acquired directly from the stub
++    client before `narrate()` runs."""
++    case = CASES["answer/VC-POC-01"]
++    reference_answer = REFERENCES[case.case_id].output["answer"]
++
++    def boom_interpret_intent(question, model=None):
++        raise AssertionError(
++            "interpret_intent must not be called during a narration-stage trial"
++        )
++
++    def boom_build_agent(*args, **kwargs):
++        raise AssertionError(
++            "build_agent (and therefore its evidence tool) must not be invoked "
++            "during a narration-stage trial"
++        )
++
++    monkeypatch.setattr(live, "interpret_intent", boom_interpret_intent)
++    monkeypatch.setattr(live, "build_agent", boom_build_agent)
++
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="narration",
++            narration_model=make_narration_model(reference_answer),
++        )
++    )
++    assert result.passed, result.detail
++    assert record is not None
++
++
++def test_intent_trial_never_fetches_evidence_or_calls_narrate(monkeypatch):
++    """The converse: an intent-stage trial never builds an evidence client and
++    never calls narration."""
++    case = CASES["answer/VC-POC-01"]
++    intent = StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha College"])
++
++    def boom_build_client(*args, **kwargs):
++        raise AssertionError(
++            "build_client (an evidence fetch) must not be called during an "
++            "intent-stage trial"
++        )
++
++    async def boom_narrate(*args, **kwargs):
++        raise AssertionError("narrate must not be called during an intent-stage trial")
++
++    monkeypatch.setattr(live, "build_client", boom_build_client)
++    monkeypatch.setattr(live, "narrate", boom_narrate)
++
++    result, record = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="intent",
++            intent_model=make_intent_model(intent),
++        )
++    )
++    assert result.passed, result.detail
++    assert record is None
++
++
++def test_narration_stage_is_unaffected_by_a_wrong_scripted_intent():
++    """The defining isolation check: two narration runs of the same case, whose
++    scripted models differ only in what intent they would produce IF intent
++    interpretation were invoked, must produce identical output and grades —
++    because narration never invokes it."""
++    case = CASES["answer/VC-POC-01"]
++    reference_answer = REFERENCES[case.case_id].output["answer"]
++    correct_intent = StructuredIntent(question_id="VC-POC-01", school_mentions=["Alpha College"])
++    wrong_intent = StructuredIntent(question_id="excluded", excluded_topic="finance")
++
++    result_a, record_a = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="narration",
++            intent_model=make_intent_model(correct_intent),
++            narration_model=make_narration_model(reference_answer),
++        )
++    )
++    result_b, record_b = asyncio.run(
++        live.run_trial(
++            case, case.phrasings[0], 1, "stub", stage="narration",
++            intent_model=make_intent_model(wrong_intent),
++            narration_model=make_narration_model(reference_answer),
++        )
++    )
++    assert result_a.passed == result_b.passed
++    assert result_a.failed_graders == result_b.failed_graders
++    assert _drop_generated_utc(record_a.output) == _drop_generated_utc(record_b.output)
++
++
++# --------------------------------------------------------------------------
++# PF-4: the live-marked file is provably invisible to the default gate, and
++# fully covered by -m live — a missing marker fails the PR gate.
++# --------------------------------------------------------------------------
++
++
++def test_live_eval_file_is_deselected_by_default_and_fully_marked_live():
++    live_file = "tests/live/test_live_eval.py"
++    source = (PROJECT_ROOT / live_file).read_text("utf-8")
++    tree = ast.parse(source)
++    test_names = [
++        node.name
++        for node in ast.walk(tree)
++        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
++    ]
++    assert test_names, "no test functions found — the file moved or is empty"
++
++    # Default options (this repo's addopts is `-m "not live"`): every test in
++    # the file must be deselected, not merely absent from a `-k` filter — so
++    # the check is that none of the file's OWN test names appear as a
++    # collected/selected item, not a guess at pytest's summary wording.
++    default_run = subprocess.run(
++        [sys.executable, "-m", "pytest", live_file, "--collect-only", "-q"],
++        cwd=str(PROJECT_ROOT),
++        capture_output=True,
++        text=True,
++    )
++    assert default_run.returncode in (0, 5), default_run.stdout + default_run.stderr
++    for name in test_names:
++        assert name not in default_run.stdout, (
++            f"{name!r} was collected by the DEFAULT options — a live-marked test "
++            "must never be reachable from the PR gate by accident (ADR-007)"
++        )
++
++    # `-m live` must select every test the file defines: a missing marker on any
++    # test in the file is exactly the gap PF-4 exists to catch.
++    live_run = subprocess.run(
++        [sys.executable, "-m", "pytest", live_file, "--collect-only", "-q", "-m", "live"],
++        cwd=str(PROJECT_ROOT),
++        capture_output=True,
++        text=True,
++    )
++    assert live_run.returncode == 0, live_run.stdout + live_run.stderr
++    for name in test_names:
++        assert name in live_run.stdout, (
++            f"{name!r} is missing from the `-m live` collection — a test in "
++            f"{live_file} lacks the live marker and would leak into the PR gate"
++        )

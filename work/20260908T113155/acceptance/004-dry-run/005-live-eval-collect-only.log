@@ -1,0 +1,12 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-re8whlmw/k-12harness
+command: [".venv/bin/python", "-m", "pytest", "tests/live/test_live_eval.py", "--collect-only", "-m", "live", "-q"]
+
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[answer/VC-POC-REF-01]
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[clarify/peer_filters]
+tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[refuse/finance]
+tests/live/test_live_eval.py::test_the_frozen_prompt_is_actually_cached
+tests/live/test_live_eval.py::test_a_live_run_stays_inside_the_control_envelope
+
+5 tests collected in 0.29s
+
+exit_code: 0

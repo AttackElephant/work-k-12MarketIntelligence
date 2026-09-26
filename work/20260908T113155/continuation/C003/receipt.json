@@ -1,0 +1,72 @@
+{
+  "budget": {
+    "anchor_event": 124,
+    "attempts_consumed": 1,
+    "per_tier_limit": 2,
+    "selected_tier": "T0",
+    "tier_attempts_consumed": 1,
+    "total_limit": 6
+  },
+  "candidate": {
+    "repositories": [
+      {
+        "branch": "main",
+        "head": "553d7885ba48baabd5e8a513bb3f24b165c33f48",
+        "identity_sha256": "7f75ce16c051229e62be5d85f81c2dc376916dc80d3cbc398fb31ae14323ec56",
+        "planning_base": "553d7885ba48baabd5e8a513bb3f24b165c33f48",
+        "repo": "k-12Harness",
+        "staged_patch": "continuation/C003/k-12harness-staged.patch",
+        "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": [
+          " M evals/graders.py",
+          " M evals/live.py",
+          " M tests/live/test_live_eval.py",
+          " M tests/unit/test_live_tier.py"
+        ],
+        "unstaged_patch": "continuation/C003/k-12harness-unstaged.patch",
+        "unstaged_patch_sha256": "83695b0b382adce7a42afaa8a31e0e3eabd5bedc545a949d7cf44252cb75f449",
+        "unstaged_sha256": "83695b0b382adce7a42afaa8a31e0e3eabd5bedc545a949d7cf44252cb75f449",
+        "untracked": [],
+        "untracked_archive": "continuation/C003/k-12harness-untracked.tar",
+        "untracked_archive_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652"
+      }
+    ],
+    "sha256": "c8b1f305fd0dff0bf6b8ed930a92dbed52108aa027feb151aadddf2a4b3a3499"
+  },
+  "contract": {
+    "path": "acceptance/003-contract.yaml",
+    "sha256": "0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad",
+    "version": 3
+  },
+  "guidance": "Restore the public graders grade_intent, grade_intent_question_match and grade_case_narration in evals/graders.py: public names, no aliasing, no private _grade_* names, no wrappers. Give each a load-bearing mutation in tests/unit/test_graders.py MUTATIONS so that test_every_grader_has_at_least_one_mutation passes because every public grader is genuinely covered, not because the scan stops seeing them. Every other plan and contract obligation remains yours in full.",
+  "id": "C003",
+  "prepared_at": "2026-09-26T11:30:06Z",
+  "reason": "Contract v3 permits evals/graders.py but not tests/unit/test_graders.py. The plan adds public grade_* graders and ADR-013 test_every_grader_has_at_least_one_mutation requires a mutation per public grader, so no correct implementation fits the v3 scope; attempt 7 escaped the test by renaming the graders private.",
+  "source": {
+    "authorised_by": "shane",
+    "defective_criteria": [],
+    "evidence": {
+      "seq": 133,
+      "sha256": "33edbff34d6095f375f732c43c02c69fc3a8c42690a5b56cff8df02189ef5c07",
+      "type": "controller.transition"
+    },
+    "execution_cycle": {
+      "transition_event": 133,
+      "transition_sha256": "33edbff34d6095f375f732c43c02c69fc3a8c42690a5b56cff8df02189ef5c07"
+    },
+    "failed_criteria": [],
+    "kind": "contract-defect",
+    "missing_files": [
+      {
+        "path": "tests/unit/test_graders.py",
+        "repo": "k-12Harness"
+      }
+    ],
+    "summary": [
+      "scope omits k-12Harness:tests/unit/test_graders.py, which the work requires"
+    ],
+    "verification_runs": []
+  },
+  "source_state": "executed"
+}
