@@ -1,0 +1,72 @@
+{
+  "budget": {
+    "anchor_event": 89,
+    "attempts_consumed": 1,
+    "per_tier_limit": 2,
+    "selected_tier": "T0",
+    "tier_attempts_consumed": 1,
+    "total_limit": 6
+  },
+  "candidate": {
+    "repositories": [
+      {
+        "branch": "main",
+        "head": "553d7885ba48baabd5e8a513bb3f24b165c33f48",
+        "identity_sha256": "ae7c58f0b605a4cbf3ffc3d9172cc3baa825bf07aae106d70c22e8be888697bc",
+        "planning_base": "553d7885ba48baabd5e8a513bb3f24b165c33f48",
+        "repo": "k-12Harness",
+        "staged_patch": "continuation/C002/k-12harness-staged.patch",
+        "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": [
+          " M evals/graders.py",
+          " M evals/live.py",
+          " M tests/live/test_live_eval.py",
+          " M tests/unit/test_live_tier.py"
+        ],
+        "unstaged_patch": "continuation/C002/k-12harness-unstaged.patch",
+        "unstaged_patch_sha256": "482d3e7a22af2f9baf61ec2896f5770c5b495f708a3d5087c28a9cccefbf0118",
+        "unstaged_sha256": "482d3e7a22af2f9baf61ec2896f5770c5b495f708a3d5087c28a9cccefbf0118",
+        "untracked": [],
+        "untracked_archive": "continuation/C002/k-12harness-untracked.tar",
+        "untracked_archive_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652"
+      }
+    ],
+    "sha256": "c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef"
+  },
+  "contract": {
+    "path": "acceptance/002-contract.yaml",
+    "sha256": "7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d",
+    "version": 2
+  },
+  "guidance": "The previous attempts ran blind and then corrected only failing tests; the plan's Planning review 1 resolutions (PF-1..PF-4) and the contract are your obligations in full. (1) Restore the public names grade_intent, grade_intent_question_match and grade_case_narration: renaming them to _-prefixed names to escape test_every_grader_has_at_least_one_mutation breaks ADR-013. Give each new grader a load-bearing mutation in tests/unit/test_graders.py MUTATIONS instead. (2) PF-1: the narration oracle is always build_client('stub', case.stub_case) with the case's recorded request, never the --emitter value; refuse --stage narration --emitter real at argument validation; narration eligibility is having a stub_case, print the excluded count, and exit non-zero when no case is eligible. (3) PF-2: after CredentialsRejected, say truthfully whether a checkpoint exists and, if so, print its path and the --resume command, instead of always 'No report was written'; leave an existing running checkpoint byte-for-byte unchanged; test both cases for every stage. (4) PF-3: spy tests proving a narration trial never calls interpret_intent or the evidence tool, an intent trial never fetches or calls narrate, and two narration runs differing only in scripted intent produce identical AnswerView, output and grades. (5) PF-4: a unit test that collecting tests/live/test_live_eval.py with default options selects zero tests and with -m live selects every test in the file. (6) Contract compatibility: --stage end-to-end and --stage omitted keep ask(build_agent(), deps, phrasing); do not switch end-to-end to the new pipeline.",
+  "id": "C002",
+  "prepared_at": "2026-09-26T09:54:14Z",
+  "reason": "stdout_excludes 'failed' matches the base's permanent '1 xfailed'; no candidate can pass it",
+  "source": {
+    "authorised_by": "shane",
+    "defective_criteria": [
+      "full-test-suite"
+    ],
+    "evidence": {
+      "seq": 105,
+      "sha256": "8c915b4e1ed2eedbcab215cf1ec58b04ae5e91d841bb4315c2b414361ccf6610",
+      "type": "verification.deterministic-completed"
+    },
+    "execution_cycle": {
+      "transition_event": 98,
+      "transition_sha256": "cd5a5f3abbe5587c42d03b77d75662fe7cd14b0cac1ba57f2892d6a798dd5e25"
+    },
+    "failed_criteria": [
+      "full-test-suite"
+    ],
+    "kind": "contract-defect",
+    "summary": [
+      "full-test-suite: output contains 'failed' (log verification/V002/001-full-test-suite.log)"
+    ],
+    "verification_runs": [
+      "V002"
+    ]
+  },
+  "source_state": "executed"
+}

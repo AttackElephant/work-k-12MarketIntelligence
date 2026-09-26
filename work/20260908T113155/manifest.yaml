@@ -418,7 +418,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: executed
+state: ready
 parent: null
 children: []
 transitions:
@@ -725,6 +725,63 @@ transitions:
   migration_record_sha256: 7ae79d751a07031097ab164f08ece76f95da3dd302e81958c958d139653b4229
   event_seq: 107
   obligations: []
+- at: '2026-09-26T09:54:15Z'
+  transition: F25
+  event: contract-defect
+  from: executed
+  to: requires_recontract
+  by: shane
+  reason: stdout_excludes 'failed' matches the base's permanent '1 xfailed'; no candidate can pass it
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (91 characters)
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: contract_defect_prepared
+    evidence: contract defect C002 names full-test-suite; candidate c71f6a2c94b0 is held for the next
+      dispatch
+  - guard: attempt_closed
+    evidence: 7 attempt(s), all closed
+  - guard: lock_released
+    evidence: lock released
+  continuation: C002
+  candidate_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
+- at: '2026-09-26T09:57:22Z'
+  transition: F20
+  event: recontract
+  from: requires_recontract
+  to: contracted
+  by: shane@Mimir.local
+  reason: v3 changes only stdout_excludes to '\d+ failed' in four criteria (diffed); base dry run clean
+  guards:
+  - guard: new_contract_version
+    evidence: contract v3 supersedes 2 version(s)
+  - guard: contract_current_and_intact
+    evidence: contract v3 intact (0ea93c07603a)
+  - guard: contract_deterministic_criteria
+    evidence: 5 deterministic criteria
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-26T09:58:37Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: plan unchanged and reviewed clean; contract v3 adopted; dry run has no flags
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: contract_dry_run_current
+    evidence: contract v3 dry-run at the base commit
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no applicable review feedback batches
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   scale: medium
@@ -862,7 +919,7 @@ risk:
   escalations: []
   deescalations: []
 contract:
-  current: 2
+  current: 3
   versions:
   - version: 1
     path: acceptance/001-contract.yaml
@@ -876,13 +933,23 @@ contract:
     path: acceptance/002-contract.yaml
     artifact: A8
     sha256: 7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d
-    status: current
+    status: superseded
     reason: 'Correct live-eval-collect-only only: select the live tests explicitly (tests/live/test_live_eval.py
       --collect-only -m live -q, exit 0) so it proves the file collects and every test is live-marked.
       Drop the work-store permitted_files entry, which validation now refuses. Keep every other obligation
       unchanged.'
     plan_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
     recorded_at: '2026-09-26T00:49:56Z'
+  - version: 3
+    path: acceptance/003-contract.yaml
+    artifact: A10
+    sha256: 0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad
+    status: current
+    reason: 'Change only the pytest summary patterns: replace stdout_excludes ''failed'' with ''\d+ failed''
+      in every criterion that uses it, because a bare ''failed'' matches the base''s ''1 xfailed''. Keep
+      every other obligation unchanged.'
+    plan_sha256: d14b820000993b44bc2ee9f0d4548a1656e933ab110090db9c1401e51a224cd7
+    recorded_at: '2026-09-26T09:55:47Z'
 decisions: []
 constraints: []
 concerns:
@@ -980,7 +1047,7 @@ artifacts:
   created_at: '2026-09-25T14:25:39Z'
   produced_by_attempt: 4
   planning_review_round: 2
-- status: current
+- status: superseded
   supersedes: null
   id: A8
   type: acceptance_contract
@@ -989,7 +1056,7 @@ artifacts:
   sha256: 7f0fe01bf4c9aca029e5ccd265e644430b7f12a3ab6ba6ca8ebdf1dda83f770d
   created_at: '2026-09-26T00:49:56Z'
   produced_by_attempt: 6
-- status: current
+- status: superseded
   supersedes: null
   id: A9
   type: contract_review_view
@@ -999,6 +1066,36 @@ artifacts:
   created_at: '2026-09-26T00:49:56Z'
   produced_by_attempt: 6
   derived_from: A8
+- status: current
+  supersedes: null
+  id: A10
+  type: acceptance_contract
+  path: acceptance/003-contract.yaml
+  version: 3
+  sha256: 0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad
+  created_at: '2026-09-26T09:55:47Z'
+  produced_by_attempt: 8
+- status: current
+  supersedes: null
+  id: A11
+  type: contract_review_view
+  path: acceptance/003-contract-review.md
+  version: 3
+  sha256: cd7ce62b23c660980e658faba5360cdc696c7fba3057e5c1759418171f35cda3
+  created_at: '2026-09-26T09:55:47Z'
+  produced_by_attempt: 8
+  derived_from: A10
+- status: current
+  supersedes: null
+  id: A12
+  type: contract_dry_run
+  path: acceptance/003-dry-run.json
+  version: 3
+  sha256: 9c0a479b19f408d00471e1046c933eaace5a81a96e1d70ddfee170fb260aabab
+  contract_sha256: 0ea93c07603a8199b4b4de4dd87767d91a420b60a1bcae505aa25a96c3cd45ad
+  flagged: []
+  created_at: '2026-09-26T09:55:58Z'
+  produced_by_attempt: 8
 attempts:
 - attempt: 1
   role: planner
@@ -1428,6 +1525,57 @@ attempts:
   read_context_files: 17
   effective_context_sha256: 3b80bf1003519142c610ddfbab3b3fe020007cb93a16e313c5c8a05e39e7f846
   native_log_bytes: 1373459
+- attempt: 8
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-26T09:54:24Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T09:55:46Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 3
+    cache_creation_input_tokens: 127931
+    cache_read_input_tokens: 120975
+    output_tokens: 7153
+  initial_input_tokens: 75475
+  peak_input_tokens: 75475
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/001-plan.md
+  - root2:acceptance/002-contract.yaml
+  - root1:contract/PINNED.json
+  - root1:contract/POC_CONTRACT_V0.3_SPEC.md
+  - root1:contract/POC_EVIDENCE_CONTRACT.md
+  - root1:contract/poc_evidence_error.v0.3.0.schema.json
+  - root1:contract/poc_input_catalog.v0.3.0.schema.json
+  - root1:contract/poc_question_registry.v0.3.0.json
+  - root1:contract/poc_school_directory.v0.3.0.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
+  - root1:contract/question_schemas/v0.3.0/_index.json
+  - root1:docs/decisions.md
+  - root1:evals/cases/golden_cases.json
+  - root1:prompts/input_catalog.snapshot.json
+  - root1:prompts/rules.md
+  contract: acceptance/003-contract.yaml
+  headroom: 0.3774
+  growth_per_turn: 0.0
 routing:
   executor_ladder:
   - T0
@@ -1663,8 +1811,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 24
-  model_sessions_launched: 7
+  controller_commands: 28
+  model_sessions_launched: 8
 checkpoints: []
 acceptance:
   state: pending
@@ -1981,3 +2129,17 @@ continuations:
   held_at: '2026-09-26T00:47:45Z'
   activated_at: '2026-09-26T00:53:05Z'
   completed_at: '2026-09-26T00:57:40Z'
+- id: C002
+  path: continuation/C002/receipt.json
+  sha256: 02c71e2476471d6f5fbb4ccbf03ae7802f1283f54258ad5ec50d50765efdecb6
+  status: held
+  prepared_at: '2026-09-26T09:54:14Z'
+  source_state: executed
+  kind: contract-defect
+  candidate_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
+  budget_anchor_event: 89
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 108
+  event_sha256: 360ba44491cb5cf20e055cd3222abffc69e4df6e74704fb221099a86bfd17f08
+  held_at: '2026-09-26T09:54:15Z'
