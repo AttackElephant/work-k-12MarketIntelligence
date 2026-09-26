@@ -3,8 +3,8 @@ created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
   version: 0.5.0
-  commit: dfc9967d2d5c8df4bd85723430c5e48553d66d56
-  bound_at: '2026-09-26T00:46:24Z'
+  commit: 2eaef9a8571b52827f8de71d8e684def6b236734
+  bound_at: '2026-09-25T23:58:47Z'
   bound_by: shane
   history:
   - commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
@@ -214,103 +214,6 @@ method:
     event_sha256: 4a8cfb2e8092cfec363b48b35b00a65a118073eef835b0b598a01deee7bd504b
     transition_n: 8
     status: applied
-  - commit: dfc9967d2d5c8df4bd85723430c5e48553d66d56
-    version: 0.5.0
-    bound_at: '2026-09-26T00:46:24Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff
-    record_path: migrations/b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff.json
-    previous_commit: 2eaef9a8571b52827f8de71d8e684def6b236734
-    previous_version: 0.5.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: 'adopt PR 17: contract-defect route to recontract'
-    authority: shane
-    compatibility:
-      assessment: conditional
-      known: true
-      note: same method version; the work item is rebound to a new commit
-      pair:
-      - 0.5.0
-      - 0.5.0
-      plan_adoptions: []
-      work_packages:
-        contract_version: 1
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - candidate:current
-      - concerns:C1
-      - contract:v1
-      - declared_scope:current
-      - definitions:k-12Harness:contract/PINNED.json
-      - definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md
-      - definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md
-      - definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json
-      - definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:evals/cases/golden_cases.json
-      - definitions:k-12Harness:prompts/input_catalog.snapshot.json
-      - definitions:k-12Harness:prompts/rules.md
-      - deterministic_runs:V001
-      - findings:PF-1
-      - findings:PF-2
-      - findings:PF-3
-      - findings:PF-4
-      - plan:A1
-      - request:A0
-      - risk:current
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-1
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-2
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-3
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-4
-    - by: shane
-      disposition: retain
-      evidence: plan:A1
-    reference_exceptions:
-    - artefacts:
-      - planning/001-plan.md
-      forced_to_decide:
-      - plan:A1
-      integrity: unverified
-      reason: remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the
-        plan planning review 2 read clean
-      reference: plan:A1
-    obligations: []
-    from_state: executed
-    resulting_state: executed
-    resume:
-    - --apply
-    - --confirm
-    - b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff
-    event_seq: 73
-    event_sha256: ad81c03332d0d3a950eda8c8ba0f0c4f5f24287e15905909b014a67039387ac3
-    transition_n: 10
-    status: applied
 artifact_schema_version: 0.5.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
@@ -480,21 +383,6 @@ transitions:
     evidence: lock released
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
-- at: '2026-09-26T00:46:24Z'
-  transition: M1
-  event: migrate
-  from: executed
-  to: executed
-  by: shane
-  reason: 'adopt PR 17: contract-defect route to recontract'
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=32, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: b1f9887f3560198fc498723194e9cda89bc9630a9d28a2d5e70105d050719bff
-  event_seq: 73
-  obligations: []
 size_estimate:
   files: 4
   scale: medium
@@ -1163,7 +1051,7 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 17
+  controller_commands: 16
   model_sessions_launched: 5
 checkpoints: []
 acceptance:
