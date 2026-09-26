@@ -1,0 +1,43 @@
+started: 2026-09-26T13:29:26Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_graders.py", "-q"]
+
+...............................F.........                                [100%]
+=================================== FAILURES ===================================
+_ test_isolated_stage_mutation_is_caught_by_its_grader[intent-classifies-the-wrong-registry-question] _
+
+label = 'intent classifies the wrong registry question'
+run = <function _intent_question_match_mutation at 0x10b6c7480>
+grader = 'intent_question_match'
+
+    @pytest.mark.parametrize(
+        "label,run,grader",
+        ISOLATED_MUTATIONS,
+        ids=[m[0].replace(" ", "-") for m in ISOLATED_MUTATIONS],
+    )
+    def test_isolated_stage_mutation_is_caught_by_its_grader(label, run, grader):
+>       caught = run()
+                 ^^^^^
+
+tests/unit/test_graders.py:338: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_graders.py:298: in _intent_question_match_mutation
+    return [r.grader for r in failures(grade_intent_question_match(CASES["answer/VC-POC-01"], intent))]
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+results = GradeResult(grader='intent_question_match', passed=False, detail="expected 'VC-POC-01', got 'VC-POC-04'")
+
+    def failures(results: list[GradeResult]) -> list[GradeResult]:
+>       return [r for r in results if not r.passed]
+                           ^^^^^^^
+E       TypeError: 'GradeResult' object is not iterable
+
+evals/graders.py:105: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_graders.py::test_isolated_stage_mutation_is_caught_by_its_grader[intent-classifies-the-wrong-registry-question]
+1 failed, 40 passed in 0.03s
+
+ended: 2026-09-26T13:29:26Z
+exit_code: 1
+duration_seconds: 0.151

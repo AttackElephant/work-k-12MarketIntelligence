@@ -527,7 +527,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: executed
+state: verified_det
 parent: null
 children: []
 transitions:
@@ -1082,6 +1082,72 @@ transitions:
     evidence: no open migration obligations
   continuation: C003
   candidate_start_sha256: c8b1f305fd0dff0bf6b8ed930a92dbed52108aa027feb151aadddf2a4b3a3499
+- at: '2026-09-26T13:29:30Z'
+  transition: F13
+  event: verification-failed
+  from: executed
+  to: executing
+  by: shane@Mimir.local
+  reason: 'V003 fails: grade_intent_question_match mutation runner passes a single GradeResult to failures();
+    and grade_intent / grade_case_narration are dispatchers given None-branches only to satisfy the mutation
+    scan'
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (208 characters)
+  - guard: continuation_prepared
+    evidence: continuation C004 binds candidate 297428e92acc from deterministic-failure
+  - guard: continuation_budget_current
+    evidence: 'lineage at T7 event 152: 1 of 6 attempts consumed; correction tier T0'
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: lock_available
+    evidence: lock is available
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C004
+  candidate_sha256: 297428e92accc3f343b443c36ee01147eb7d82bb2363ceb48005d82192202e3e
+  budget_anchor_event: 152
+  selected_tier: T0
+- at: '2026-09-26T13:37:01Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  guards:
+  - guard: attempt_closed
+    evidence: 12 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v4 intact (83681f913a8c)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 5 file(s) within 10 declared from 553d7885ba48'
+  - guard: contracted_outputs_exist
+    evidence: 6 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 009-artifact-inventory.json: append-only; planning/001-plan.md equals
+      the latest reviewed plan'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C004
+  candidate_start_sha256: 297428e92accc3f343b443c36ee01147eb7d82bb2363ceb48005d82192202e3e
+- at: '2026-09-26T13:43:29Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: 'V004: all 5 v4 criteria pass; graders public with genuine mutations; single grade_case stage
+    dispatch'
+  guards:
+  - guard: deterministic_criteria_pass
+    evidence: 5 deterministic criteria pass against contract v4 in execution cycle 180 across V004
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   scale: medium
@@ -2140,6 +2206,87 @@ attempts:
   read_context_files: 17
   effective_context_sha256: cb1f7999589bc6ea5be89ffbb033954fdfbd3345b56fb30ed9489f97bc140932
   native_log_bytes: 1062666
+- attempt: 12
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-26T13:29:38Z'
+  continuation: C004
+  candidate_start_sha256: 297428e92accc3f343b443c36ee01147eb7d82bb2363ceb48005d82192202e3e
+  budget_anchor_event: 152
+  provider: anthropic
+  model: claude-sonnet-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-23'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T13:37:00Z'
+  prompt_path: capture/prompts/012-executor.md
+  prompt_sha256: abff09cec2ee0e10006d830376c8a364f21f31b2d96d69f67b7a6c0e3d5fe186
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.168 (Claude Code)
+    actual_changed_paths: []
+    ignored_paths_created: []
+    reported_reads:
+    - evals/graders.py
+    - evals/live.py
+    - tests/unit/test_graders.py
+    - .
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    - evals
+    - tests/unit/test_rendering.py
+    reported_writes:
+    - evals/graders.py
+    - evals/live.py
+    - tests/unit/test_graders.py
+    shell_commands: []
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 23
+    total_cost_usd: 0.93501955
+    malformed_events: 0
+    returncode: 0
+  transport_attempts: 1
+  usage:
+    input_tokens: 45
+    cache_creation_input_tokens: 68051
+    cache_read_input_tokens: 1527801
+    output_tokens: 13966
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 68051
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 1313
+      cache_read_input_tokens: 79606
+      cache_creation_input_tokens: 203
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 203
+      type: message
+    speed: standard
+  elapsed_seconds: 441.97588712500874
+  read_context_files: 17
+  effective_context_sha256: a2643533357b456d7a8a0fbc9517e7249101b6764097d612435eeac8b67cf438
+  native_log_bytes: 986385
 routing:
   executor_ladder:
   - T0
@@ -2391,6 +2538,180 @@ verification:
       log_sha256: e2c03252a2f1b8346918ca0fc984255e7054252d43c39fcfd060e84d357090d5
     expectations_not_evaluated: []
     ended_at: '2026-09-26T01:07:50Z'
+  - id: V003
+    at: '2026-09-26T13:29:09Z'
+    status: failed
+    contract: acceptance/004-contract.yaml
+    contract_version: 4
+    contract_sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+    execution_cycle:
+      transition_event: 161
+      transition_sha256: 37ab5db8d6fb1286b3be06bd177b61b7bde5dc5c36277b0c3ff5e609745051c7
+    candidate_sha256: 297428e92accc3f343b443c36ee01147eb7d82bb2363ceb48005d82192202e3e
+    selected_criteria:
+    - full-test-suite
+    - contract-pin-unchanged
+    - live-tier-deterministic-tests
+    - graders-tests
+    - live-eval-collect-only
+    results:
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: 'The manifest verification command passes: the offline suite exits zero with no failures
+        and no unexpected passes. Live-marked tests remain excluded from this gate (ADR-007).'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 1
+      passed: false
+      failure_reasons:
+      - exit code 1, expected 0
+      - output contains '\\d+ failed'
+      log: verification/V003/001-full-test-suite.log
+      log_sha256: fbd9e7c7c5c27f7dae1a9509972a8a86bde0507b60d1082091a473ac5faae53f
+    - id: contract-pin-unchanged
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q
+      expected: 'The contract pin test still passes: no vendored contract file under contract/ changed
+        and the registry version still equals settings.CONTRACT_VERSION (ADR-008).'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V003/002-contract-pin-unchanged.log
+      log_sha256: c8492e40f4567e0d2edd9592db62ec432d2cfa7f1f02039c39ab93911ad1a8d9
+    - id: live-tier-deterministic-tests
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_live_tier.py -q
+      expected: The deterministic (scripted-model) live-tier tests pass, covering per-stage execution
+        and grading, narration/intent isolation, per-stage checkpoint/resume without repeating completed
+        trials, per-stage pass@k/pass^k over completed trials only, quota interruption leaving a resumable
+        checkpoint, and CredentialsRejected writing no report.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V003/003-live-tier-deterministic-tests.log
+      log_sha256: 2c55e34d4bd9f330645536d9152a76b44a2460991592e93a8a591e439d6687c6
+    - id: graders-tests
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_graders.py -q
+      expected: 'The adversarial grader tests still pass: existing graders'' pass/fail rules are unchanged
+        and every grader still carries a load-bearing mutation (ADR-013). Stage-scoped selection does
+        not weaken any grader, and any new public grade_* grader carries its own mutation.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 1
+      passed: false
+      failure_reasons:
+      - exit code 1, expected 0
+      - output contains '\\d+ failed'
+      log: verification/V003/004-graders-tests.log
+      log_sha256: f431278afdad447bbed76a1ad797d2d4630160b81df3f23f52f5ba48807c6e5e
+    - id: live-eval-collect-only
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/live/test_live_eval.py --collect-only -m live -q
+      expected: 'Selecting the live marker explicitly collects the new three-stage manual coverage: the
+        file collects cleanly under `-m live` and exits zero (at least one live test is selected), proving
+        the live-marked tests are present and, since the repository''s default addopts `-m ''not live''`
+        deselects them, that they stay excluded from the default PR gate (ADR-007). Marker completeness
+        of the file is additionally proven by the unit assertion inside the full-test-suite gate.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V003/005-live-eval-collect-only.log
+      log_sha256: bdc0cf3d1e0d627c2fdd658589ee2bc52698ca16772e139cdbeff81448c14ac0
+    expectations_not_evaluated: []
+    ended_at: '2026-09-26T13:29:27Z'
+  - id: V004
+    at: '2026-09-26T13:42:55Z'
+    status: passed
+    contract: acceptance/004-contract.yaml
+    contract_version: 4
+    contract_sha256: 83681f913a8c15ab11defa62cf6c25dd487ed91b79bd3437e473814f98c3e5b5
+    execution_cycle:
+      transition_event: 180
+      transition_sha256: 2ebddc967189bf52225158cefd56dace03ec274bcd96b5d1debfd76533041f4c
+    candidate_sha256: 38669883c1c43aef6510381a98074c888923b38269be706fa2d87fb18a4d9c7f
+    selected_criteria:
+    - full-test-suite
+    - contract-pin-unchanged
+    - live-tier-deterministic-tests
+    - graders-tests
+    - live-eval-collect-only
+    results:
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: 'The manifest verification command passes: the offline suite exits zero with no failures
+        and no unexpected passes. Live-marked tests remain excluded from this gate (ADR-007).'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V004/001-full-test-suite.log
+      log_sha256: 2d004d7ba33331dd0ced15b9fcf256c84d8bee5d4648add2a3722ca1b2c7681f
+    - id: contract-pin-unchanged
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q
+      expected: 'The contract pin test still passes: no vendored contract file under contract/ changed
+        and the registry version still equals settings.CONTRACT_VERSION (ADR-008).'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V004/002-contract-pin-unchanged.log
+      log_sha256: 502e4ad2294a93f17aa48a5660e66f0ebcb89d3ec9cc72c68473362f57f75738
+    - id: live-tier-deterministic-tests
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_live_tier.py -q
+      expected: The deterministic (scripted-model) live-tier tests pass, covering per-stage execution
+        and grading, narration/intent isolation, per-stage checkpoint/resume without repeating completed
+        trials, per-stage pass@k/pass^k over completed trials only, quota interruption leaving a resumable
+        checkpoint, and CredentialsRejected writing no report.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V004/003-live-tier-deterministic-tests.log
+      log_sha256: b26280e3e1d82484101d0ffa4bf6fc9b4d46034e671c3135d6f95ebb7a031ad9
+    - id: graders-tests
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_graders.py -q
+      expected: 'The adversarial grader tests still pass: existing graders'' pass/fail rules are unchanged
+        and every grader still carries a load-bearing mutation (ADR-013). Stage-scoped selection does
+        not weaken any grader, and any new public grade_* grader carries its own mutation.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V004/004-graders-tests.log
+      log_sha256: d660ccc06e13c4069980cace62ce64a5878c2697c2b640eaf3d5d41d75371d62
+    - id: live-eval-collect-only
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/live/test_live_eval.py --collect-only -m live -q
+      expected: 'Selecting the live marker explicitly collects the new three-stage manual coverage: the
+        file collects cleanly under `-m live` and exits zero (at least one live test is selected), proving
+        the live-marked tests are present and, since the repository''s default addopts `-m ''not live''`
+        deselects them, that they stay excluded from the default PR gate (ADR-007). Marker completeness
+        of the file is additionally proven by the unit assertion inside the full-test-suite gate.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V004/005-live-eval-collect-only.log
+      log_sha256: f1b78ce0828c3c9eb1511a80b589d0434171288122c504cabecb59add83c7755
+    expectations_not_evaluated: []
+    ended_at: '2026-09-26T13:43:13Z'
   semantic_reviews: []
 stage_outcomes:
   challenge:
@@ -2407,8 +2728,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 39
-  model_sessions_launched: 11
+  controller_commands: 42
+  model_sessions_launched: 12
 checkpoints: []
 acceptance:
   state: pending
@@ -2417,9 +2738,9 @@ acceptance:
 escapes: []
 lock:
   owner: shane@Mimir.local
-  acquired_at: '2026-09-26T12:47:56Z'
-  released_at: '2026-09-26T12:52:45Z'
-  attempt: 11
+  acquired_at: '2026-09-26T13:29:38Z'
+  released_at: '2026-09-26T13:37:00Z'
+  attempt: 12
 capture:
   event_log: capture/events.jsonl
   sessions: []
@@ -2757,3 +3078,18 @@ continuations:
   held_at: '2026-09-26T11:30:07Z'
   activated_at: '2026-09-26T12:47:56Z'
   completed_at: '2026-09-26T12:52:46Z'
+- id: C004
+  path: continuation/C004/receipt.json
+  sha256: e8c678908b7f4fc2637b67f709609a7c2e9ae2e5948459ec82a4a9e40998f105
+  status: completed
+  prepared_at: '2026-09-26T13:29:30Z'
+  source_state: executed
+  kind: deterministic-failure
+  candidate_sha256: 297428e92accc3f343b443c36ee01147eb7d82bb2363ceb48005d82192202e3e
+  budget_anchor_event: 152
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 170
+  event_sha256: 67b0ad0ca9d8f215357f76b8137d0321877ca6759a9cb91c14d6fd6db45c0fe8
+  activated_at: '2026-09-26T13:29:30Z'
+  completed_at: '2026-09-26T13:37:01Z'
