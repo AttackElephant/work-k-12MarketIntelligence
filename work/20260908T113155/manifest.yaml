@@ -2431,6 +2431,29 @@ attempts:
   read_context_files: 17
   effective_context_sha256: a2643533357b456d7a8a0fbc9517e7249101b6764097d612435eeac8b67cf438
   native_log_bytes: 986385
+- attempt: 13
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-09-26T22:07:35Z'
+  semantic_round: 1
+  semantic_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 7
+  closed_at: '2026-09-26T22:07:38Z'
+  failure_kind: transport
+  failure_reason: harness_error
+  context_bytes: 56954
 routing:
   executor_ladder:
   - T0
@@ -2857,6 +2880,29 @@ verification:
     expectations_not_evaluated: []
     ended_at: '2026-09-26T13:43:13Z'
   semantic_reviews: []
+  semantic_attempts:
+  - round: 1
+    kind: general
+    covers: []
+    at: '2026-09-26T22:07:38Z'
+    attempt: 13
+    status: failed
+    failure: TransportFailure
+    failure_kind: transport
+    reason: model transport exited with status 1
+    retry: run_verifier.py /Users/shane/Projects/work/k-12MarketIntelligence/work/20260908T113155
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
 stage_outcomes:
   challenge:
     performed: false
@@ -2873,7 +2919,7 @@ stage_outcomes:
     evidence: []
 effort:
   controller_commands: 44
-  model_sessions_launched: 12
+  model_sessions_launched: 13
 checkpoints:
 - at: '2026-09-26T13:45:20Z'
   message: 'feat(evals): execute and grade isolated intent, narration and end-to-end stages in live.py'
