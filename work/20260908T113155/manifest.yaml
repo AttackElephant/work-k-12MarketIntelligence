@@ -418,7 +418,7 @@ request: "Make evals/live.py execute and grade genuinely isolated intent, narrat
   \ stages while preserving quota-aware checkpointing, resumability, and completed-trial\n  semantics."
 narrative: null
 class: null
-state: ready
+state: executed
 parent: null
 children: []
 transitions:
@@ -782,6 +782,62 @@ transitions:
     evidence: no open blocking concerns
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-09-26T09:58:55Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: latest readiness transition has no review batch and no late feedback exists
+  - guard: scope_revalidated
+    evidence: revalidated work-store@fbd982be63eb (evidence, branch only), k-12Harness@553d7885ba48 (held
+      candidate, continuation C002)
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''contract'', ''planning'']'
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: headroom_guard_passed
+    evidence: headroom 0.4199 (83987 of 200000 tokens)
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C002
+  candidate_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
+- at: '2026-09-26T10:09:30Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  guards:
+  - guard: attempt_closed
+    evidence: 9 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v3 intact (0ea93c07603a)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 4 file(s) within 9 declared from 553d7885ba48'
+  - guard: contracted_outputs_exist
+    evidence: 6 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 006-artifact-inventory.json: append-only; planning/001-plan.md equals
+      the latest reviewed plan'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C002
+  candidate_start_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
 size_estimate:
   files: 4
   scale: medium
@@ -1576,6 +1632,98 @@ attempts:
   contract: acceptance/003-contract.yaml
   headroom: 0.3774
   growth_per_turn: 0.0
+- attempt: 9
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-26T09:58:55Z'
+  continuation: C002
+  candidate_start_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
+  budget_anchor_event: 89
+  provider: anthropic
+  model: claude-sonnet-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-23'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-26T10:09:29Z'
+  prompt_path: capture/prompts/009-executor.md
+  prompt_sha256: b3a8fc9322c72713a4b284ea31298464ba1b8a9a56ed3595cb9663d79c7d837b
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.168 (Claude Code)
+    actual_changed_paths: []
+    ignored_paths_created: []
+    reported_reads:
+    - evals/live.py
+    - evals/graders.py
+    - tests/unit/test_graders.py
+    - evals/stub_emitter.py
+    - evals/schema.py
+    - evals/replay.py
+    - harness/intent.py
+    - harness/narration.py
+    - harness/answer_view.py
+    - harness/agent.py
+    - harness/tools.py
+    - harness/errors.py
+    - tests/unit/test_live_tier.py
+    - evals/cases/golden_cases.json
+    - pytest.ini
+    - tests/live/test_live_eval.py
+    - .
+    - tests/unit/test_intent_boundary.py
+    - tests
+    reported_writes:
+    - evals/live.py
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    shell_commands: []
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 64
+    total_cost_usd: 4.202737350000001
+    malformed_events: 0
+    returncode: 0
+  transport_attempts: 1
+  usage:
+    input_tokens: 111
+    cache_creation_input_tokens: 212525
+    cache_read_input_tokens: 8490372
+    output_tokens: 56451
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 212525
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 1337
+      cache_read_input_tokens: 211699
+      cache_creation_input_tokens: 826
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 826
+      type: message
+    speed: standard
+  elapsed_seconds: 634.0614979579696
+  read_context_files: 17
+  effective_context_sha256: e00e06a5dd9d40258875510cbaeecf0af7e563776963bfd2613f75da50a14d75
+  native_log_bytes: 2953457
 routing:
   executor_ladder:
   - T0
@@ -1600,6 +1748,22 @@ routing:
     transient_retries: 3
     streaming: auto
   - at: '2026-09-26T00:53:05Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: anthropic
+    model: claude-sonnet-5
+    transport: claude
+    selector: tier:T0
+    context_window: 200000
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-09-23'
+    effort: medium
+    timeout_seconds: 1200.0
+    deadline_seconds: 1260.0
+    transient_retries: 3
+    streaming: auto
+  - at: '2026-09-26T09:58:54Z'
     tier: T0
     reason: pre-flight tier resolution
     provider: anthropic
@@ -1811,8 +1975,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 28
-  model_sessions_launched: 8
+  controller_commands: 30
+  model_sessions_launched: 9
 checkpoints: []
 acceptance:
   state: pending
@@ -1821,9 +1985,9 @@ acceptance:
 escapes: []
 lock:
   owner: shane@Mimir.local
-  acquired_at: '2026-09-26T00:53:05Z'
-  released_at: '2026-09-26T00:57:39Z'
-  attempt: 7
+  acquired_at: '2026-09-26T09:58:55Z'
+  released_at: '2026-09-26T10:09:29Z'
+  attempt: 9
 capture:
   event_log: capture/events.jsonl
   sessions: []
@@ -2132,7 +2296,7 @@ continuations:
 - id: C002
   path: continuation/C002/receipt.json
   sha256: 02c71e2476471d6f5fbb4ccbf03ae7802f1283f54258ad5ec50d50765efdecb6
-  status: held
+  status: completed
   prepared_at: '2026-09-26T09:54:14Z'
   source_state: executed
   kind: contract-defect
@@ -2143,3 +2307,5 @@ continuations:
   event_seq: 108
   event_sha256: 360ba44491cb5cf20e055cd3222abffc69e4df6e74704fb221099a86bfd17f08
   held_at: '2026-09-26T09:54:15Z'
+  activated_at: '2026-09-26T09:58:55Z'
+  completed_at: '2026-09-26T10:09:30Z'
