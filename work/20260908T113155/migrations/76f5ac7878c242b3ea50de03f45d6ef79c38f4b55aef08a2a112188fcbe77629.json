@@ -1,0 +1,1129 @@
+{
+  "record": {
+    "authority": "shane",
+    "compatibility": {
+      "assessment": "conditional",
+      "known": true,
+      "note": "same method version; the work item is rebound to a new commit",
+      "pair": [
+        "0.5.0",
+        "0.5.0"
+      ],
+      "plan_adoptions": [],
+      "schema_stages": [
+        "already at artifact schema 0.5.0"
+      ],
+      "work_packages": {
+        "contract_version": 4,
+        "representation": "implicit-single"
+      }
+    },
+    "computed_from": {
+      "ledger_tip": {
+        "seq": 194,
+        "sha256": "54bac5f7466d64a477bd738612448e7632f7e4632fcecb88c96294b97780deba"
+      },
+      "manifest_sha256": "7e6558de038cb33d4bc64274d7854fead0f314ab6e4e5dfaf559a0b1c6ecb368"
+    },
+    "decisions": [
+      {
+        "by": "shane",
+        "disposition": "retain",
+        "evidence": "findings:PF-1"
+      },
+      {
+        "by": "shane",
+        "disposition": "retain",
+        "evidence": "findings:PF-2"
+      },
+      {
+        "by": "shane",
+        "disposition": "retain",
+        "evidence": "findings:PF-3"
+      },
+      {
+        "by": "shane",
+        "disposition": "retain",
+        "evidence": "findings:PF-4"
+      },
+      {
+        "by": "shane",
+        "disposition": "retain",
+        "evidence": "plan:A1"
+      }
+    ],
+    "dispositions": {
+      "decide": [],
+      "invalidate": [],
+      "regenerate": [],
+      "retain": [
+        "attempts:1",
+        "attempts:10",
+        "attempts:11",
+        "attempts:12",
+        "attempts:13",
+        "attempts:2",
+        "attempts:3",
+        "attempts:4",
+        "attempts:5",
+        "attempts:6",
+        "attempts:7",
+        "attempts:8",
+        "attempts:9",
+        "candidate:current",
+        "checkpoints:1",
+        "concerns:C1",
+        "continuations:C001",
+        "continuations:C002",
+        "continuations:C003",
+        "continuations:C004",
+        "contract:v1",
+        "contract:v2",
+        "contract:v3",
+        "contract:v4",
+        "declared_scope:current",
+        "definitions:k-12Harness:contract/PINNED.json",
+        "definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md",
+        "definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json",
+        "definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json",
+        "definitions:k-12Harness:docs/decisions.md",
+        "definitions:k-12Harness:evals/cases/golden_cases.json",
+        "definitions:k-12Harness:prompts/input_catalog.snapshot.json",
+        "definitions:k-12Harness:prompts/rules.md",
+        "deterministic_runs:V001",
+        "deterministic_runs:V002",
+        "deterministic_runs:V003",
+        "deterministic_runs:V004",
+        "findings:PF-1",
+        "findings:PF-2",
+        "findings:PF-3",
+        "findings:PF-4",
+        "plan:A1",
+        "request:A0",
+        "risk:current"
+      ]
+    },
+    "evidence": [
+      {
+        "detail": {
+          "artifact": "A0",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "request:A0",
+        "integrity": "verified",
+        "integrity_detail": "request.md: sha256 verified",
+        "kind": "request",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "request.md",
+        "supports": [
+          "draft"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:d33007eaa439068e1c2eaa088a31a5a2fca6c2b90cefe344066ad4d757b0ddbc"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/PINNED.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/PINNED.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/PINNED.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:065f2a38b4befc09363b300cf7d601e4e782175ae6ef1ebca24d4eb173dfbe57"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/POC_CONTRACT_V0.3_SPEC.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/POC_CONTRACT_V0.3_SPEC.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:956534556c5953c6fa80508508ee30d5d81a88a5bbd1639a8b897c2de43f8199"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/POC_EVIDENCE_CONTRACT.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/POC_EVIDENCE_CONTRACT.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:88740f619b84511af27c45142afde420b1df85593be99710937eb8051e0bb8e5"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_evidence_error.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_evidence_error.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:41bad353798aa0c2dbbd2fcc33db806430a12c371db8c20ef35d822aac207dc2"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_input_catalog.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_input_catalog.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:3bea2093b2e900ecf7b27528aaad1dcec93f11791dd87ccf85c67f73f588b7cb"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_question_registry.v0.3.0.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_question_registry.v0.3.0.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:b3f1de1b68a80724af459d87f29ffaab7a97f9ac0e60fd15f93f39852118dd29"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/poc_school_directory.v0.3.0.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/poc_school_directory.v0.3.0.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:67955eaa6b8bdf6bd7ec2fdfa5152718eddeaf08782ea025fdeec0513e3fbf11"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:680a29c9592c59dcd200b255ac14339a945b24ec286af890bd1472b0824d2ee3"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:f1b66e8963e05d6db6b52f35dbb26576c87c78d6bc0f1b86d721e7c5176b61c2"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:e5b9877ffeb14e436433ebbc894de62a4bf8022324b9a33cfc80f4538d09bb1d"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:contract/question_schemas/v0.3.0/_index.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "contract/question_schemas/v0.3.0/_index.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:docs/decisions.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:docs/decisions.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "docs/decisions.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:10587743a8041e1d0520951e5b308a4776a2f462d0dae6f84a74cd9ce9632d92"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:evals/cases/golden_cases.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:evals/cases/golden_cases.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "evals/cases/golden_cases.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:a53480e98cca27a64518dbb940c6e83a69270132aa20b491874bb2b68f10fe10"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:prompts/input_catalog.snapshot.json",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:prompts/input_catalog.snapshot.json",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "prompts/input_catalog.snapshot.json",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "repo": "k-12Harness",
+          "revision": "sha256:6a2a92d5ddba792b56c450ded4a2a982d04530b557967ab129c50fa37fb06d28"
+        },
+        "disposition": "retain",
+        "id": "definitions:k-12Harness:prompts/rules.md",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness@553d7885ba48:prompts/rules.md",
+        "kind": "definitions",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "prompts/rules.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "decided_by": "shane",
+        "detail": {
+          "artifact": "A1",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "exception": {
+          "reason": "remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the plan planning review 2 read clean",
+          "reference": "plan:A1"
+        },
+        "id": "plan:A1",
+        "integrity": "unverified",
+        "integrity_detail": "integrity unverified under an explicit reference exception: planning/001-plan.md: hash mismatch",
+        "kind": "plan",
+        "proposed": "decide",
+        "proposed_reason": "a reference exception covers this evidence; a human must decide",
+        "reason": "human decision (shane): retain",
+        "ref": "planning/001-plan.md",
+        "supports": [
+          "planned"
+        ]
+      },
+      {
+        "detail": {
+          "artifact": "A2",
+          "status": "superseded",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "contract:v1",
+        "integrity": "verified",
+        "integrity_detail": "acceptance/001-contract.yaml: sha256 verified",
+        "kind": "contract",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "acceptance/001-contract.yaml",
+        "supports": []
+      },
+      {
+        "detail": {
+          "artifact": "A8",
+          "status": "superseded",
+          "version": 2
+        },
+        "disposition": "retain",
+        "id": "contract:v2",
+        "integrity": "verified",
+        "integrity_detail": "acceptance/002-contract.yaml: sha256 verified",
+        "kind": "contract",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "acceptance/002-contract.yaml",
+        "supports": []
+      },
+      {
+        "detail": {
+          "artifact": "A10",
+          "status": "superseded",
+          "version": 3
+        },
+        "disposition": "retain",
+        "id": "contract:v3",
+        "integrity": "verified",
+        "integrity_detail": "acceptance/003-contract.yaml: sha256 verified",
+        "kind": "contract",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "acceptance/003-contract.yaml",
+        "supports": []
+      },
+      {
+        "detail": {
+          "artifact": "A13",
+          "status": "current",
+          "version": 4
+        },
+        "disposition": "retain",
+        "id": "contract:v4",
+        "integrity": "verified",
+        "integrity_detail": "acceptance/004-contract.yaml: sha256 verified",
+        "kind": "contract",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "acceptance/004-contract.yaml",
+        "supports": [
+          "contracted"
+        ]
+      },
+      {
+        "detail": {
+          "current": "normal",
+          "obligations": [
+            "planning",
+            "contract",
+            "planning_review",
+            "deterministic",
+            "semantic"
+          ],
+          "rationale_recorded": true
+        },
+        "disposition": "retain",
+        "id": "risk:current",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "risk",
+        "proposed": "retain",
+        "proposed_reason": "risk level and rationale are recorded",
+        "reason": "risk level and rationale are recorded",
+        "ref": "risk",
+        "supports": [
+          "classified"
+        ]
+      },
+      {
+        "detail": {
+          "declared": {
+            "k-12Harness": [
+              "evals/graders.py",
+              "evals/live.py",
+              "evals/replay.py",
+              "evals/schema.py",
+              "harness/answer_view.py",
+              "harness/intent.py",
+              "harness/narration.py",
+              "tests/live/test_live_eval.py",
+              "tests/unit/test_graders.py",
+              "tests/unit/test_live_tier.py"
+            ],
+            "work-store": []
+          },
+          "scope_version": 5
+        },
+        "disposition": "retain",
+        "id": "declared_scope:current",
+        "integrity": "verified",
+        "integrity_detail": "scope digest matches",
+        "kind": "declared_scope",
+        "proposed": "retain",
+        "proposed_reason": "declared scope matches its recorded digest",
+        "reason": "declared scope matches its recorded digest",
+        "ref": "scope",
+        "supports": [
+          "executing",
+          "executed"
+        ]
+      },
+      {
+        "detail": {
+          "blocking": false,
+          "status": "resolved"
+        },
+        "disposition": "retain",
+        "id": "concerns:C1",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "concerns",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "C1",
+        "supports": []
+      },
+      {
+        "decided_by": "shane",
+        "detail": {},
+        "disposition": "retain",
+        "id": "findings:PF-1",
+        "integrity": "unverified",
+        "integrity_detail": "findings carry no semantics in schema 0.5.0",
+        "kind": "findings",
+        "proposed": "decide",
+        "proposed_reason": "reserved by schema 0.5.0 without semantics; a human must say what it means",
+        "reason": "human decision (shane): retain",
+        "ref": "PF-1",
+        "supports": []
+      },
+      {
+        "decided_by": "shane",
+        "detail": {},
+        "disposition": "retain",
+        "id": "findings:PF-2",
+        "integrity": "unverified",
+        "integrity_detail": "findings carry no semantics in schema 0.5.0",
+        "kind": "findings",
+        "proposed": "decide",
+        "proposed_reason": "reserved by schema 0.5.0 without semantics; a human must say what it means",
+        "reason": "human decision (shane): retain",
+        "ref": "PF-2",
+        "supports": []
+      },
+      {
+        "decided_by": "shane",
+        "detail": {},
+        "disposition": "retain",
+        "id": "findings:PF-3",
+        "integrity": "unverified",
+        "integrity_detail": "findings carry no semantics in schema 0.5.0",
+        "kind": "findings",
+        "proposed": "decide",
+        "proposed_reason": "reserved by schema 0.5.0 without semantics; a human must say what it means",
+        "reason": "human decision (shane): retain",
+        "ref": "PF-3",
+        "supports": []
+      },
+      {
+        "decided_by": "shane",
+        "detail": {},
+        "disposition": "retain",
+        "id": "findings:PF-4",
+        "integrity": "unverified",
+        "integrity_detail": "findings carry no semantics in schema 0.5.0",
+        "kind": "findings",
+        "proposed": "decide",
+        "proposed_reason": "reserved by schema 0.5.0 without semantics; a human must say what it means",
+        "reason": "human decision (shane): retain",
+        "ref": "PF-4",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "planner",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:1",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 1",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "contract",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:2",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 2",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "planning-review",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:3",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 3",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "planning-review",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:4",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 4",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "executor",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:5",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 5",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "contract",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:6",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 6",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "executor",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:7",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 7",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "contract",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:8",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 8",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "executor",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:9",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 9",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "contract",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:10",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 10",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "executor",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:11",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 11",
+        "supports": []
+      },
+      {
+        "detail": {
+          "exit_code": 0,
+          "failure_reason": null,
+          "reconstructed": false,
+          "role": "executor",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:12",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 12",
+        "supports": [
+          "executing",
+          "executed"
+        ]
+      },
+      {
+        "detail": {
+          "exit_code": 7,
+          "failure_reason": "harness_error",
+          "reconstructed": false,
+          "role": "verifier",
+          "status": "closed"
+        },
+        "disposition": "retain",
+        "id": "attempts:13",
+        "integrity": "n/a",
+        "integrity_detail": "",
+        "kind": "attempts",
+        "proposed": "retain",
+        "proposed_reason": "record retained as history",
+        "reason": "record retained as history",
+        "ref": "attempt 13",
+        "supports": []
+      },
+      {
+        "detail": {
+          "checkpoint_commits": {
+            "k-12Harness": "1b3284534ce9c57a547ee4f5291cf01c983977af",
+            "work-store": "b62b8ff593fb6472f2a8f338b45f726adbadfc90"
+          }
+        },
+        "disposition": "retain",
+        "id": "candidate:current",
+        "integrity": "verified",
+        "integrity_detail": "k-12Harness is clean at checkpoint 1b3284534ce9",
+        "kind": "candidate",
+        "proposed": "retain",
+        "proposed_reason": "k-12Harness is clean at checkpoint 1b3284534ce9",
+        "reason": "k-12Harness is clean at checkpoint 1b3284534ce9",
+        "ref": "component repositories",
+        "supports": [
+          "executing",
+          "executed",
+          "verified_det"
+        ]
+      },
+      {
+        "detail": {
+          "against_current_contract": false,
+          "contract_version": 1,
+          "execution_cycle": {
+            "transition_event": 65,
+            "transition_sha256": "d9cd5bde46069843d86602a683c27ec10ca421452d32e95f17add02d1a304d87"
+          },
+          "status": "failed"
+        },
+        "disposition": "retain",
+        "id": "deterministic_runs:V001",
+        "integrity": "verified",
+        "integrity_detail": "5 log(s) verified",
+        "kind": "deterministic_runs",
+        "proposed": "retain",
+        "proposed_reason": "run retained as history",
+        "reason": "run retained as history",
+        "ref": "V001",
+        "supports": []
+      },
+      {
+        "detail": {
+          "against_current_contract": false,
+          "contract_version": 2,
+          "execution_cycle": {
+            "transition_event": 98,
+            "transition_sha256": "cd5a5f3abbe5587c42d03b77d75662fe7cd14b0cac1ba57f2892d6a798dd5e25"
+          },
+          "status": "failed"
+        },
+        "disposition": "retain",
+        "id": "deterministic_runs:V002",
+        "integrity": "verified",
+        "integrity_detail": "5 log(s) verified",
+        "kind": "deterministic_runs",
+        "proposed": "retain",
+        "proposed_reason": "run retained as history",
+        "reason": "run retained as history",
+        "ref": "V002",
+        "supports": []
+      },
+      {
+        "detail": {
+          "against_current_contract": true,
+          "contract_version": 4,
+          "execution_cycle": {
+            "transition_event": 161,
+            "transition_sha256": "37ab5db8d6fb1286b3be06bd177b61b7bde5dc5c36277b0c3ff5e609745051c7"
+          },
+          "status": "failed"
+        },
+        "disposition": "retain",
+        "id": "deterministic_runs:V003",
+        "integrity": "verified",
+        "integrity_detail": "5 log(s) verified",
+        "kind": "deterministic_runs",
+        "proposed": "retain",
+        "proposed_reason": "run retained as history",
+        "reason": "run retained as history",
+        "ref": "V003",
+        "supports": []
+      },
+      {
+        "detail": {
+          "against_current_contract": true,
+          "contract_version": 4,
+          "execution_cycle": {
+            "transition_event": 180,
+            "transition_sha256": "2ebddc967189bf52225158cefd56dace03ec274bcd96b5d1debfd76533041f4c"
+          },
+          "status": "passed"
+        },
+        "disposition": "retain",
+        "id": "deterministic_runs:V004",
+        "integrity": "verified",
+        "integrity_detail": "5 log(s) verified",
+        "kind": "deterministic_runs",
+        "proposed": "retain",
+        "proposed_reason": "passed run against the current contract with verified logs",
+        "reason": "passed run against the current contract with verified logs",
+        "ref": "V004",
+        "supports": [
+          "verified_det"
+        ]
+      },
+      {
+        "detail": {
+          "at": "2026-09-26T13:45:20Z",
+          "commits": [
+            {
+              "commit": "b62b8ff593fb6472f2a8f338b45f726adbadfc90",
+              "repo": "work-store"
+            },
+            {
+              "commit": "1b3284534ce9c57a547ee4f5291cf01c983977af",
+              "repo": "k-12Harness"
+            }
+          ]
+        },
+        "disposition": "retain",
+        "id": "checkpoints:1",
+        "integrity": "verified",
+        "integrity_detail": "work-store@b62b8ff593fb; k-12Harness@1b3284534ce9",
+        "kind": "checkpoints",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "checkpoint 1",
+        "supports": [
+          "checkpointed"
+        ]
+      },
+      {
+        "detail": {
+          "kind": "contract-defect",
+          "source_state": "executed",
+          "status": "completed"
+        },
+        "disposition": "retain",
+        "id": "continuations:C001",
+        "integrity": "verified",
+        "integrity_detail": "continuation/C001/receipt.json: sha256 verified",
+        "kind": "continuations",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "continuation/C001/receipt.json",
+        "supports": []
+      },
+      {
+        "detail": {
+          "kind": "contract-defect",
+          "source_state": "executed",
+          "status": "completed"
+        },
+        "disposition": "retain",
+        "id": "continuations:C002",
+        "integrity": "verified",
+        "integrity_detail": "continuation/C002/receipt.json: sha256 verified",
+        "kind": "continuations",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "continuation/C002/receipt.json",
+        "supports": []
+      },
+      {
+        "detail": {
+          "kind": "contract-defect",
+          "source_state": "executed",
+          "status": "completed"
+        },
+        "disposition": "retain",
+        "id": "continuations:C003",
+        "integrity": "verified",
+        "integrity_detail": "continuation/C003/receipt.json: sha256 verified",
+        "kind": "continuations",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "continuation/C003/receipt.json",
+        "supports": []
+      },
+      {
+        "detail": {
+          "kind": "deterministic-failure",
+          "source_state": "executed",
+          "status": "completed"
+        },
+        "disposition": "retain",
+        "id": "continuations:C004",
+        "integrity": "verified",
+        "integrity_detail": "continuation/C004/receipt.json: sha256 verified",
+        "kind": "continuations",
+        "proposed": "retain",
+        "proposed_reason": "historical; supports no current state",
+        "reason": "historical; supports no current state",
+        "ref": "continuation/C004/receipt.json",
+        "supports": []
+      }
+    ],
+    "kind": "coding-harness.migration",
+    "obligations": [],
+    "previous": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "6ace286cce3a352ac99d44d21c57d13b0cc0f685",
+      "method_id": "coding-harness",
+      "method_version": "0.5.0"
+    },
+    "reason": "adopt PR 22: strict response schemas and failure detail",
+    "record_version": 1,
+    "reference_integrity": {
+      "event_references_checked": 73,
+      "exceptions": [
+        {
+          "artefacts": [
+            "planning/001-plan.md"
+          ],
+          "forced_to_decide": [
+            "plan:A1"
+          ],
+          "integrity": "unverified",
+          "reason": "remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the plan planning review 2 read clean",
+          "reference": "plan:A1"
+        }
+      ],
+      "failures": []
+    },
+    "resume": {
+      "arguments": [
+        "--apply",
+        "--confirm",
+        "{record_sha256}"
+      ]
+    },
+    "state": {
+      "basis": "every supporting evidence item is retained",
+      "current": "checkpointed",
+      "resulting": "checkpointed"
+    },
+    "target": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "878bf0dc78d2e5e4c3c5ba32f08d3c886265eca3",
+      "method_id": "coding-harness",
+      "method_version": "0.5.0"
+    },
+    "work_item": "20260908T113155"
+  },
+  "sha256": "76f5ac7878c242b3ea50de03f45d6ef79c38f4b55aef08a2a112188fcbe77629"
+}
