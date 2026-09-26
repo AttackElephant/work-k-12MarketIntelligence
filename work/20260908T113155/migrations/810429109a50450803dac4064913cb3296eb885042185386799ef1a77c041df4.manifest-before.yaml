@@ -3,8 +3,8 @@ created: '2026-09-08T11:31:55Z'
 method:
   id: coding-harness
   version: 0.5.0
-  commit: 50a2869a6caf2d1b521d7835dc36a8350f621e43
-  bound_at: '2026-09-26T11:29:49Z'
+  commit: 3e8230c1605825c8fc3e0412a17c3b119a305844
+  bound_at: '2026-09-26T09:53:52Z'
   bound_by: shane
   history:
   - commit: 196bee59710ba5de09a46992ae5ea72095fd54b5
@@ -412,115 +412,6 @@ method:
     event_seq: 107
     event_sha256: 7f9f3b498399d308300224b478c45e48486f066f630cde7e1ec9f7a910d25378
     transition_n: 16
-    status: applied
-  - commit: 50a2869a6caf2d1b521d7835dc36a8350f621e43
-    version: 0.5.0
-    bound_at: '2026-09-26T11:29:49Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: 810429109a50450803dac4064913cb3296eb885042185386799ef1a77c041df4
-    record_path: migrations/810429109a50450803dac4064913cb3296eb885042185386799ef1a77c041df4.json
-    previous_commit: 3e8230c1605825c8fc3e0412a17c3b119a305844
-    previous_version: 0.5.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: 'adopt PRs 19 and 20: scope defects, enforcing-test scope, release test fix'
-    authority: shane
-    compatibility:
-      assessment: conditional
-      known: true
-      note: same method version; the work item is rebound to a new commit
-      pair:
-      - 0.5.0
-      - 0.5.0
-      plan_adoptions: []
-      work_packages:
-        contract_version: 3
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - attempts:6
-      - attempts:7
-      - attempts:8
-      - attempts:9
-      - candidate:current
-      - concerns:C1
-      - continuations:C001
-      - continuations:C002
-      - contract:v1
-      - contract:v2
-      - contract:v3
-      - declared_scope:current
-      - definitions:k-12Harness:contract/PINNED.json
-      - definitions:k-12Harness:contract/POC_CONTRACT_V0.3_SPEC.md
-      - definitions:k-12Harness:contract/POC_EVIDENCE_CONTRACT.md
-      - definitions:k-12Harness:contract/poc_evidence_error.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_input_catalog.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/poc_question_registry.v0.3.0.json
-      - definitions:k-12Harness:contract/poc_school_directory.v0.3.0.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-01.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-03.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/VC-POC-04.request.schema.json
-      - definitions:k-12Harness:contract/question_schemas/v0.3.0/_index.json
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:evals/cases/golden_cases.json
-      - definitions:k-12Harness:prompts/input_catalog.snapshot.json
-      - definitions:k-12Harness:prompts/rules.md
-      - deterministic_runs:V001
-      - deterministic_runs:V002
-      - findings:PF-1
-      - findings:PF-2
-      - findings:PF-3
-      - findings:PF-4
-      - plan:A1
-      - request:A0
-      - risk:current
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: candidate:current
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-1
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-2
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-3
-    - by: shane
-      disposition: retain
-      evidence: findings:PF-4
-    - by: shane
-      disposition: retain
-      evidence: plan:A1
-    reference_exceptions:
-    - artefacts:
-      - planning/001-plan.md
-      forced_to_decide:
-      - plan:A1
-      integrity: unverified
-      reason: remediated in place per runbook section 4; bytes equal reviews/002-plan-reviewed.md, the
-        plan planning review 2 read clean
-      reference: plan:A1
-    obligations: []
-    from_state: executed
-    resulting_state: executed
-    resume:
-    - --apply
-    - --confirm
-    - 810429109a50450803dac4064913cb3296eb885042185386799ef1a77c041df4
-    event_seq: 134
-    event_sha256: 1330a48e78838a109ee22112b2cce778d8596021f0baae9becdccc4627e8e9b5
-    transition_n: 22
     status: applied
 artifact_schema_version: 0.5.0
 request: "Make evals/live.py execute and grade genuinely isolated intent, narration, and end-to-\n  end\
@@ -947,21 +838,6 @@ transitions:
     evidence: no open migration obligations
   continuation: C002
   candidate_start_sha256: c71f6a2c94b02b5bbc1e8d6993aadfa8e0528d7bd79ea47a2a2184cde8aa19ef
-- at: '2026-09-26T11:29:49Z'
-  transition: M1
-  event: migrate
-  from: executed
-  to: executed
-  by: shane
-  reason: 'adopt PRs 19 and 20: scope defects, enforcing-test scope, release test fix'
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=41, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: 810429109a50450803dac4064913cb3296eb885042185386799ef1a77c041df4
-  event_seq: 134
-  obligations: []
 size_estimate:
   files: 4
   scale: medium
@@ -2099,7 +1975,7 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 31
+  controller_commands: 30
   model_sessions_launched: 9
 checkpoints: []
 acceptance:
