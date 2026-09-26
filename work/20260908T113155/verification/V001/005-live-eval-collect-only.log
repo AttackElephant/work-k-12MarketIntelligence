@@ -1,0 +1,10 @@
+started: 2026-09-26T00:03:01Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/live/test_live_eval.py", "--collect-only", "-q"]
+
+
+no tests collected (5 deselected) in 0.30s
+
+ended: 2026-09-26T00:03:01Z
+exit_code: 5
+duration_seconds: 0.504

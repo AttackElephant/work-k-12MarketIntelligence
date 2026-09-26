@@ -1,0 +1,10 @@
+started: 2026-09-26T00:02:59Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_live_tier.py", "-q"]
+
+..............................................                           [100%]
+46 passed in 1.12s
+
+ended: 2026-09-26T00:03:00Z
+exit_code: 0
+duration_seconds: 1.345

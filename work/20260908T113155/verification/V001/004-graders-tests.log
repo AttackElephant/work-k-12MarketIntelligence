@@ -1,0 +1,36 @@
+started: 2026-09-26T00:03:00Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_graders.py", "-q"]
+
+...............................F......                                   [100%]
+=================================== FAILURES ===================================
+_________________ test_every_grader_has_at_least_one_mutation __________________
+
+    def test_every_grader_has_at_least_one_mutation():
+        """A grader with no mutation behind it is untested code that reports
+        success — the exact shape of a green suite that measures nothing."""
+        from evals import graders
+    
+        covered = {grader for _, _, _, grader in MUTATIONS}
+        declared = {
+            name.removeprefix("grade_")
+            for name in dir(graders)
+            if name.startswith("grade_") and name not in {"grade_case", "grade_suite"}
+        }
+>       assert declared <= covered, f"graders with no adversarial case: {sorted(declared - covered)}"
+E       AssertionError: graders with no adversarial case: ['case_narration', 'intent', 'intent_question_match']
+E       assert {'case_narrat..._stated', ...} <= {'clarificati...ounding', ...}
+E         
+E         Extra items in the left set:
+E         'case_narration'
+E         'intent'
+E         'intent_question_match'
+
+tests/unit/test_graders.py:272: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_graders.py::test_every_grader_has_at_least_one_mutation
+1 failed, 37 passed in 0.03s
+
+ended: 2026-09-26T00:03:00Z
+exit_code: 1
+duration_seconds: 0.147
