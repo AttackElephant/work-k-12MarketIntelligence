@@ -1,0 +1,102 @@
+{
+  "record": {
+    "authority": "shane",
+    "compatibility": {
+      "assessment": "compatible",
+      "known": true,
+      "note": "batch review feedback, protocol-2 challenge and controlled scope identity were introduced in 0.4.0; binding, work packages and the judgment layer in 0.5.0",
+      "pair": [
+        "0.3.0",
+        "0.5.0"
+      ],
+      "plan_adoptions": [],
+      "schema_stages": [
+        "artifact schema 0.3.0 -> 0.4.0",
+        "no successful legacy Planner attempt is available for plan adoption",
+        "added batch-review projections; retained 0 legacy contract-feedback artifact(s)",
+        "recorded scope identity v1 at 2d98ed3d5762",
+        "artifact schema 0.4.0 -> 0.5.0",
+        "reserved 'origin' (no semantics in schema 0.5.0)",
+        "reserved 'work_packages' (no semantics in schema 0.5.0)",
+        "reserved 'findings' (no semantics in schema 0.5.0)",
+        "reserved 'improvements' (no semantics in schema 0.5.0)"
+      ],
+      "work_packages": {
+        "contract_version": null,
+        "representation": "none"
+      }
+    },
+    "computed_from": {
+      "ledger_tip": {
+        "seq": 3,
+        "sha256": "8fb1cdca4a0f5c5072ad8491589e9fbfad680354d4a0181a42e3ce3380a164e6"
+      },
+      "manifest_sha256": "d80931aaf2a7d73118773a8300da2de5e4050fe91ca330eef84f0f94b1e63a60"
+    },
+    "decisions": [],
+    "dispositions": {
+      "decide": [],
+      "invalidate": [],
+      "regenerate": [],
+      "retain": [
+        "request:A0"
+      ]
+    },
+    "evidence": [
+      {
+        "detail": {
+          "artifact": "A0",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "request:A0",
+        "integrity": "verified",
+        "integrity_detail": "request.md: sha256 verified",
+        "kind": "request",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "request.md",
+        "supports": [
+          "draft"
+        ]
+      }
+    ],
+    "kind": "coding-harness.migration",
+    "obligations": [],
+    "previous": {
+      "artifact_schema_version": "0.3.0",
+      "method_commit": null,
+      "method_id": "coding-harness",
+      "method_version": "0.3.0"
+    },
+    "reason": "Bind 0.3.0 draft to coding-harness 0.5.0 at 3b7b830 before planning",
+    "record_version": 1,
+    "reference_integrity": {
+      "event_references_checked": 1,
+      "exceptions": [],
+      "failures": []
+    },
+    "resume": {
+      "arguments": [
+        "--apply",
+        "--confirm",
+        "{record_sha256}"
+      ]
+    },
+    "state": {
+      "basis": "every supporting evidence item is retained",
+      "current": "draft",
+      "resulting": "draft"
+    },
+    "target": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "3b7b830fd409e84f69cd4d8fb48feb6922b2d1bb",
+      "method_id": "coding-harness",
+      "method_version": "0.5.0"
+    },
+    "work_item": "20260908T113226"
+  },
+  "sha256": "b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110"
+}

@@ -1,0 +1,5 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-amknkw3i/k-12harness
+command: ["grep", "-RE", "^\\*\\*Type:\\*\\* (patch|minor|major)", "releases/_next/"]
+
+
+exit_code: 1

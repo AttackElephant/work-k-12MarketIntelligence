@@ -1,0 +1,10 @@
+started: 2026-09-27T13:36:46Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_usage.py", "-q"]
+
+.........                                                                [100%]
+9 passed in 0.16s
+
+ended: 2026-09-27T13:36:46Z
+exit_code: 0
+duration_seconds: 0.324

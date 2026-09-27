@@ -1,0 +1,7 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-amknkw3i/k-12harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_usage.py", "-q"]
+
+.........                                                                [100%]
+9 passed in 0.17s
+
+exit_code: 0

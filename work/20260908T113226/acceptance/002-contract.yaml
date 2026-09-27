@@ -1,0 +1,103 @@
+contract_version: 0.1.0
+artifact_version: 1
+work_item: 20260908T113226
+observable_behaviour:
+  - id: account-usage-recorded
+    behaviour: "A claude_account request whose CLI success envelope carries a `usage` block returns a `ModelResponse` with a populated `RequestUsage`, so `harness/usage.py` records non-zero input/output/cache_read/cache_write instead of the current all-zero record."
+  - id: per-model-recorded
+    behaviour: "When the envelope's `modelUsage` map names a main model and any helper model, their counts are summed into the returned aggregate and the per-model breakdown is recorded as integer-only, model-name-keyed entries in `RequestUsage.details` (DECIDED C2, option (a): no schema change)."
+  - id: missing-usage-safe
+    behaviour: "A missing or partial `usage` block yields a zeroed `RequestUsage` and the request still records, rather than raising."
+  - id: no-raw-no-secret
+    behaviour: "The recorded usage and its `details` contain only numeric counts and model names \u2014 never the CLI `result` text, never any token or credential."
+  - id: runbook-corrected
+    behaviour: "RUNBOOK.md \u00a71 no longer states that the Claude CLI does not expose cache counters; it reflects that claude returns `cache_read_input_tokens`/`cache_creation_input_tokens` and per-model `modelUsage`, which the harness now records (concern C1)."
+required_outputs:
+  - repo: k-12Harness
+    path: harness/claude_account_cli.py
+    reason: "Adds the pure `_request_usage(envelope)` helper and refactors `_invoke_claude` to pass `usage=` into the returned ModelResponse; the substantive change."
+  - repo: k-12Harness
+    path: tests/unit/test_claude_account_cli.py
+    reason: "Per-helper coverage/enforcement file for this adapter; must gain tests for usage mapping, helper-model aggregation, no-raw/no-secret, missing-usage tolerance, and end-to-end populated usage."
+  - repo: k-12Harness
+    path: RUNBOOK.md
+    reason: "Correct the stale \u00a71 sentence claiming the CLI does not expose cache counters (concern C1)."
+  - repo: k-12Harness
+    path: releases/_next/claude-account-usage.md
+    reason: "The release-notes CI gate requires exactly one new releases/_next/*.md (Type: patch) with Local deployment / Manual steps / Verification sections; the PR gate fails without it."
+permitted_files: []
+deterministic:
+  - id: full-test-suite
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/ -q"
+    expected: "The declared verification suite exits zero with no failures and no errors (pre-existing xfail/xpass unaffected)."
+    expect:
+      exit_code: 0
+      stdout_excludes: '\d+ (failed|error)'
+  - id: adapter-usage-tests
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/unit/test_claude_account_cli.py -q"
+    expected: "The adapter tests, including the new usage-parsing tests, exit zero with no failures."
+    expect:
+      exit_code: 0
+      stdout_excludes: '\d+ (failed|error)'
+  - id: usage-convention-green
+    repo: k-12Harness
+    command: ".venv/bin/python -m pytest tests/unit/test_usage.py -q"
+    expected: "The token-convention invariant (input_tokens includes cache read+write) stays green, proving the mapping obeyed it."
+    expect:
+      exit_code: 0
+      stdout_excludes: '\d+ (failed|error)'
+  - id: release-note-typed
+    repo: k-12Harness
+    command: "grep -RE '^\\*\\*Type:\\*\\* (patch|minor|major)' releases/_next/"
+    expected: "The added release note under releases/_next/ declares a patch/minor/major Type line, as the release-notes gate requires; the base commit has no such file so this depends on the change."
+    expect:
+      exit_code: 0
+must_not_change:
+  - invariant: "The genai-prices token convention enforced by harness/usage.py and tests/unit/test_usage.py: input_tokens INCLUDES cache read+write (USAGE_SONNET 1000+2000+100 => 3100). The mapping must satisfy it; neither file is edited."
+  - invariant: "harness/usage.py contains no code change \u2014 it already surfaces the four token fields and details and must merely inherit the populated RequestUsage (DECIDED C2, option (a): harness/usage.py stays out of scope)."
+  - invariant: "LlmRequestRecord SCHEMA_VERSION (=1) and its single `model` column stay unchanged (DECIDED C2, option (a): per-model usage rides in RequestUsage.details, no schema bump)."
+  - invariant: "The account-mode error and quota paths and `_redact_account_token` on every error string in harness/claude_account_cli.py; only usage population is added."
+  - invariant: "The contract pin (contract/PINNED.json) and tests/unit/test_contract_pin.py; VERSION is not touched and no releases/v*.md is added (release-notes gate)."
+failure_behaviour:
+  - condition: "The CLI success envelope has a missing or partial `usage` block."
+    expected: "`_request_usage` returns zeroed usage and the request records normally, never raising (ADR-005 telemetry-never-fails posture)."
+  - condition: "The `modelUsage` per-model sum disagrees with the top-level `usage` block."
+    expected: "The parser uses the `modelUsage` sum when present, otherwise the top-level block, and records both in `details` for auditability."
+compatibility:
+  - obligation: "ADR-005: record_run/telemetry never fails a successful run; the total-tolerant parser preserves this."
+  - obligation: "ADR-019: the account transport records account-plan usage only and leaks no credential or token; ADR-018 remains history and is superseded by ADR-019 for the local POC provider."
+  - obligation: "ADR-006: the cache-hit regression check remains `cache_read_tokens > 0` in the usage telemetry, now populatable on the account path."
+  - obligation: "ADR-007: the live tier (tests/live, -m live) stays manual and never becomes a PR gate; pytest.ini deselects -m live by default."
+  - obligation: "The release-notes CI gate (.github/workflows/pr-checks.yml job release-notes and .claude/hooks/require-release-notes.sh): exactly one new releases/_next/*.md with a Type line and Local deployment / Manual steps / Verification (fenced bash) sections; VERSION untouched; no releases/v*.md added."
+compatibility_baselines: []
+contract_requirements:
+  - id: scope-is-the-file-list
+    requirement: "The permitted change set is exactly required_outputs plus permitted_files; harness/usage.py, harness/agent.py, tests/unit/test_usage.py, docs/decisions.md and tests/live are outside scope."
+  - id: decision-per-model-granularity
+    requirement: "DECIDED (C2): per-model (helper-model) usage is recorded as integer-only, model-name-keyed entries in RequestUsage.details with no schema change (option (a)); the rejected option (b) would have added a first-class per-model column via an LlmRequestRecord SCHEMA_VERSION bump. Consequently LlmRequestRecord SCHEMA_VERSION stays 1 and harness/usage.py stays out of scope. This contract's required_outputs, must_not_change (SCHEMA_VERSION=1 invariant), semantic per-model-details and observable_behaviour per-model-recorded are all written on option (a)."
+  - id: assumption-cli-field-names
+    requirement: "ASSUMPTION: the CLI top-level `usage` block uses Anthropic-style names (input_tokens, output_tokens, cache_read_input_tokens, cache_creation_input_tokens) reporting input EXCLUDING cache (C1). Only cache_creation_input_tokens is confirmed by an existing repo fixture; the rest are asserted by concern C1, not pinned under work-store evidence."
+  - id: gap-helper-model-shape
+    requirement: "GAP: the helper-model `modelUsage` entry shape is unobserved (concern C1). The parser tolerates and aggregates helper entries when present and records them in details; no captured helper sample pins their keys."
+  - id: adr018-conflict-resolved
+    requirement: "ASSUMPTION: request.md vs ADR-018 ('Account plans expose neither per-request USD pricing nor provider cache counters through this CLI boundary') is resolved \u2014 ADR-018 (Codex boundary) is superseded by ADR-019 (T1 review), so recording cache/per-model counters needs no new superseding ADR; adding one is out of scope."
+semantic:
+  - id: usage-populated-per-convention
+    criterion: "A fake CLI success envelope carrying `usage` yields a ModelResponse whose RequestUsage sets cache_read_tokens, cache_write_tokens and output_tokens from the CLI counts and input_tokens = base_input + cache_read + cache_write; via usage.extract_request_records the LlmRequestRecord shows those non-zero values."
+  - id: helper-model-aggregated
+    criterion: "An envelope whose `modelUsage` names a main and a helper model produces an aggregate summing both, and a per-model breakdown in RequestUsage.details keyed by model name."
+  - id: per-model-details
+    criterion: "Per-model usage is recorded as integer-only, model-name-keyed details entries (DECIDED C2, option (a) of decision-per-model-granularity); no first-class column is added."
+  - id: no-raw-response-no-credential
+    criterion: "Neither the RequestUsage, its details, nor the resulting LlmRequestRecord contains the CLI `result` text, any raw response body, or any token/credential \u2014 only numeric counts and model names."
+  - id: telemetry-never-fails
+    criterion: "A missing/empty/partial usage block produces zeroed usage and a recorded request without raising."
+  - id: runbook-reflects-c1
+    criterion: "RUNBOOK.md \u00a71 no longer claims the Claude CLI does not expose cache counters and states the harness now records cache and per-model usage (C1)."
+out_of_scope:
+  - item: "Reconciling tests/live/test_live_eval.py (the cache-counter skip and the `not complete` assertion) \u2014 a live-tier behavioural decision, and any new live test must carry the `live` marker (PF-4)."
+  - item: "Enabling the account-mode cache-read assertion in the live tier; deferred pending captured helper-model/cache-read evidence."
+  - item: "Adding a superseding ADR to docs/decisions.md for the ADR-018 cache-counter claim (append-only log; resolved as superseded by ADR-019)."
+  - item: "A first-class per-model column or LlmRequestRecord SCHEMA_VERSION bump (DECIDED C2 rejected this in favour of option (a); see decision-per-model-granularity), and any change to harness/usage.py or harness/agent.py."

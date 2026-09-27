@@ -1,0 +1,82 @@
+{
+  "at": "2026-09-27T12:56:01Z",
+  "bases": {
+    "k-12Harness": "1b3284534ce9c57a547ee4f5291cf01c983977af"
+  },
+  "contract": "acceptance/002-contract.yaml",
+  "contract_sha256": "c659eaa7a49cb626034b741c9c1cd0135174f4ded14adc0c9f453242b2ade70f",
+  "contract_version": 2,
+  "environment_dirs": {
+    "k-12Harness": [
+      ".venv"
+    ]
+  },
+  "flagged": [],
+  "results": [
+    {
+      "command": ".venv/bin/python -m pytest tests/ -q",
+      "exit_code": 0,
+      "flags": [],
+      "id": "full-test-suite",
+      "log": "acceptance/002-dry-run/001-full-test-suite.log",
+      "log_sha256": "e55ef2face4f28cbfe468bf4106ef7b83d1073d50ddc8f8b4355227240556990",
+      "output_tail": [
+        "sssssssssss............................................................. [  8%]",
+        ".......x................................................................ [ 16%]",
+        "........................................................................ [ 24%]",
+        "........................................................................ [ 33%]",
+        "........................................................................ [ 41%]",
+        "........................................................................ [ 49%]",
+        "........................................................................ [ 58%]",
+        "........................................................................ [ 66%]",
+        "........................................................................ [ 74%]",
+        "..............sssssssssssss........ssss................................. [ 82%]",
+        "........................................................................ [ 91%]",
+        "........................................................................ [ 99%]",
+        "....                                                                     [100%]",
+        "839 passed, 28 skipped, 8 deselected, 1 xfailed in 12.09s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/unit/test_claude_account_cli.py -q",
+      "exit_code": 0,
+      "flags": [],
+      "id": "adapter-usage-tests",
+      "log": "acceptance/002-dry-run/002-adapter-usage-tests.log",
+      "log_sha256": "3edebe802c9dc438552b60a48ddcd0176a6e43c51298c16f19db568081c4d092",
+      "output_tail": [
+        "...............                                                          [100%]",
+        "15 passed in 0.14s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/unit/test_usage.py -q",
+      "exit_code": 0,
+      "flags": [],
+      "id": "usage-convention-green",
+      "log": "acceptance/002-dry-run/003-usage-convention-green.log",
+      "log_sha256": "9d023d5d594a86ee505be08c794403c67320a28acbcc11e96218cadf1600741e",
+      "output_tail": [
+        ".........                                                                [100%]",
+        "9 passed in 0.17s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "grep -RE '^\\*\\*Type:\\*\\* (patch|minor|major)' releases/_next/",
+      "exit_code": 1,
+      "flags": [],
+      "id": "release-note-typed",
+      "log": "acceptance/002-dry-run/004-release-note-typed.log",
+      "log_sha256": "5e27d59f40772dd668b868a89b7b2742868ab1bd405622d8a20b02b9c60b2fae",
+      "output_tail": [],
+      "ran": true,
+      "repo": "k-12Harness"
+    }
+  ]
+}

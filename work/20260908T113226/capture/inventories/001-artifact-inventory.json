@@ -1,0 +1,41 @@
+{
+  "captured_at": "2026-09-27T12:50:05Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract.yaml",
+      "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.json",
+      "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.manifest-before.yaml",
+      "planning/001-plan.md",
+      "request.md"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "01b8ac82c1a5861bdaa8ac392ece38dc2472adfbdfd0cd19eaba83c17a1eea3e",
+      "size": 9917
+    },
+    "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.json": {
+      "kind": "file",
+      "sha256": "f647b48f549def2cef5ab1fe455110c0ffb026deb4e9c9e99ccb11968568cdac",
+      "size": 3116
+    },
+    "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "d80931aaf2a7d73118773a8300da2de5e4050fe91ca330eef84f0f94b1e63a60",
+      "size": 2336
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "75c4edd7505683e21a6ff638bc9f2cc00450d8577822a1a72f1580c83372816b",
+      "size": 11079
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "e0cbd9916e22312544f939bee7dded11eca3993cdfda454b6afde7fa8d4210b6",
+      "size": 197
+    }
+  }
+}

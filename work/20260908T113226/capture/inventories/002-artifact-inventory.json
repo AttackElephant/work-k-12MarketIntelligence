@@ -1,0 +1,78 @@
+{
+  "captured_at": "2026-09-27T12:55:48Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract-review.md",
+      "acceptance/001-dry-run.json",
+      "acceptance/001-dry-run/001-full-test-suite.log",
+      "acceptance/001-dry-run/002-adapter-usage-tests.log",
+      "acceptance/001-dry-run/003-usage-convention-green.log",
+      "acceptance/001-dry-run/004-release-note-typed.log",
+      "acceptance/002-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "51979049855efa12424473544aed98ce7812f861b499c64ef809f7688fa66115",
+      "size": 9705
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "01b8ac82c1a5861bdaa8ac392ece38dc2472adfbdfd0cd19eaba83c17a1eea3e",
+      "size": 9917
+    },
+    "acceptance/001-dry-run.json": {
+      "kind": "file",
+      "sha256": "3fee62635e314f48d9648b1f8289ba6cbb035b165313743a6c551f9a668d1543",
+      "size": 3458
+    },
+    "acceptance/001-dry-run/001-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "b667ee1227ad2fe4c38681e2da4f897d20164cb6bf9eb9beee819a47d9fc2a15",
+      "size": 1258
+    },
+    "acceptance/001-dry-run/002-adapter-usage-tests.log": {
+      "kind": "file",
+      "sha256": "d81460d82489d7fdf69f8c71b642b6e461149fb02e6f3884ba753b7128593ad0",
+      "size": 290
+    },
+    "acceptance/001-dry-run/003-usage-convention-green.log": {
+      "kind": "file",
+      "sha256": "ccebf2ef3e96e3594400cfe3b5b23b489539038fad6b799f411749e387ed2faa",
+      "size": 276
+    },
+    "acceptance/001-dry-run/004-release-note-typed.log": {
+      "kind": "file",
+      "sha256": "d034d3a7cc6b0135db066277f925a9a7b38e96ce0b7a90d44535631943fa8990",
+      "size": 184
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "c659eaa7a49cb626034b741c9c1cd0135174f4ded14adc0c9f453242b2ade70f",
+      "size": 10148
+    },
+    "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.json": {
+      "kind": "file",
+      "sha256": "f647b48f549def2cef5ab1fe455110c0ffb026deb4e9c9e99ccb11968568cdac",
+      "size": 3116
+    },
+    "migrations/b0e37d1efc29901068ad681d26aea75f1469c69c1af1a5e2540227a654ffb110.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "d80931aaf2a7d73118773a8300da2de5e4050fe91ca330eef84f0f94b1e63a60",
+      "size": 2336
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "75c4edd7505683e21a6ff638bc9f2cc00450d8577822a1a72f1580c83372816b",
+      "size": 11079
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "e0cbd9916e22312544f939bee7dded11eca3993cdfda454b6afde7fa8d4210b6",
+      "size": 197
+    }
+  }
+}

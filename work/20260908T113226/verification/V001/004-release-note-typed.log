@@ -1,0 +1,9 @@
+started: 2026-09-27T13:36:46Z
+cwd: /Users/shane/Projects/k-12Harness
+command: ["grep", "-RE", "^\\*\\*Type:\\*\\* (patch|minor|major)", "releases/_next/"]
+
+releases/_next/claude-account-usage.md:**Type:** patch
+
+ended: 2026-09-27T13:36:46Z
+exit_code: 0
+duration_seconds: 0.003

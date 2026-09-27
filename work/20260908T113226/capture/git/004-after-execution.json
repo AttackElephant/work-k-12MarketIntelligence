@@ -1,0 +1,22 @@
+{
+  "base": "1b3284534ce9c57a547ee4f5291cf01c983977af",
+  "branch": "wi/20260908T113226",
+  "captured_at": "2026-09-27T13:15:44Z",
+  "head": "1b3284534ce9c57a547ee4f5291cf01c983977af",
+  "label": "after-execution",
+  "repo": "/Users/shane/Projects/k-12Harness",
+  "status_porcelain": [
+    " M RUNBOOK.md",
+    " M harness/claude_account_cli.py",
+    " M tests/unit/test_claude_account_cli.py",
+    "?? releases/_next/claude-account-usage.md"
+  ],
+  "tracked_changes_from_base": [
+    "RUNBOOK.md",
+    "harness/claude_account_cli.py",
+    "tests/unit/test_claude_account_cli.py"
+  ],
+  "untracked": [
+    "releases/_next/claude-account-usage.md"
+  ]
+}
