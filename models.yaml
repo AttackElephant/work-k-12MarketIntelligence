@@ -1,8 +1,14 @@
+# Executor tiers route through Claude Code as the governed edit transport. `edit_tools`
+# keeps the default file tools and adds one scoped shell rule: the component's own
+# verification entry point (k-12Harness/.method.yaml: verify), so the executor can run
+# focused checks before it returns. No other shell command is permitted. The harness's
+# deterministic verification still runs independently afterwards and is the authority.
 executor_ladder:
 - tier: T0
   provider: anthropic
   model: claude-sonnet-5
   transport: claude
+  edit_tools: [Read, Edit, Write, Grep, Glob, 'Bash(.venv/bin/python -m pytest *)']
   model_class: executor
   billing: subscription
   context_window: 200000
@@ -15,6 +21,7 @@ executor_ladder:
   provider: anthropic
   model: claude-sonnet-5
   transport: claude
+  edit_tools: [Read, Edit, Write, Grep, Glob, 'Bash(.venv/bin/python -m pytest *)']
   model_class: executor
   billing: subscription
   context_window: 200000
@@ -27,6 +34,7 @@ executor_ladder:
   provider: anthropic
   model: claude-sonnet-5
   transport: claude
+  edit_tools: [Read, Edit, Write, Grep, Glob, 'Bash(.venv/bin/python -m pytest *)']
   model_class: executor
   billing: subscription
   context_window: 200000
