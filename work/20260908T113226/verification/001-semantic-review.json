@@ -1,0 +1,19 @@
+{
+  "classification": "blocker",
+  "covers": [],
+  "findings": [
+    {
+      "evidence": "In harness/claude_account_cli.py, `_request_usage` adds `usage.input_tokens`, `usage.output_tokens`, `usage.cache_read_tokens`, and `usage.cache_write_tokens` whenever the top-level usage block is present. `usage` is not a model name, so these entries do not satisfy the required \u201cmodel-name-keyed\u201d per-model breakdown. The new helper-model test explicitly asserts these extra entries, thereby encoding behavior contrary to the semantic criterion rather than detecting it.",
+      "id": "details-not-per-model-only",
+      "regression": false,
+      "required_change": "Remove the `usage.*` entries from `RequestUsage.details`; keep the top-level counts only in the aggregate RequestUsage fields, and populate details solely with integer count entries keyed by actual names from `modelUsage`. Update the test and documentation/docstring accordingly.",
+      "severity": "blocker",
+      "summary": "RequestUsage.details contains non-model-keyed top-level usage entries."
+    }
+  ],
+  "kind": "general",
+  "resolutions": {},
+  "review": "S1",
+  "round": 1,
+  "summary": "The aggregate usage mapping is implemented, but RequestUsage.details violates the contract\u2019s required per-model-only representation by also recording the top-level usage block as a pseudo-model."
+}

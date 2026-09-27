@@ -56,7 +56,7 @@ request: "Make the Claude account adapter record the CLI’s actual aggregate an
   \ cache and helper-model usage—without exposing raw responses or credentials."
 narrative: null
 class: null
-state: verified_det
+state: accepted
 parent: null
 children: []
 transitions:
@@ -208,6 +208,65 @@ transitions:
     evidence: 4 deterministic criteria pass against contract v2 in execution cycle 50 across V001
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-09-27T13:46:37Z'
+  transition: T10
+  event: checkpoint
+  from: verified_det
+  to: checkpointed
+  by: shane
+  reason: 'Checkpoint fbe4b36 on wi/20260908T113226: exactly the 4 permitted paths V001 verified against
+    contract v2'
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: checkpoint_recorded
+    evidence: checkpoint at 2026-09-27T13:46:02Z across 2 repository scope(s)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-27T14:12:56Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane
+  reason: Semantic review S1 recorded; its only finding SF-1 dispositioned reject (contract v2 failure_behaviour
+    requires top-level usage in details); no open blockers
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'revise'
+  - guard: semantic_evidence_current
+    evidence: semantic review S1 binds contract v2, candidate 29cf6c94afc7 and this execution cycle
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-27T14:16:52Z'
+  transition: T12
+  event: accept
+  from: verified_sem
+  to: accepted
+  by: shane
+  reason: 'Contract v2 met: V001 passed all 4 deterministic criteria; S1 semantic review recorded with
+    SF-1 rejected against the contract failure_behaviour clause; checkpoint fbe4b36 on wi/20260908T113226;
+    C1 resolved'
+  guards:
+  - guard: semantic_evidence_current
+    evidence: semantic review S1 binds contract v2, candidate 29cf6c94afc7 and this execution cycle
+  - guard: semantic_outcome_pass
+    evidence: semantic review S1 classified BLOCKER; every blocker is dispositioned as rejected or carried
+      as residual risk
+  - guard: judgment_findings_dispositioned
+    evidence: 1 finding(s) dispositioned
+  - guard: work_packages_complete
+    evidence: no explicit work packages; the contract is the implicit single package
+  - guard: compatibility_satisfied
+    evidence: 0 affected consumer(s) recorded and escalated
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 4
   subsystems: []
@@ -311,13 +370,16 @@ concerns:
     in modelUsage not yet observed.'
   detail: null
   blocking: false
-  status: open
+  status: resolved
   opened_at: '2026-09-27T11:20:08Z'
   references:
   - k-12Harness:RUNBOOK.md
   - request.md
-  resolution: null
-  resolved_at: null
+  resolution: 'RUNBOOK.md corrected in checkpoint fbe4b36 (contract v2 runbook-corrected, verified V001
+    and reviewed in S1): it now states the CLI returns cache counters and modelUsage and the harness records
+    them. Helper-model modelUsage shape remains unobserved; the parser tolerates any keys.'
+  resolved_at: '2026-09-27T14:16:45Z'
+  resolved_by: shane
 - id: C2
   origin_stage: contracting
   raised_by: operator
@@ -415,6 +477,15 @@ artifacts:
   flagged: []
   created_at: '2026-09-27T12:56:01Z'
   produced_by_attempt: 3
+- status: current
+  supersedes: null
+  id: A8
+  type: semantic_review
+  path: verification/001-semantic-review.json
+  version: 1
+  sha256: f9e35a4c4790df246b9276a234a61bb31a069d545e89232f6ec81bcf28b967dc
+  created_at: '2026-09-27T13:47:26Z'
+  produced_by_attempt: 5
 attempts:
 - attempt: 1
   role: planner
@@ -716,6 +787,34 @@ attempts:
   read_context_files: 5
   effective_context_sha256: d6ff8a42a5ba9fc5e470927548416936361ec6ddc751dcbc2ca24256ae9b4ae2
   native_log_bytes: 924168
+- attempt: 5
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-09-27T13:47:07Z'
+  semantic_round: 1
+  semantic_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-27T13:47:26Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 18756
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 762
+    reasoning_output_tokens: 516
+  context_bytes: 20589
 routing:
   executor_ladder:
   - T0
@@ -818,7 +917,63 @@ verification:
       log_sha256: f33ba42e021ef80458e8b5305faef19396c253571584b39fd5e12ff4bf87f57f
     expectations_not_evaluated: []
     ended_at: '2026-09-27T13:36:46Z'
-  semantic_reviews: []
+  semantic_reviews:
+  - id: S1
+    at: '2026-09-27T13:47:26Z'
+    work_item: 20260908T113226
+    work_package: null
+    round: 1
+    kind: general
+    covers: []
+    classification: blocker
+    outcome: revise
+    material_finding: false
+    binding:
+      contract_version: 2
+      contract_sha256: c659eaa7a49cb626034b741c9c1cd0135174f4ded14adc0c9f453242b2ade70f
+      execution_cycle:
+        transition_event: 50
+        transition_sha256: df12b0c56dbeb55b0ad8febf67ab03c7059538ba1dcf6d4f36f9532a653e9689
+      candidate_sha256: 29cf6c94afc771f6fa0d27f228d06b710b30a144067a3208f50142daf815b52a
+      verified_candidate_sha256: 02853935f3e40fc40200a3ff4e5154e342e2fe1697287b579cfc8f9c9e8bbeb7
+      checkpoint_at: '2026-09-27T13:46:02Z'
+      checkpoint_commits:
+      - repo: work-store
+        commit: cc6a779412acde34bf385c2f99aa0113dbd533c3
+      - repo: k-12Harness
+        commit: fbe4b3683df7ebedfd10db8b49932b66b97ad7b5
+      work_package: null
+    verifier:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+      role: verifier
+      attempt: 5
+      independent_of_executor: true
+      independence_basis: a different provider/model from the executor
+      executor_route:
+        provider: anthropic
+        model: claude-sonnet-5
+        tier: T0
+        attempt: 4
+      independence_authorised_by: null
+    artifact: verification/001-semantic-review.json
+    artifact_id: A8
+    sha256: f9e35a4c4790df246b9276a234a61bb31a069d545e89232f6ec81bcf28b967dc
+    summary: The aggregate usage mapping is implemented, but RequestUsage.details violates the contract’s
+      required per-model-only representation by also recording the top-level usage block as a pseudo-model.
+    resolutions: {}
+    findings:
+    - SF-1
+    carried_forward: []
 stage_outcomes:
   challenge:
     performed: false
@@ -830,17 +985,69 @@ stage_outcomes:
     changed_plan: false
     evidence: []
   semantic_verification:
-    performed: false
+    performed: true
     material_finding: false
-    evidence: []
+    evidence:
+    - A8
 effort:
-  controller_commands: 13
-  model_sessions_launched: 4
-checkpoints: []
+  controller_commands: 18
+  model_sessions_launched: 5
+checkpoints:
+- at: '2026-09-27T13:46:02Z'
+  message: 'feat(claude-account): record CLI token usage including cache and per-model counts'
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: main
+    commit: cc6a779412acde34bf385c2f99aa0113dbd533c3
+    uncommitted: []
+    created: false
+  - repo: k-12Harness
+    branch: wi/20260908T113226
+    commit: fbe4b3683df7ebedfd10db8b49932b66b97ad7b5
+    parent: 1b3284534ce9c57a547ee4f5291cf01c983977af
+    permitted:
+    - RUNBOOK.md
+    - harness/claude_account_cli.py
+    - releases/_next/claude-account-usage.md
+    - tests/unit/test_claude_account_cli.py
+    committed_paths:
+    - RUNBOOK.md
+    - harness/claude_account_cli.py
+    - releases/_next/claude-account-usage.md
+    - tests/unit/test_claude_account_cli.py
+    uncommitted_outside_scope: []
+    created: true
+    commit_output: "[wi/20260908T113226 fbe4b36] feat(claude-account): record CLI token usage including\
+      \ cache and per-model counts\n 4 files changed, 335 insertions(+), 2 deletions(-)\n create mode\
+      \ 100644 releases/_next/claude-account-usage.md"
+  verified:
+    contract_version: 2
+    contract_sha256: c659eaa7a49cb626034b741c9c1cd0135174f4ded14adc0c9f453242b2ade70f
+    execution_cycle:
+      transition_event: 50
+      transition_sha256: df12b0c56dbeb55b0ad8febf67ab03c7059538ba1dcf6d4f36f9532a653e9689
+    candidate_sha256: 02853935f3e40fc40200a3ff4e5154e342e2fe1697287b579cfc8f9c9e8bbeb7
+    criteria:
+    - adapter-usage-tests
+    - full-test-suite
+    - release-note-typed
+    - usage-convention-green
+    runs:
+    - V001
+  commit_created: true
 acceptance:
-  state: pending
-  at: null
-  gates_satisfied: []
+  state: accepted
+  at: '2026-09-27T14:16:52Z'
+  gates_satisfied:
+  - semantic_evidence_current
+  - semantic_outcome_pass
+  - judgment_findings_dispositioned
+  - work_packages_complete
+  - compatibility_satisfied
+  - no_open_blocking_concerns
+  - human_authorisation
+  - migration_obligations_satisfied
 escapes: []
 lock:
   owner: shane@Mimir.local
@@ -860,7 +1067,40 @@ scope_version: 3
 scope_sha256: 727a107c9877b5b21e512980bd13cab2f38af6ca0bf69d33b2eaac82edc015c7
 origin: null
 work_packages: []
-findings: []
+findings:
+- id: SF-1
+  origin: semantic
+  review: S1
+  round: 1
+  severity: blocker
+  summary: RequestUsage.details contains non-model-keyed top-level usage entries.
+  detail: null
+  required_change: Remove the `usage.*` entries from `RequestUsage.details`; keep the top-level counts
+    only in the aggregate RequestUsage fields, and populate details solely with integer count entries
+    keyed by actual names from `modelUsage`. Update the test and documentation/docstring accordingly.
+  evidence: In harness/claude_account_cli.py, `_request_usage` adds `usage.input_tokens`, `usage.output_tokens`,
+    `usage.cache_read_tokens`, and `usage.cache_write_tokens` whenever the top-level usage block is present.
+    `usage` is not a model name, so these entries do not satisfy the required “model-name-keyed” per-model
+    breakdown. The new helper-model test explicitly asserts these extra entries, thereby encoding behavior
+    contrary to the semantic criterion rather than detecting it.
+  references: []
+  work_package: null
+  regression: false
+  carried_into: null
+  status: dispositioned
+  raised_at: '2026-09-27T13:47:26Z'
+  disposition:
+    kind: reject
+    rationale: Contract v2 failure_behaviour requires the parser to record both the modelUsage per-model
+      counts and the top-level usage block in details for auditability; per-model-recorded and per-model-details
+      require model-name-keyed per-model entries, not that details holds nothing else; DECIDED C2 fixed
+      the storage location, not exclusivity. The usage.* entries are integer-only and fixed-prefixed,
+      carry no raw text or credential, and removing them would violate the contract.
+    authorised_by: shane
+    at: '2026-09-27T13:49:24Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-27T13:49:24Z'
 improvements: []
 migration_obligations: []
 continuations: []
