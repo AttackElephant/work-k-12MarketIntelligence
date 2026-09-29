@@ -1610,3 +1610,146 @@ continuations:
   event_sha256: 8a4ac1ad533a7ddaf4dbfdd3f1aeff1427ee6e3daeed364763744b8ba052bd24
   activated_at: '2026-09-29T08:04:37Z'
   completed_at: '2026-09-29T08:05:21Z'
+delivery:
+  contract:
+    kind: merge-release-notes
+    notes_dir: releases/_next
+    template: releases/_template.md
+    version_file: VERSION
+    tag_format: v{version}
+    remote: origin
+    pull_request_command: null
+    source: declared
+    path_classes:
+      minor:
+      - .method.yaml
+      - .claude/hooks/require-release-notes.sh
+      - harness/**
+      - prompts/**
+      - contract/*.json
+      - contract/question_schemas/**
+      - evals/**
+      - server/**
+      - sql/**
+      - config/**
+      - '*.py'
+      - requirements*.txt
+      - setup.sh
+      - pytest.ini
+      - logging_config.yaml
+      - .github/**
+      - .claude/**
+      patch:
+      - tests/**
+      - docs/**
+      - releases/**
+      - captures/**
+      - contract/*.md
+      - '*.md'
+      - .env.example
+      - .gitignore
+      source: declared
+  steps:
+    note:
+      repo: k-12Harness
+      branch: wi/20260908T113253
+      path: releases/_next/reconcile-doc-surfaces.md
+      sha256: f847adde5291624d1377c1ad1b4996f23027d5c4933acca095f40a9112978353
+      commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      candidate: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      classification:
+        increment: patch
+        mechanical: patch
+        rule: 'patch: every changed path is a non-behaviour path, or a behaviour path whose Python changed
+          only in comments or docstrings'
+        paths:
+        - path: README.md
+          class: patch
+          pattern: '*.md'
+          content: text
+          effective: patch
+        - path: RUNBOOK.md
+          class: patch
+          pattern: '*.md'
+          content: text
+          effective: patch
+        - path: releases/_next/reconcile-doc-surfaces.md
+          class: patch
+          pattern: releases/**
+          content: text
+          effective: patch
+        path_classes:
+          minor:
+          - .method.yaml
+          - .claude/hooks/require-release-notes.sh
+          - harness/**
+          - prompts/**
+          - contract/*.json
+          - contract/question_schemas/**
+          - evals/**
+          - server/**
+          - sql/**
+          - config/**
+          - '*.py'
+          - requirements*.txt
+          - setup.sh
+          - pytest.ini
+          - logging_config.yaml
+          - .github/**
+          - .claude/**
+          patch:
+          - tests/**
+          - docs/**
+          - releases/**
+          - captures/**
+          - contract/*.md
+          - '*.md'
+          - .env.example
+          - .gitignore
+          source: declared
+        major_decision: null
+        declared: null
+      contract_source: declared
+      adopted: the accepted candidate carries its own release note; nothing was written or committed
+      recorded: true
+      event_seq: 95
+    push:
+      repo: k-12Harness
+      remote: origin
+      branch: wi/20260908T113253
+      commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      remote_before: null
+      already_present: false
+      recorded: true
+      event_seq: 96
+    pull-request:
+      repo: k-12Harness
+      branch: wi/20260908T113253
+      base: main
+      url: https://github.com/AttackElephant/k-12Harness/pull/9
+      commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      how: recorded
+      command_output: null
+      recorded: true
+      event_seq: 97
+    merged:
+      repo: k-12Harness
+      remote: origin
+      default_branch: main
+      merge_commit: e68b6412f383021d230f9b12321399632a3a1a51
+      merge_kind: merge
+      delivered_commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      pull_request: https://github.com/AttackElephant/k-12Harness/pull/9
+      verified_paths:
+      - README.md
+      - RUNBOOK.md
+      - releases/_next/reconcile-doc-surfaces.md
+      release:
+        tag: v1.2.1
+        version: 1.2.1
+        commit: e4bd76bd90ce258e56fa41a65ad1b60e3589820a
+        version_file: 1.2.1
+        consistent: true
+      complete: true
+      recorded: true
+      event_seq: 99
