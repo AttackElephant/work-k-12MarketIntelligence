@@ -85,25 +85,52 @@ transitions:
   event_seq: 4
   obligations: []
 size_estimate:
-  files: null
-  subsystems: []
-  scale: null
-definitions: []
+  files: 6
+  scale: medium
+  subsystems:
+  - docs
+  - cli
+  - releases
+  - tests
+  source: planner
+definitions:
+- ref: docs/architecture.md
+  repo: k-12Harness
+  authority: null
+  revision: sha256:d20e51fff1b7fb4043c220d7f1ef67e9953bafbe203fa84a2d834f80ab183b85
+  sha256: d20e51fff1b7fb4043c220d7f1ef67e9953bafbe203fa84a2d834f80ab183b85
+- ref: docs/decisions.md
+  repo: k-12Harness
+  authority: null
+  revision: sha256:18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
+  sha256: 18d2cce9c5c4dd80abc78fffa2f1c5be89f8c18f494cc51cf60325279969c918
 compatibility:
   baselines: []
   affected_consumers: []
 scope:
 - id: work-store
-  repo: /home/user/work-k-12MarketIntelligence
-  store_directory: work-k-12MarketIntelligence
+  repo: /Users/shane/Projects/work/k-12MarketIntelligence
+  store_directory: k-12MarketIntelligence
   role: evidence
   governance: append-only
-  branch: claude/method-coding-harness-review-6nqxx6
-  base_commit: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  branch: main
+  base_commit: 5bce091aea66981e842bac8f00327fb0725d3cf4
   dirty: true
   dirty_explanation: the work item writes its own evidence here
-  head_at_dispatch: fd3ad035ddbea9c7eb6a890f169e8a0ee261aa2f
+  head_at_dispatch: 5bce091aea66981e842bac8f00327fb0725d3cf4
   verify: null
+  declared_files: []
+  declared: false
+- id: k-12Harness
+  repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  governance: diff-allowlist
+  branch: wi/20260908T113253
+  base_commit: e4141843ae5abe51ce85c99778de7a126f5f206a
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: e4141843ae5abe51ce85c99778de7a126f5f206a
+  verify: .venv/bin/python -m pytest tests/ -q
   declared_files: []
   declared: false
 risk:
@@ -130,7 +157,79 @@ artifacts:
   produced_by_attempt: null
   status: current
   supersedes: null
-attempts: []
+- status: current
+  supersedes: null
+  id: A1
+  type: planning_plan
+  path: planning/001-plan.md
+  version: 1
+  sha256: b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b
+  created_at: '2026-09-29T02:46:30Z'
+  produced_by_attempt: 1
+attempts:
+- attempt: 1
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-09-29T02:42:11Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-29T02:46:30Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 13
+    cache_creation_input_tokens: 141378
+    cache_read_input_tokens: 257535
+    output_tokens: 18811
+  initial_input_tokens: 26364
+  peak_input_tokens: 51147
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root1:docs/architecture.md
+  - root1:docs/decisions.md
+  - root1:run.py
+  - root1:RUNBOOK.md
+  - root1:README.md
+  - root1:config/settings.py
+  - root1:demo.py
+  - root1:releases/v1.2.0.md
+  - root1:releases/_template.md
+  - root1:tests/unit/test_run_cli.py
+  requested_files_read:
+  - root1:run.py
+  - root1:RUNBOOK.md
+  - root1:README.md
+  - root1:config/settings.py
+  - root1:demo.py
+  - root1:releases/v1.2.0.md
+  - root1:releases/_template.md
+  - root1:tests/unit/test_run_cli.py
+  plan: planning/001-plan.md
+  size_estimate:
+    files: 6
+    scale: medium
+    subsystems:
+    - docs
+    - cli
+    - releases
+    - tests
+    source: planner
+  headroom: 0.1318
+  growth_per_turn: 12391.5
 routing:
   executor_ladder:
   - T0
@@ -162,7 +261,7 @@ stage_outcomes:
     evidence: []
 effort:
   controller_commands: 1
-  model_sessions_launched: 0
+  model_sessions_launched: 1
 checkpoints: []
 acceptance:
   state: pending
@@ -182,8 +281,8 @@ review_batches: []
 review_reconciliations: []
 review_items: []
 review_actions: []
-scope_version: 1
-scope_sha256: 2d98ed3d5762a94d9c1484247ce0497bcd0b43d7426b19c94884bf5f4ca63a86
+scope_version: 2
+scope_sha256: b835c49bd39bd9cdb19e6de4a9f0529a0c224da88cc2d48b6a038a0a5bf2f92c
 origin: null
 work_packages: []
 findings: []
