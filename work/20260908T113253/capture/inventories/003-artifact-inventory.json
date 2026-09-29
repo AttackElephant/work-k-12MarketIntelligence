@@ -1,0 +1,89 @@
+{
+  "captured_at": "2026-09-29T07:18:05Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract-review.md",
+      "acceptance/001-dry-run.json",
+      "acceptance/001-dry-run/001-full-test-suite.log",
+      "acceptance/001-dry-run/002-demo-properties-green.log",
+      "acceptance/001-dry-run/003-run-cli-green.log",
+      "acceptance/001-dry-run/004-contract-pin-unchanged.log",
+      "acceptance/001-dry-run/005-release-note-typed.log",
+      "acceptance/002-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    ".DS_Store": {
+      "kind": "file",
+      "sha256": "b15760aa3d067af8e624ea222cd7304280e821f98d7f60c582f490ddbb848c42",
+      "size": 6148
+    },
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "b6c136bd08afb909ccf32dcfcb74229f536a38c03945c04ce746d2a86edbbc77",
+      "size": 13562
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "738c54436db6cfb884c7cc34307700a5dd0d279fa429baad85e1168620337c76",
+      "size": 14941
+    },
+    "acceptance/001-dry-run.json": {
+      "kind": "file",
+      "sha256": "2afc2a2bbf53ad267539d9a97bd8637364eca1857a23a058671ffb3efa012bc4",
+      "size": 3963
+    },
+    "acceptance/001-dry-run/001-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "43267bbf1821905a446afc797354cb0f9c49a7750411642f06083f1767a75c53",
+      "size": 1258
+    },
+    "acceptance/001-dry-run/002-demo-properties-green.log": {
+      "kind": "file",
+      "sha256": "ecc7b301682a490bfef1ee359597318d7a1998d97019b8f6723cc711a6b49dbf",
+      "size": 276
+    },
+    "acceptance/001-dry-run/003-run-cli-green.log": {
+      "kind": "file",
+      "sha256": "8aba905b91242056750e18ea491ba2e9cd63912d88142e903634f4a18183bd62",
+      "size": 279
+    },
+    "acceptance/001-dry-run/004-contract-pin-unchanged.log": {
+      "kind": "file",
+      "sha256": "aee8f9771b59c615c45d4d94ca477bd98c389b17318268f4bb6e4923a3afb0a2",
+      "size": 283
+    },
+    "acceptance/001-dry-run/005-release-note-typed.log": {
+      "kind": "file",
+      "sha256": "db9392f814e8fffe84c4252ed9a4f1390c98f9006bfacfec930b4a9a203aba42",
+      "size": 184
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5",
+      "size": 14311
+    },
+    "migrations/1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937.json": {
+      "kind": "file",
+      "sha256": "5c811ba9f5416d12df5dff049640d827b9d45d70615cfafba39202deb65b3aa3",
+      "size": 3516
+    },
+    "migrations/1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "aee4c81a09ee17998632fd2d4f1cf0764c8f712ee93d2b32811363456fbebc04",
+      "size": 2349
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b",
+      "size": 12360
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "d1058b867ce6ccc7ed6076f54413564b029bd0651971df2f14f264e8d9c63f80",
+      "size": 209
+    }
+  }
+}

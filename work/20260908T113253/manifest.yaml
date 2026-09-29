@@ -65,7 +65,7 @@ request: "Reconcile entry points, CLI help, runbook guidance, and release docume
   \ pipeline status, explicit evaluation stages, pinned model, and checkpoint\n  compatibility rules."
 narrative: null
 class: null
-state: draft
+state: verified_det
 parent: null
 children: []
 transitions:
@@ -84,15 +84,153 @@ transitions:
   migration_record_sha256: 1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937
   event_seq: 4
   obligations: []
+- at: '2026-09-29T02:56:58Z'
+  transition: T1
+  event: plan-ready
+  from: draft
+  to: planned
+  by: shane@Mimir.local
+  reason: Operator reviewed the bounded plan and size estimate.
+  guards:
+  - guard: definitions_resolved
+    evidence: 2 definition references resolve at their recorded revisions
+  - guard: definition_conflicts_are_structured
+    evidence: 0 open planning concern(s) recorded as structured entries
+  - guard: planning_artifact_exists
+    evidence: planning artifact 001-plan.md
+  - guard: base_state_recorded
+    evidence: base commit, branch and tree state recorded for every scope entry
+  - guard: size_estimate_present
+    evidence: size estimate files=6 scale=medium
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T03:00:25Z'
+  transition: T2
+  event: risk
+  from: planned
+  to: classified
+  by: shane@Mimir.local
+  reason: Operator confirmed the risk classification.
+  guards:
+  - guard: risk_classified
+    evidence: risk low with rationale
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T07:23:05Z'
+  transition: T3
+  event: acceptance-ready
+  from: classified
+  to: contracted
+  by: shane@Mimir.local
+  reason: Operator approved contract v2 carrying DECIDED C1 and C2.
+  guards:
+  - guard: contract_current_and_intact
+    evidence: contract v2 intact (ea24050b01ae)
+  - guard: contract_deterministic_criteria
+    evidence: 3 deterministic criteria
+  - guard: owner_decisions_recorded
+    evidence: 'every DECISION: entry of the current contract has a blocking concern'
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T07:34:22Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: Low-risk pre-execution obligations are complete.
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: contract_dry_run_current
+    evidence: contract v2 dry-run at the base commit
+  - guard: owner_decisions_carried
+    evidence: 'owner decisions carried: decision-checkpoint-referent (C1), decision-release-note-type
+      (C2)'
+  - guard: no_held_semantic_defect
+    evidence: no semantic contract defect is held
+  - guard: planning_review_complete
+    evidence: the bounded planning review is not an obligation at this risk level
+  - guard: no_applicable_review_batches
+    evidence: no applicable review feedback batches
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T07:34:29Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  guards:
+  - guard: review_readiness_current
+    evidence: latest readiness transition has no review batch and no late feedback exists
+  - guard: scope_revalidated
+    evidence: revalidated work-store@1613260b4030 (evidence, branch only), k-12Harness@e4141843ae5a
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''contract'', ''planning'']'
+  - guard: planning_review_complete
+    evidence: the bounded planning review is not an obligation at this risk level
+  - guard: headroom_guard_passed
+    evidence: headroom 0.1323 (26450 of 200000 tokens)
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T07:35:55Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  guards:
+  - guard: attempt_closed
+    evidence: 5 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v2 intact (ea24050b01ae)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 3 file(s) within 3 declared from e4141843ae5a'
+  - guard: executor_tool_policy_honoured
+    evidence: attempt 5 advertised exactly the requested tools ['Bash', 'Edit', 'Glob', 'Grep', 'Read',
+      'Write'] under permission mode 'acceptEdits' with scoped rules ['Bash(.venv/bin/python -m pytest
+      *)']
+  - guard: contracted_outputs_exist
+    evidence: 3 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 004-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T07:51:26Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: Operator reviewed the current-contract deterministic pass.
+  guards:
+  - guard: sandbox_incidents_acknowledged
+    evidence: no sandbox incident is recorded
+  - guard: deterministic_criteria_pass
+    evidence: 3 deterministic criteria pass against contract v2 in execution cycle 54 across V001
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 6
+  subsystems: []
   scale: medium
-  subsystems:
-  - docs
-  - cli
-  - releases
-  - tests
-  source: planner
+  source: 001-plan.md
+  recorded_by: operator
 definitions:
 - ref: docs/architecture.md
   repo: k-12Harness
@@ -120,7 +258,7 @@ scope:
   head_at_dispatch: 5bce091aea66981e842bac8f00327fb0725d3cf4
   verify: null
   declared_files: []
-  declared: false
+  declared: true
 - id: k-12Harness
   repo: /Users/shane/Projects/k-12Harness
   role: execution
@@ -131,22 +269,99 @@ scope:
   dirty_explanation: null
   head_at_dispatch: e4141843ae5abe51ce85c99778de7a126f5f206a
   verify: .venv/bin/python -m pytest tests/ -q
-  declared_files: []
-  declared: false
+  declared_files:
+  - README.md
+  - RUNBOOK.md
+  - releases/_next/reconcile-doc-surfaces.md
+  declared: true
 risk:
-  initial: null
-  current: null
-  maximum: null
-  rationale: null
-  obligations: []
+  initial: low
+  current: low
+  maximum: low
+  rationale: your rationale
+  obligations:
+  - planning
+  - contract
+  - deterministic
+  - semantic
   escalations: []
   deescalations: []
 contract:
-  current: null
-  versions: []
+  current: 2
+  versions:
+  - version: 1
+    path: acceptance/001-contract.yaml
+    artifact: A2
+    sha256: 738c54436db6cfb884c7cc34307700a5dd0d279fa429baad85e1168620337c76
+    status: superseded
+    reason: initial acceptance contract
+    plan_sha256: b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b
+    recorded_at: '2026-09-29T03:15:44Z'
+  - version: 2
+    path: acceptance/002-contract.yaml
+    artifact: A5
+    sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+    status: current
+    reason: 'DECIDED C1: the checkpoint compatibility rules are the live-eval resume rules as implemented
+      in evals/live.py (report format version, contract version, model and stage must match; the saved
+      case selection must still exist). DECIDED C2: run.py and demo.py are not edited because nothing
+      in them is stale; they leave permitted_files and the release note is Type: patch.'
+    plan_sha256: b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b
+    recorded_at: '2026-09-29T07:18:05Z'
 decisions: []
 constraints: []
-concerns: []
+concerns:
+- id: C1
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: which ''checkpoint compatibility rules'' referent the doc surfaces reconcile to.
+    Options: (a) the model-checkpoint/resume rule — the pinned account model (config/settings.py CLAUDE_ACCOUNT_MODEL)
+    cannot resume a checkpoint produced by another model, per-model cache minimums re-verified on upgrade
+    (ADR-006); (b) the eval-resume checkpoint (RUNBOOK §1 `--resume`); (c) the contract hash pin (ADR-008);
+    (d) the SDK+framework pin surface (ADR-015-3). Neither Definition Pack reference defines a ''checkpoint''
+    concept, so this is an owner choice. The rest of the contract is written on option (a). Affects: semantic
+    checkpoint-rule-documented, observable_behaviour runbook-reflects-stages, and RUNBOOK.md / README.md
+    content in required_outputs.'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-checkpoint-referent). Put it to the owner; the version that carries the answer reads DECIDED
+    (C<n>): where this entry was.'
+  blocking: true
+  status: resolved
+  opened_at: '2026-09-29T03:15:57Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: Live-eval resume rules as implemented in evals/live.py; carried by contract v2 as DECIDED
+    (C1)
+  resolved_at: '2026-09-29T07:22:20Z'
+  decision_entry: decision-checkpoint-referent
+  contract_version: 1
+  resolved_by: shane
+- id: C2
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: whether the reconciliation edits the code entry points (run.py, demo.py) at all.
+    Under the v1.2.0 path classes, any change to a root *.py behaviour path makes the release note `**Type:**
+    minor`; a docs-only change (README, RUNBOOK, the note) is `**Type:** patch`. Options: (a) edit run.py/demo.py
+    help/docstrings where they name provider/model/eval stages — release note Type: minor, run.py and
+    demo.py are in the change set; (b) leave run.py/demo.py untouched — release note Type: patch. The
+    contract is written on option (a) (the plan lists run.py/demo.py as in-scope surfaces) but keeps them
+    in permitted_files so option (b) needs no restructuring; the release-note-typed deterministic accepts
+    either Type. Affects: permitted_files (run.py, demo.py), observable_behaviour no-behaviour-change,
+    semantic release-note-type-correct, deterministic release-note-typed.'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-release-note-type). Put it to the owner; the version that carries the answer reads DECIDED
+    (C<n>): where this entry was.'
+  blocking: true
+  status: resolved
+  opened_at: '2026-09-29T03:15:57Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: 'run.py and demo.py untouched, release note Type: patch; carried by contract v2 as DECIDED
+    (C2)'
+  resolved_at: '2026-09-29T07:22:26Z'
+  decision_entry: decision-release-note-type
+  contract_version: 1
+  resolved_by: shane
 artifacts:
 - id: A0
   type: request
@@ -166,6 +381,66 @@ artifacts:
   sha256: b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b
   created_at: '2026-09-29T02:46:30Z'
   produced_by_attempt: 1
+- status: superseded
+  supersedes: null
+  id: A2
+  type: acceptance_contract
+  path: acceptance/001-contract.yaml
+  version: 1
+  sha256: 738c54436db6cfb884c7cc34307700a5dd0d279fa429baad85e1168620337c76
+  created_at: '2026-09-29T03:15:44Z'
+  produced_by_attempt: 3
+- status: superseded
+  supersedes: null
+  id: A3
+  type: contract_review_view
+  path: acceptance/001-contract-review.md
+  version: 1
+  sha256: b6c136bd08afb909ccf32dcfcb74229f536a38c03945c04ce746d2a86edbbc77
+  created_at: '2026-09-29T03:15:44Z'
+  produced_by_attempt: 3
+  derived_from: A2
+- status: superseded
+  supersedes: null
+  id: A4
+  type: contract_dry_run
+  path: acceptance/001-dry-run.json
+  version: 1
+  sha256: 2afc2a2bbf53ad267539d9a97bd8637364eca1857a23a058671ffb3efa012bc4
+  contract_sha256: 738c54436db6cfb884c7cc34307700a5dd0d279fa429baad85e1168620337c76
+  flagged: []
+  created_at: '2026-09-29T03:15:57Z'
+  produced_by_attempt: 3
+- status: current
+  supersedes: null
+  id: A5
+  type: acceptance_contract
+  path: acceptance/002-contract.yaml
+  version: 2
+  sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+  created_at: '2026-09-29T07:18:05Z'
+  produced_by_attempt: 4
+- status: current
+  supersedes: null
+  id: A6
+  type: contract_review_view
+  path: acceptance/002-contract-review.md
+  version: 2
+  sha256: 132b57a9ae1f61f95943286c77de38d3b6ebd08830e62371c848687524f2f40e
+  created_at: '2026-09-29T07:18:05Z'
+  produced_by_attempt: 4
+  derived_from: A5
+- status: current
+  supersedes: null
+  id: A7
+  type: contract_dry_run
+  path: acceptance/002-dry-run.json
+  version: 2
+  sha256: 31a6ebb00fbe8505f9f34ee10c2b6f770c12fa9b727d6bc40c1f48b4141b5445
+  contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+  flagged: []
+  created_at: '2026-09-29T07:18:16Z'
+  produced_by_attempt: 4
 attempts:
 - attempt: 1
   role: planner
@@ -230,20 +505,326 @@ attempts:
     source: planner
   headroom: 0.1318
   growth_per_turn: 12391.5
+- attempt: 2
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-29T03:03:14Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 7
+  closed_at: '2026-09-29T03:03:14Z'
+  failure_kind: transport
+  failure_reason: harness_error
+- attempt: 3
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-29T03:10:28Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-29T03:15:43Z'
+  turns: 3
+  transport_attempts: 3
+  usage:
+    input_tokens: 6
+    cache_creation_input_tokens: 217311
+    cache_read_input_tokens: 0
+    output_tokens: 24562
+  initial_input_tokens: 31940
+  peak_input_tokens: 58471
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/001-plan.md
+  - root1:docs/architecture.md
+  - root1:docs/decisions.md
+  - root0:work/20260908T113226/acceptance/002-contract.yaml
+  - root1:tests/unit/test_demo.py
+  - root1:.claude/hooks/require-release-notes.sh
+  - root1:releases/_template.md
+  - root1:releases/v1.2.0.md
+  - root1:tests/unit/test_run_cli.py
+  - root1:README.md
+  - root1:RUNBOOK.md
+  - root1:run.py
+  - root1:demo.py
+  requested_files_read:
+  - root0:work/20260908T113226/acceptance/002-contract.yaml
+  - root1:tests/unit/test_demo.py
+  - root1:.claude/hooks/require-release-notes.sh
+  - root1:releases/_template.md
+  - root1:releases/v1.2.0.md
+  - root1:tests/unit/test_run_cli.py
+  - root1:README.md
+  - root1:RUNBOOK.md
+  - root1:run.py
+  - root1:demo.py
+  contract: acceptance/001-contract.yaml
+  headroom: 0.1597
+  growth_per_turn: 8843.7
+- attempt: 4
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-09-29T07:13:52Z'
+  provider: anthropic
+  model: claude-opus-4-8
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-23'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-29T07:18:05Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 2
+    cache_creation_input_tokens: 60671
+    cache_read_input_tokens: 0
+    output_tokens: 21436
+  initial_input_tokens: 37507
+  peak_input_tokens: 37507
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root2:planning/001-plan.md
+  - root2:acceptance/001-contract.yaml
+  - root1:docs/architecture.md
+  - root1:docs/decisions.md
+  contract: acceptance/002-contract.yaml
+  headroom: 0.1875
+  growth_per_turn: 0.0
+- attempt: 5
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-29T07:34:29Z'
+  provider: anthropic
+  model: claude-sonnet-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-23'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  edit_tools:
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Bash(.venv/bin/python -m pytest *)
+  exit_code: 0
+  closed_at: '2026-09-29T07:35:54Z'
+  prompt_path: capture/prompts/005-executor.md
+  prompt_sha256: a2edc1e9f8f4f77462463c7f8f09a5741e3a7f04a3ee27ec2a4e65d7deac0c85
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.283 (Claude Code)
+    actual_changed_paths:
+    - README.md
+    - RUNBOOK.md
+    - releases/_next/reconcile-doc-surfaces.md
+    ignored_paths_created: []
+    reported_reads:
+    - README.md
+    - RUNBOOK.md
+    - docs/decisions.md
+    - docs/architecture.md
+    reported_writes:
+    - README.md
+    - RUNBOOK.md
+    - releases/_next/reconcile-doc-surfaces.md
+    shell_commands:
+    - ls /Users/shane/Projects/k-12Harness/releases/_next/ 2>/dev/null; cat /Users/shane/Projects/k-12Harness/releases/_template.md
+      2>/dev/null
+    - .venv/bin/python -m pytest tests/ -q 2>&1 | tail -40
+    - .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q 2>&1 | tail -10 && echo "---" && grep
+      -RE '^\*\*Type:\*\* patch' releases/_next/ && echo "---" && git status --porcelain
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 16
+    total_cost_usd: 0.4670312000000001
+    malformed_events: 0
+    returncode: 0
+    requested_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    permission_rules:
+    - Bash(.venv/bin/python -m pytest *)
+    advertised_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    unexpected_tools: []
+    permission_mode: acceptEdits
+    init_events: 1
+    sandbox_incidents: []
+  transport_attempts: 1
+  usage:
+    input_tokens: 26
+    cache_creation_input_tokens: 65193
+    cache_read_input_tokens: 658136
+    output_tokens: 7458
+    output_tokens_details:
+      thinking_tokens: 1720
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 65193
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 795
+      cache_read_input_tokens: 64896
+      cache_creation_input_tokens: 297
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 297
+      type: message
+    speed: standard
+  elapsed_seconds: 84.6107965419651
+  read_context_files: 4
+  effective_context_sha256: abea7419f31402211a5719772417e26d5521f866605de9ec909e019ebcc85ad4
+  native_log_bytes: 604340
 routing:
   executor_ladder:
   - T0
   - T1
   - T2
-  current_tier: null
-  decisions: []
+  current_tier: T0
+  decisions:
+  - at: '2026-09-29T07:34:29Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: anthropic
+    model: claude-sonnet-5
+    transport: claude
+    selector: tier:T0
+    context_window: 200000
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-09-23'
+    effort: medium
+    timeout_seconds: 1200.0
+    deadline_seconds: 1260.0
+    transient_retries: 3
+    streaming: auto
+    edit_tools:
+    - Read
+    - Edit
+    - Write
+    - Grep
+    - Glob
+    - Bash(.venv/bin/python -m pytest *)
   frontier_execution:
     authorised: false
     authorised_by: null
     after_replan: null
     rationale: null
 verification:
-  deterministic_runs: []
+  deterministic_runs:
+  - id: V001
+    at: '2026-09-29T07:41:30Z'
+    status: passed
+    contract: acceptance/002-contract.yaml
+    contract_version: 2
+    contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+    execution_cycle:
+      transition_event: 54
+      transition_sha256: 033ecc0c751f179079d9102e8ba4a4a9409539e24e9d185ccf16acaffce456df
+    candidate_sha256: 4a28468f274bc3cea7ebfbcb808533f69f2c93a2802c6a4c0cf8bd6f9bbdd4b5
+    selected_criteria:
+    - full-test-suite
+    - contract-pin-unchanged
+    - release-note-typed
+    results:
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The declared verification suite (manifest k-12Harness.verify) exits zero with no failures
+        and no errors; pre-existing xfail/xpass are unaffected. This covers tests/unit/test_run_cli.py
+        and tests/unit/test_demo.py, which must stay green with run.py/demo.py unchanged.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/001-full-test-suite.log
+      log_sha256: 3933a34a7be11c26f4b1fa017e26eecab836f9b3b1ecc570a30d3818263330ac
+    - id: contract-pin-unchanged
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q
+      expected: The contract pin test stays green, proving no accidental contract/PINNED.json or CONTRACT_VERSION
+        change (ADR-008); this is a docs-only WI with no contract bump.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/002-contract-pin-unchanged.log
+      log_sha256: 560a0a24052b3e32000f5dae2177db84e09ba35da118b2d7a804deedcbb93322
+    - id: release-note-typed
+      repo: k-12Harness
+      command: grep -RE '^\*\*Type:\*\* patch' releases/_next/
+      expected: The added releases/_next/ note declares `**Type:** patch`, as DECIDED C2 requires for
+        a docs-only change under the v1.2.0 path classes; the base commit carries only releases/_next/.gitkeep,
+        so exit 0 here depends on the change.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/003-release-note-typed.log
+      log_sha256: e1243e20e9d8cb68eaea932dc918ddc41dc096225bff5789022cf73ed9868c36
+    expectations_not_evaluated: []
+    ended_at: '2026-09-29T07:41:44Z'
   semantic_reviews: []
 stage_outcomes:
   challenge:
@@ -260,8 +841,8 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 1
-  model_sessions_launched: 1
+  controller_commands: 12
+  model_sessions_launched: 5
 checkpoints: []
 acceptance:
   state: pending
@@ -269,9 +850,10 @@ acceptance:
   gates_satisfied: []
 escapes: []
 lock:
-  owner: null
-  acquired_at: null
-  released_at: null
+  owner: shane@Mimir.local
+  acquired_at: '2026-09-29T07:34:29Z'
+  released_at: '2026-09-29T07:35:54Z'
+  attempt: 5
 capture:
   event_log: capture/events.jsonl
   sessions: []
@@ -281,10 +863,11 @@ review_batches: []
 review_reconciliations: []
 review_items: []
 review_actions: []
-scope_version: 2
-scope_sha256: b835c49bd39bd9cdb19e6de4a9f0529a0c224da88cc2d48b6a038a0a5bf2f92c
+scope_version: 3
+scope_sha256: 2c3c6f4cb171aa0ff9f038b36a0bd7d5bfe94951276541b3397993b025091fe9
 origin: null
 work_packages: []
 findings: []
 improvements: []
 migration_obligations: []
+continuations: []

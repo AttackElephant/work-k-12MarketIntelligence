@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-09-29T03:15:44Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    ".DS_Store": {
+      "kind": "file",
+      "sha256": "b15760aa3d067af8e624ea222cd7304280e821f98d7f60c582f490ddbb848c42",
+      "size": 6148
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "738c54436db6cfb884c7cc34307700a5dd0d279fa429baad85e1168620337c76",
+      "size": 14941
+    },
+    "migrations/1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937.json": {
+      "kind": "file",
+      "sha256": "5c811ba9f5416d12df5dff049640d827b9d45d70615cfafba39202deb65b3aa3",
+      "size": 3516
+    },
+    "migrations/1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937.manifest-before.yaml": {
+      "kind": "file",
+      "sha256": "aee4c81a09ee17998632fd2d4f1cf0764c8f712ee93d2b32811363456fbebc04",
+      "size": 2349
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "b3108a5cf757cf4278f1ad05aa8a08d040f4fffb611faeef034374a1f5d3f12b",
+      "size": 12360
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "d1058b867ce6ccc7ed6076f54413564b029bd0651971df2f14f264e8d9c63f80",
+      "size": 209
+    }
+  }
+}
