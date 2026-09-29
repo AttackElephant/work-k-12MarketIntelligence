@@ -2,14 +2,14 @@ id: 20260908T113253
 created: '2026-09-08T11:32:53Z'
 method:
   id: coding-harness
-  version: 0.7.0
-  commit: 726aac0667efd8919b4e31263ba8baf611911793
-  bound_at: '2026-09-29T11:35:08Z'
+  version: 0.6.0
+  commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
+  bound_at: '2026-09-29T02:20:46Z'
   bound_by: shane
   release: &id001
     state: released
-    tag: coding-harness/v0.7.0
-    checkout_commit: 726aac0667efd8919b4e31263ba8baf611911793
+    tag: coding-harness/v0.6.0
+    checkout_commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
   history:
   - commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
     version: 0.6.0
@@ -58,82 +58,6 @@ method:
     event_seq: 4
     event_sha256: fdad70d2a86cd8ac52060a02a3b892f543de66e65ff1615dadfc5f171e46d7ac
     transition_n: 1
-    status: applied
-    release:
-      state: released
-      tag: coding-harness/v0.6.0
-      checkout_commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
-  - commit: 726aac0667efd8919b4e31263ba8baf611911793
-    version: 0.7.0
-    bound_at: '2026-09-29T11:35:08Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: 606e9d187fa8c51dc1db72581c9c1a6ec073e9a18aefafe103cc0142c846932a
-    record_path: migrations/606e9d187fa8c51dc1db72581c9c1a6ec073e9a18aefafe103cc0142c846932a.json
-    previous_commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
-    previous_version: 0.6.0
-    previous_schema: 0.5.0
-    schema: 0.5.0
-    reason: Adopt coding-harness 0.7.0 so delivery can adopt the release note the accepted candidate carries
-    authority: shane
-    compatibility:
-      assessment: conditional
-      known: true
-      note: 'same MAJOR (0): the common rules apply'
-      pair:
-      - 0.6.0
-      - 0.7.0
-      plan_adoptions: []
-      relation: same-major
-      work_packages:
-        contract_version: 2
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - attempts:6
-      - attempts:7
-      - attempts:8
-      - checkpoints:1
-      - checkpoints:2
-      - concerns:C1
-      - concerns:C2
-      - continuations:C001
-      - contract:v1
-      - contract:v2
-      - declared_scope:current
-      - definitions:k-12Harness:docs/architecture.md
-      - definitions:k-12Harness:docs/decisions.md
-      - deterministic_runs:V001
-      - deterministic_runs:V002
-      - findings:SF-1
-      - plan:A1
-      - request:A0
-      - risk:current
-      - semantic_reviews:S1
-      - semantic_reviews:S2
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: findings:SF-1
-    reference_exceptions: []
-    obligations: []
-    from_state: accepted
-    resulting_state: accepted
-    resume:
-    - --apply
-    - --confirm
-    - 606e9d187fa8c51dc1db72581c9c1a6ec073e9a18aefafe103cc0142c846932a
-    event_seq: 94
-    event_sha256: 42088c9815ebced7eaef23ed12b253a09a038096446e74ad3a97e2d7db45a370
-    transition_n: 17
     status: applied
     release: *id001
 artifact_schema_version: 0.5.0
@@ -454,21 +378,6 @@ transitions:
     evidence: authorised by shane
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
-- at: '2026-09-29T11:35:08Z'
-  transition: M1
-  event: migrate
-  from: accepted
-  to: accepted
-  by: shane
-  reason: Adopt coding-harness 0.7.0 so delivery can adopt the release note the accepted candidate carries
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=26, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: terminal states are not regressed
-  migration_record_sha256: 606e9d187fa8c51dc1db72581c9c1a6ec073e9a18aefafe103cc0142c846932a
-  event_seq: 94
-  obligations: []
 size_estimate:
   files: 6
   subsystems: []
@@ -1445,7 +1354,7 @@ stage_outcomes:
     - A8
     - A9
 effort:
-  controller_commands: 22
+  controller_commands: 21
   model_sessions_launched: 8
 checkpoints:
 - at: '2026-09-29T07:53:44Z'
