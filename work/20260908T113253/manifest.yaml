@@ -225,6 +225,104 @@ transitions:
     evidence: 3 deterministic criteria pass against contract v2 in execution cycle 54 across V001
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-09-29T07:54:06Z'
+  transition: T10
+  event: checkpoint
+  from: verified_det
+  to: checkpointed
+  by: shane
+  reason: Operator approved the known-good commits.
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: checkpoint_recorded
+    evidence: checkpoint at 2026-09-29T07:53:44Z across 2 repository scope(s)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T08:03:58Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane@Mimir.local
+  reason: Semantic review S1 recorded; blocker SF-1 dispositioned remediate.
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'revise'
+  - guard: semantic_evidence_current
+    evidence: semantic review S1 binds contract v2, candidate a0b5b7014ed6 and this execution cycle
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T08:04:37Z'
+  transition: F14
+  event: revise-implementation
+  from: verified_sem
+  to: executing
+  by: shane@Mimir.local
+  reason: Remediate semantic blocker SF-1.
+  guards:
+  - guard: reason_recorded
+    evidence: reason recorded (32 characters)
+  - guard: continuation_prepared
+    evidence: continuation C001 binds candidate a0b5b7014ed6 from semantic-revision
+  - guard: continuation_budget_current
+    evidence: 'lineage at T7 event 45: 1 of 6 attempts consumed; correction tier T0'
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: lock_available
+    evidence: lock is available
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C001
+  candidate_sha256: a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8
+  budget_anchor_event: 45
+  selected_tier: T0
+- at: '2026-09-29T08:05:21Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  guards:
+  - guard: attempt_closed
+    evidence: 7 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v2 intact (ea24050b01ae)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 3 file(s) within 3 declared from e4141843ae5a'
+  - guard: executor_tool_policy_honoured
+    evidence: attempt 7 advertised exactly the requested tools ['Bash', 'Edit', 'Glob', 'Grep', 'Read',
+      'Write'] under permission mode 'acceptEdits' with scoped rules ['Bash(.venv/bin/python -m pytest
+      *)']
+  - guard: contracted_outputs_exist
+    evidence: 3 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 005-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C001
+  candidate_start_sha256: a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8
+- at: '2026-09-29T09:20:08Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: Operator reviewed the post-semantic-correction deterministic pass.
+  guards:
+  - guard: sandbox_incidents_acknowledged
+    evidence: no sandbox incident is recorded
+  - guard: deterministic_criteria_pass
+    evidence: 3 deterministic criteria pass against contract v2 in execution cycle 79 across V002
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 6
   subsystems: []
@@ -441,6 +539,15 @@ artifacts:
   flagged: []
   created_at: '2026-09-29T07:18:16Z'
   produced_by_attempt: 4
+- status: current
+  supersedes: null
+  id: A8
+  type: semantic_review
+  path: verification/001-semantic-review.json
+  version: 1
+  sha256: 1e19d913da9dad3b45a81698b9acf1b3ba8a2680cc3672a8dc3c3dc53ef12fe2
+  created_at: '2026-09-29T07:57:36Z'
+  produced_by_attempt: 6
 attempts:
 - attempt: 1
   role: planner
@@ -733,6 +840,143 @@ attempts:
   read_context_files: 4
   effective_context_sha256: abea7419f31402211a5719772417e26d5521f866605de9ec909e019ebcc85ad4
   native_log_bytes: 604340
+- attempt: 6
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-09-29T07:57:17Z'
+  semantic_round: 1
+  semantic_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-29T07:57:36Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 17381
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 649
+    reasoning_output_tokens: 418
+  context_bytes: 15441
+- attempt: 7
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-09-29T08:04:41Z'
+  continuation: C001
+  candidate_start_sha256: a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8
+  budget_anchor_event: 45
+  provider: anthropic
+  model: claude-sonnet-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-09-23'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  edit_tools:
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Bash(.venv/bin/python -m pytest *)
+  exit_code: 0
+  closed_at: '2026-09-29T08:05:20Z'
+  prompt_path: capture/prompts/007-executor.md
+  prompt_sha256: 215aebac54d0f6b76a3838ef40461c298c3d1cddb927185bfc9d90c80dc58215
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.283 (Claude Code)
+    actual_changed_paths:
+    - README.md
+    - RUNBOOK.md
+    ignored_paths_created: []
+    reported_reads:
+    - README.md
+    - RUNBOOK.md
+    reported_writes:
+    - README.md
+    - RUNBOOK.md
+    shell_commands:
+    - .venv/bin/python -m pytest tests/ -q 2>&1 | tail -20
+    - .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q 2>&1 | tail -10
+    - grep -RE '^\*\*Type:\*\* patch' releases/_next/
+    - git status --short && git diff --stat
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 13
+    total_cost_usd: 0.135944
+    malformed_events: 0
+    returncode: 0
+    requested_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    permission_rules:
+    - Bash(.venv/bin/python -m pytest *)
+    advertised_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    unexpected_tools: []
+    permission_mode: acceptEdits
+    init_events: 1
+    sandbox_incidents: []
+  transport_attempts: 1
+  usage:
+    input_tokens: 18
+    cache_creation_input_tokens: 17441
+    cache_read_input_tokens: 197070
+    output_tokens: 2673
+    output_tokens_details:
+      thinking_tokens: 252
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 17441
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 574
+      cache_read_input_tokens: 25741
+      cache_creation_input_tokens: 205
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 205
+      type: message
+    speed: standard
+  elapsed_seconds: 38.85063145897584
+  read_context_files: 4
+  effective_context_sha256: 7716bc308af9048edf15165545880ff95026b59b491aa39f0261e5a3b11548e7
+  native_log_bytes: 171722
 routing:
   executor_ladder:
   - T0
@@ -825,7 +1069,119 @@ verification:
       log_sha256: e1243e20e9d8cb68eaea932dc918ddc41dc096225bff5789022cf73ed9868c36
     expectations_not_evaluated: []
     ended_at: '2026-09-29T07:41:44Z'
-  semantic_reviews: []
+  - id: V002
+    at: '2026-09-29T09:19:48Z'
+    status: passed
+    contract: acceptance/002-contract.yaml
+    contract_version: 2
+    contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+    execution_cycle:
+      transition_event: 79
+      transition_sha256: 2624e9df097257004cae6cee2a2cea77aa15e57524f6badc241dd80be7961d55
+    candidate_sha256: d112690cef7f3f4fe0667308fc7237e7d7130c1673d261d17dfe76f88f683ede
+    selected_criteria:
+    - full-test-suite
+    - contract-pin-unchanged
+    - release-note-typed
+    results:
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The declared verification suite (manifest k-12Harness.verify) exits zero with no failures
+        and no errors; pre-existing xfail/xpass are unaffected. This covers tests/unit/test_run_cli.py
+        and tests/unit/test_demo.py, which must stay green with run.py/demo.py unchanged.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/001-full-test-suite.log
+      log_sha256: b36c415a5200e43a260211c6c3a3f8a97780187f3da5a0ec1c29d637932cd9cf
+    - id: contract-pin-unchanged
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_contract_pin.py -q
+      expected: The contract pin test stays green, proving no accidental contract/PINNED.json or CONTRACT_VERSION
+        change (ADR-008); this is a docs-only WI with no contract bump.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/002-contract-pin-unchanged.log
+      log_sha256: f8a9ff337c49481fe74ec86f2de3b313b2b576b53da4e54136f50fee2cef81b8
+    - id: release-note-typed
+      repo: k-12Harness
+      command: grep -RE '^\*\*Type:\*\* patch' releases/_next/
+      expected: The added releases/_next/ note declares `**Type:** patch`, as DECIDED C2 requires for
+        a docs-only change under the v1.2.0 path classes; the base commit carries only releases/_next/.gitkeep,
+        so exit 0 here depends on the change.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/003-release-note-typed.log
+      log_sha256: 535601ba6008120351ac51654ec1d6e5a73897dbed4ef345193696702145abd5
+    expectations_not_evaluated: []
+    ended_at: '2026-09-29T09:20:02Z'
+  semantic_reviews:
+  - id: S1
+    at: '2026-09-29T07:57:36Z'
+    work_item: 20260908T113253
+    work_package: null
+    round: 1
+    kind: general
+    covers: []
+    classification: blocker
+    outcome: revise
+    material_finding: false
+    binding:
+      contract_version: 2
+      contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+      execution_cycle:
+        transition_event: 54
+        transition_sha256: 033ecc0c751f179079d9102e8ba4a4a9409539e24e9d185ccf16acaffce456df
+      candidate_sha256: a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8
+      verified_candidate_sha256: 4a28468f274bc3cea7ebfbcb808533f69f2c93a2802c6a4c0cf8bd6f9bbdd4b5
+      checkpoint_at: '2026-09-29T07:53:44Z'
+      checkpoint_commits:
+      - repo: work-store
+        commit: 883434fa9c2535ab73a8b2350215422aa8b128f1
+      - repo: k-12Harness
+        commit: 0a9b08c3c2a5bcd5ae5a282075e10a9457487777
+      work_package: null
+    verifier:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+      role: verifier
+      attempt: 6
+      independent_of_executor: true
+      independence_basis: a different provider/model from the executor
+      executor_route:
+        provider: anthropic
+        model: claude-sonnet-5
+        tier: T0
+        attempt: 5
+      independence_authorised_by: null
+    artifact: verification/001-semantic-review.json
+    artifact_id: A8
+    sha256: 1e19d913da9dad3b45a81698b9acf1b3ba8a2680cc3672a8dc3c3dc53ef12fe2
+    summary: The documentation largely satisfies the provider, pipeline, release-note, and unchanged-file
+      requirements, but it gives contradictory live-eval resume behavior and therefore does not consistently
+      document the implemented checkpoint rule.
+    resolutions: {}
+    findings:
+    - SF-1
+    carried_forward: []
 stage_outcomes:
   challenge:
     performed: false
@@ -837,13 +1193,53 @@ stage_outcomes:
     changed_plan: false
     evidence: []
   semantic_verification:
-    performed: false
+    performed: true
     material_finding: false
-    evidence: []
+    evidence:
+    - A8
 effort:
-  controller_commands: 12
-  model_sessions_launched: 5
-checkpoints: []
+  controller_commands: 18
+  model_sessions_launched: 7
+checkpoints:
+- at: '2026-09-29T07:53:44Z'
+  message: Deterministic verification passed; checkpoint authorised by operator.
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: main
+    commit: 883434fa9c2535ab73a8b2350215422aa8b128f1
+    uncommitted: []
+    created: false
+  - repo: k-12Harness
+    branch: wi/20260908T113253
+    commit: 0a9b08c3c2a5bcd5ae5a282075e10a9457487777
+    parent: e4141843ae5abe51ce85c99778de7a126f5f206a
+    permitted:
+    - README.md
+    - RUNBOOK.md
+    - releases/_next/reconcile-doc-surfaces.md
+    committed_paths:
+    - README.md
+    - RUNBOOK.md
+    - releases/_next/reconcile-doc-surfaces.md
+    uncommitted_outside_scope: []
+    created: true
+    commit_output: "[wi/20260908T113253 0a9b08c] Deterministic verification passed; checkpoint authorised\
+      \ by operator.\n 3 files changed, 122 insertions(+), 6 deletions(-)\n create mode 100644 releases/_next/reconcile-doc-surfaces.md"
+  verified:
+    contract_version: 2
+    contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+    execution_cycle:
+      transition_event: 54
+      transition_sha256: 033ecc0c751f179079d9102e8ba4a4a9409539e24e9d185ccf16acaffce456df
+    candidate_sha256: 4a28468f274bc3cea7ebfbcb808533f69f2c93a2802c6a4c0cf8bd6f9bbdd4b5
+    criteria:
+    - contract-pin-unchanged
+    - full-test-suite
+    - release-note-typed
+    runs:
+    - V001
+  commit_created: true
 acceptance:
   state: pending
   at: null
@@ -851,9 +1247,9 @@ acceptance:
 escapes: []
 lock:
   owner: shane@Mimir.local
-  acquired_at: '2026-09-29T07:34:29Z'
-  released_at: '2026-09-29T07:35:54Z'
-  attempt: 5
+  acquired_at: '2026-09-29T08:04:41Z'
+  released_at: '2026-09-29T08:05:20Z'
+  attempt: 7
 capture:
   event_log: capture/events.jsonl
   sessions: []
@@ -867,7 +1263,51 @@ scope_version: 3
 scope_sha256: 2c3c6f4cb171aa0ff9f038b36a0bd7d5bfe94951276541b3397993b025091fe9
 origin: null
 work_packages: []
-findings: []
+findings:
+- id: SF-1
+  origin: semantic
+  review: S1
+  round: 1
+  severity: blocker
+  summary: README and RUNBOOK disagree about what happens when an explicitly resumed checkpoint is incompatible.
+  detail: null
+  required_change: Make both documents describe the actual `evals/live.py` behavior consistently. If an
+    incompatible `--resume` is rejected, replace the README claim that it starts a fresh run with an explicit
+    statement that resume is refused and that the operator must initiate a separate fresh run.
+  evidence: README.md says that for a report-format, contract-version, model, stage, or saved-selection
+    mismatch, “any mismatch starts a fresh run.” RUNBOOK.md instead says such a mismatch “is refused rather
+    than silently continued.” These are materially different operator-visible behaviors, and the latter
+    is presented as the behavior of the `evals/live.py` referent.
+  references: []
+  work_package: null
+  regression: false
+  carried_into: null
+  status: remediating
+  raised_at: '2026-09-29T07:57:36Z'
+  disposition:
+    kind: remediate
+    rationale: 'README misstates evals/live.py: an incompatible --resume is refused, not restarted; correct
+      README to match the code and RUNBOOK.'
+    authorised_by: shane
+    at: '2026-09-29T08:01:41Z'
+    residual_risk: null
+    reference: null
+  dispositioned_at: '2026-09-29T08:01:41Z'
 improvements: []
 migration_obligations: []
-continuations: []
+continuations:
+- id: C001
+  path: continuation/C001/receipt.json
+  sha256: df1ffcd2b45476d769f68fd7ae17c831952b40c4e93d9473b827b4d6d75df2ed
+  status: completed
+  prepared_at: '2026-09-29T08:04:37Z'
+  source_state: verified_sem
+  kind: semantic-revision
+  candidate_sha256: a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8
+  budget_anchor_event: 45
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 69
+  event_sha256: 8a4ac1ad533a7ddaf4dbfdd3f1aeff1427ee6e3daeed364763744b8ba052bd24
+  activated_at: '2026-09-29T08:04:37Z'
+  completed_at: '2026-09-29T08:05:21Z'

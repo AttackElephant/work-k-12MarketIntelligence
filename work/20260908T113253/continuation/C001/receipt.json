@@ -1,0 +1,55 @@
+{
+  "budget": {
+    "anchor_event": 45,
+    "attempts_consumed": 1,
+    "per_tier_limit": 2,
+    "selected_tier": "T0",
+    "tier_attempts_consumed": 1,
+    "total_limit": 6
+  },
+  "candidate": {
+    "repositories": [
+      {
+        "branch": "wi/20260908T113253",
+        "head": "0a9b08c3c2a5bcd5ae5a282075e10a9457487777",
+        "identity_sha256": "a3e8e924e1280d05d0a297eaae1b7cc24f8de0216bb611eb6995ac89995dcb1d",
+        "planning_base": "e4141843ae5abe51ce85c99778de7a126f5f206a",
+        "repo": "k-12Harness",
+        "staged_patch": "continuation/C001/k-12harness-staged.patch",
+        "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": [],
+        "unstaged_patch": "continuation/C001/k-12harness-unstaged.patch",
+        "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unstaged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": [],
+        "untracked_archive": "continuation/C001/k-12harness-untracked.tar",
+        "untracked_archive_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652"
+      }
+    ],
+    "sha256": "a0b5b7014ed6c8d0d2f8257e7f315948988e23fe1632ab5e2b626ba52c26dff8"
+  },
+  "contract": {
+    "path": "acceptance/002-contract.yaml",
+    "sha256": "ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5",
+    "version": 2
+  },
+  "guidance": "README.md must state that the live evaluator refuses an incompatible --resume with an error; it never starts a fresh run itself, and the operator must start a separate fresh run. README.md and RUNBOOK.md must then agree. Change nothing else.",
+  "id": "C001",
+  "prepared_at": "2026-09-29T08:04:37Z",
+  "reason": "Remediate semantic blocker SF-1.",
+  "source": {
+    "checkpoint_at": "2026-09-29T07:53:44Z",
+    "evidence": {
+      "seq": 68,
+      "sha256": "5152bf64bd630fdefb888807f920dc0358161c07c3c371d9f36e6ea2f7261e68",
+      "type": "controller.transition"
+    },
+    "kind": "semantic-revision",
+    "semantic_review": "S1",
+    "summary": [
+      "semantic outcome revise: The documentation largely satisfies the provider, pipeline, release-note, and unchanged-file requirements, but it gives contradictory live-eval resume behavior and therefore does not consistently document the implemented checkpoint rule."
+    ]
+  },
+  "source_state": "verified_sem"
+}
