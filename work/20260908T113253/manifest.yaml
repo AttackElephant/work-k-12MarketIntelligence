@@ -65,7 +65,7 @@ request: "Reconcile entry points, CLI help, runbook guidance, and release docume
   \ pipeline status, explicit evaluation stages, pinned model, and checkpoint\n  compatibility rules."
 narrative: null
 class: null
-state: verified_det
+state: accepted
 parent: null
 children: []
 transitions:
@@ -323,6 +323,61 @@ transitions:
     evidence: 3 deterministic criteria pass against contract v2 in execution cycle 79 across V002
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-09-29T09:20:59Z'
+  transition: T10
+  event: checkpoint
+  from: verified_det
+  to: checkpointed
+  by: shane
+  reason: Operator approved the corrected known-good commits.
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: checkpoint_recorded
+    evidence: checkpoint at 2026-09-29T09:20:50Z across 2 repository scope(s)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T09:21:54Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane@Mimir.local
+  reason: Semantic recheck S2 passed; SF-1 resolved.
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'pass'
+  - guard: semantic_evidence_current
+    evidence: semantic review S2 binds contract v2, candidate 1307caad6b33 and this execution cycle
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-09-29T09:22:35Z'
+  transition: T12
+  event: accept
+  from: verified_sem
+  to: accepted
+  by: shane
+  reason: 'Operator accepts the low-risk WI: V002 passed all v2 criteria; S2 passed with SF-1 resolved;
+    C1 and C2 decided.'
+  guards:
+  - guard: semantic_evidence_current
+    evidence: semantic review S2 binds contract v2, candidate 1307caad6b33 and this execution cycle
+  - guard: semantic_outcome_pass
+    evidence: semantic outcome is pass (PASS)
+  - guard: judgment_findings_dispositioned
+    evidence: 1 finding(s) dispositioned
+  - guard: work_packages_complete
+    evidence: no explicit work packages; the contract is the implicit single package
+  - guard: compatibility_satisfied
+    evidence: 0 affected consumer(s) recorded and escalated
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 6
   subsystems: []
@@ -548,6 +603,15 @@ artifacts:
   sha256: 1e19d913da9dad3b45a81698b9acf1b3ba8a2680cc3672a8dc3c3dc53ef12fe2
   created_at: '2026-09-29T07:57:36Z'
   produced_by_attempt: 6
+- status: current
+  supersedes: null
+  id: A9
+  type: semantic_review
+  path: verification/002-semantic-review.json
+  version: 2
+  sha256: 5c95572cfc22def681e8e33bf595b4cd4919811eee40b1b4746ab147fa9d07fe
+  created_at: '2026-09-29T09:21:14Z'
+  produced_by_attempt: 8
 attempts:
 - attempt: 1
   role: planner
@@ -977,6 +1041,36 @@ attempts:
   read_context_files: 4
   effective_context_sha256: 7716bc308af9048edf15165545880ff95026b59b491aa39f0261e5a3b11548e7
   native_log_bytes: 171722
+- attempt: 8
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-09-29T09:21:05Z'
+  semantic_round: 2
+  semantic_kind: recheck
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-09-29T09:21:13Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 15489
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 109
+    reasoning_output_tokens: 0
+  context_bytes: 9583
+  covers:
+  - SF-1
 routing:
   executor_ladder:
   - T0
@@ -1182,6 +1276,67 @@ verification:
     findings:
     - SF-1
     carried_forward: []
+  - id: S2
+    at: '2026-09-29T09:21:14Z'
+    work_item: 20260908T113253
+    work_package: null
+    round: 2
+    kind: recheck
+    covers:
+    - SF-1
+    classification: pass
+    outcome: pass
+    material_finding: false
+    binding:
+      contract_version: 2
+      contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+      execution_cycle:
+        transition_event: 79
+        transition_sha256: 2624e9df097257004cae6cee2a2cea77aa15e57524f6badc241dd80be7961d55
+      candidate_sha256: 1307caad6b33658b5b3cd8295118d7f46ff633ac757be2ec41a43ec54ef9c8db
+      verified_candidate_sha256: d112690cef7f3f4fe0667308fc7237e7d7130c1673d261d17dfe76f88f683ede
+      checkpoint_at: '2026-09-29T09:20:50Z'
+      checkpoint_commits:
+      - repo: work-store
+        commit: 7dd9926f3014ef02ea7d5f5350e9ee0ba47a22d6
+      - repo: k-12Harness
+        commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+      work_package: null
+    verifier:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+      role: verifier
+      attempt: 8
+      independent_of_executor: true
+      independence_basis: a different provider/model from the executor
+      executor_route:
+        provider: anthropic
+        model: claude-sonnet-5
+        tier: T0
+        attempt: 7
+      independence_authorised_by: null
+    artifact: verification/002-semantic-review.json
+    artifact_id: A9
+    sha256: 5c95572cfc22def681e8e33bf595b4cd4919811eee40b1b4746ab147fa9d07fe
+    summary: The supplied remediation resolves the sole blocker, and no regression or additional material
+      improvement is evident in the provided diff.
+    resolutions:
+      SF-1:
+        state: resolved
+        rationale: README.md now states that an incompatible `--resume` is refused with an error and that
+          the operator must explicitly start a fresh run without `--resume`. RUNBOOK.md uses the same
+          behavior and operator instruction, removing the prior contradiction.
+    findings: []
+    carried_forward: []
 stage_outcomes:
   challenge:
     performed: false
@@ -1197,9 +1352,10 @@ stage_outcomes:
     material_finding: false
     evidence:
     - A8
+    - A9
 effort:
-  controller_commands: 18
-  model_sessions_launched: 7
+  controller_commands: 21
+  model_sessions_launched: 8
 checkpoints:
 - at: '2026-09-29T07:53:44Z'
   message: Deterministic verification passed; checkpoint authorised by operator.
@@ -1240,10 +1396,56 @@ checkpoints:
     runs:
     - V001
   commit_created: true
+- at: '2026-09-29T09:20:50Z'
+  message: Corrected candidate passed deterministic verification.
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: main
+    commit: 7dd9926f3014ef02ea7d5f5350e9ee0ba47a22d6
+    uncommitted: []
+    created: false
+  - repo: k-12Harness
+    branch: wi/20260908T113253
+    commit: fe6b6a2dc3d86d6ea8794f228cb720f1ef4f7788
+    parent: 0a9b08c3c2a5bcd5ae5a282075e10a9457487777
+    permitted:
+    - README.md
+    - RUNBOOK.md
+    - releases/_next/reconcile-doc-surfaces.md
+    committed_paths:
+    - README.md
+    - RUNBOOK.md
+    uncommitted_outside_scope: []
+    created: true
+    commit_output: "[wi/20260908T113253 fe6b6a2] Corrected candidate passed deterministic verification.\n\
+      \ 2 files changed, 8 insertions(+), 4 deletions(-)"
+  verified:
+    contract_version: 2
+    contract_sha256: ea24050b01aea3141c271e692fe40e6f09f39cb154005c1d2a1867d7fbf78de5
+    execution_cycle:
+      transition_event: 79
+      transition_sha256: 2624e9df097257004cae6cee2a2cea77aa15e57524f6badc241dd80be7961d55
+    candidate_sha256: d112690cef7f3f4fe0667308fc7237e7d7130c1673d261d17dfe76f88f683ede
+    criteria:
+    - contract-pin-unchanged
+    - full-test-suite
+    - release-note-typed
+    runs:
+    - V002
+  commit_created: true
 acceptance:
-  state: pending
-  at: null
-  gates_satisfied: []
+  state: accepted
+  at: '2026-09-29T09:22:35Z'
+  gates_satisfied:
+  - semantic_evidence_current
+  - semantic_outcome_pass
+  - judgment_findings_dispositioned
+  - work_packages_complete
+  - compatibility_satisfied
+  - no_open_blocking_concerns
+  - human_authorisation
+  - migration_obligations_satisfied
 escapes: []
 lock:
   owner: shane@Mimir.local
@@ -1282,7 +1484,7 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: remediating
+  status: dispositioned
   raised_at: '2026-09-29T07:57:36Z'
   disposition:
     kind: remediate
@@ -1293,6 +1495,12 @@ findings:
     residual_risk: null
     reference: null
   dispositioned_at: '2026-09-29T08:01:41Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: README.md now states that an incompatible `--resume` is refused with an error and that
+      the operator must explicitly start a fresh run without `--resume`. RUNBOOK.md uses the same behavior
+      and operator instruction, removing the prior contradiction.
 improvements: []
 migration_obligations: []
 continuations:

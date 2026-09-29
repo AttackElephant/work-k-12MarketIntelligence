@@ -1,0 +1,17 @@
+{
+  "classification": "pass",
+  "covers": [
+    "SF-1"
+  ],
+  "findings": [],
+  "kind": "recheck",
+  "resolutions": {
+    "SF-1": {
+      "rationale": "README.md now states that an incompatible `--resume` is refused with an error and that the operator must explicitly start a fresh run without `--resume`. RUNBOOK.md uses the same behavior and operator instruction, removing the prior contradiction.",
+      "state": "resolved"
+    }
+  },
+  "review": "S2",
+  "round": 2,
+  "summary": "The supplied remediation resolves the sole blocker, and no regression or additional material improvement is evident in the provided diff."
+}
