@@ -1,0 +1,105 @@
+{
+  "record": {
+    "authority": "shane",
+    "compatibility": {
+      "assessment": "compatible",
+      "known": true,
+      "note": "same MAJOR (0): the common rules apply; versions crossed — 0.4.0: batch review feedback, protocol-2 challenge and controlled scope identity were introduced; 0.5.0: work items are bound to a method commit, a contract without packages is the implicit single package, the bounded planning review applies to normal and high risk and semantic verification is universal; recorded obligation sets are kept, unbound semantic reviews are decided",
+      "pair": [
+        "0.3.0",
+        "0.6.0"
+      ],
+      "plan_adoptions": [],
+      "relation": "same-major",
+      "schema_stages": [
+        "artifact schema 0.3.0 -> 0.4.0",
+        "no successful legacy Planner attempt is available for plan adoption",
+        "added batch-review projections; retained 0 legacy contract-feedback artifact(s)",
+        "recorded scope identity v1 at 2d98ed3d5762",
+        "artifact schema 0.4.0 -> 0.5.0",
+        "reserved 'origin' (no semantics in schema 0.5.0)",
+        "reserved 'work_packages' (no semantics in schema 0.5.0)",
+        "reserved 'findings' (no semantics in schema 0.5.0)",
+        "reserved 'improvements' (no semantics in schema 0.5.0)"
+      ],
+      "work_packages": {
+        "contract_version": null,
+        "representation": "none"
+      }
+    },
+    "computed_from": {
+      "ledger_tip": {
+        "seq": 3,
+        "sha256": "73c7f39903b6fe6b46cb66f6e9fd51563d59a029fad24226cb882181bdc05494"
+      },
+      "manifest_sha256": "aee4c81a09ee17998632fd2d4f1cf0764c8f712ee93d2b32811363456fbebc04"
+    },
+    "decisions": [],
+    "dispositions": {
+      "decide": [],
+      "invalidate": [],
+      "regenerate": [],
+      "retain": [
+        "request:A0"
+      ]
+    },
+    "evidence": [
+      {
+        "detail": {
+          "artifact": "A0",
+          "status": "current",
+          "version": 1
+        },
+        "disposition": "retain",
+        "id": "request:A0",
+        "integrity": "verified",
+        "integrity_detail": "request.md: sha256 verified",
+        "kind": "request",
+        "proposed": "retain",
+        "proposed_reason": "identity verified against the recorded hash",
+        "reason": "identity verified against the recorded hash",
+        "ref": "request.md",
+        "supports": [
+          "draft"
+        ]
+      }
+    ],
+    "kind": "coding-harness.migration",
+    "obligations": [],
+    "previous": {
+      "artifact_schema_version": "0.3.0",
+      "method_commit": null,
+      "method_id": "coding-harness",
+      "method_version": "0.3.0"
+    },
+    "reason": "Bind the last Phase 0 WI to the running method before planning",
+    "record_version": 1,
+    "reference_integrity": {
+      "event_references_checked": 1,
+      "exceptions": [],
+      "failures": []
+    },
+    "resume": {
+      "arguments": [
+        "--apply",
+        "--confirm",
+        "{record_sha256}"
+      ]
+    },
+    "state": {
+      "basis": "every supporting evidence item is retained",
+      "current": "draft",
+      "resulting": "draft"
+    },
+    "target": {
+      "artifact_schema_version": "0.5.0",
+      "method_commit": "68e7a41ec22b808dfbb98a5563d9627fa35c9362",
+      "method_id": "coding-harness",
+      "method_release": "released",
+      "method_release_tag": "coding-harness/v0.6.0",
+      "method_version": "0.6.0"
+    },
+    "work_item": "20260908T113253"
+  },
+  "sha256": "1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937"
+}

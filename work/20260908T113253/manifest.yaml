@@ -2,8 +2,65 @@ id: 20260908T113253
 created: '2026-09-08T11:32:53Z'
 method:
   id: coding-harness
-  version: 0.3.0
-artifact_schema_version: 0.3.0
+  version: 0.6.0
+  commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
+  bound_at: '2026-09-29T02:20:46Z'
+  bound_by: shane
+  release: &id001
+    state: released
+    tag: coding-harness/v0.6.0
+    checkout_commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
+  history:
+  - commit: 68e7a41ec22b808dfbb98a5563d9627fa35c9362
+    version: 0.6.0
+    bound_at: '2026-09-29T02:20:46Z'
+    bound_by: shane
+    operation: migrate.apply
+    migration_record_sha256: 1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937
+    record_path: migrations/1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937.json
+    previous_commit: null
+    previous_version: 0.3.0
+    previous_schema: 0.3.0
+    schema: 0.5.0
+    reason: Bind the last Phase 0 WI to the running method before planning
+    authority: shane
+    compatibility:
+      assessment: compatible
+      known: true
+      note: 'same MAJOR (0): the common rules apply; versions crossed — 0.4.0: batch review feedback,
+        protocol-2 challenge and controlled scope identity were introduced; 0.5.0: work items are bound
+        to a method commit, a contract without packages is the implicit single package, the bounded planning
+        review applies to normal and high risk and semantic verification is universal; recorded obligation
+        sets are kept, unbound semantic reviews are decided'
+      pair:
+      - 0.3.0
+      - 0.6.0
+      plan_adoptions: []
+      relation: same-major
+      work_packages:
+        contract_version: null
+        representation: none
+    dispositions:
+      decide: []
+      invalidate: []
+      regenerate: []
+      retain:
+      - request:A0
+    decisions: []
+    reference_exceptions: []
+    obligations: []
+    from_state: draft
+    resulting_state: draft
+    resume:
+    - --apply
+    - --confirm
+    - 1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937
+    event_seq: 4
+    event_sha256: fdad70d2a86cd8ac52060a02a3b892f543de66e65ff1615dadfc5f171e46d7ac
+    transition_n: 1
+    status: applied
+    release: *id001
+artifact_schema_version: 0.5.0
 request: "Reconcile entry points, CLI help, runbook guidance, and release documentation with the\n  implemented\
   \ pipeline status, explicit evaluation stages, pinned model, and checkpoint\n  compatibility rules."
 narrative: null
@@ -11,7 +68,22 @@ class: null
 state: draft
 parent: null
 children: []
-transitions: []
+transitions:
+- at: '2026-09-29T02:20:46Z'
+  transition: M1
+  event: migrate
+  from: draft
+  to: draft
+  by: shane
+  reason: Bind the last Phase 0 WI to the running method before planning
+  guards:
+  - guard: evidence_dispositions
+    evidence: retain=1, invalidate=0, regenerate=0, decide=0
+  - guard: resulting_state
+    evidence: every supporting evidence item is retained
+  migration_record_sha256: 1df8054975c5f22871aaef8f86787c0b8e6ee4b25940e82e0cb866ab22768937
+  event_seq: 4
+  obligations: []
 size_estimate:
   files: null
   subsystems: []
@@ -89,7 +161,7 @@ stage_outcomes:
     material_finding: false
     evidence: []
 effort:
-  controller_commands: 0
+  controller_commands: 1
   model_sessions_launched: 0
 checkpoints: []
 acceptance:
@@ -106,3 +178,14 @@ capture:
   sessions: []
   gaps: []
 operator_observations: []
+review_batches: []
+review_reconciliations: []
+review_items: []
+review_actions: []
+scope_version: 1
+scope_sha256: 2d98ed3d5762a94d9c1484247ce0497bcd0b43d7426b19c94884bf5f4ca63a86
+origin: null
+work_packages: []
+findings: []
+improvements: []
+migration_obligations: []
