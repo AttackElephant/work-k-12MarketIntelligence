@@ -1445,7 +1445,7 @@ stage_outcomes:
     - A8
     - A9
 effort:
-  controller_commands: 22
+  controller_commands: 24
   model_sessions_launched: 8
 checkpoints:
 - at: '2026-09-29T07:53:44Z'
@@ -1537,7 +1537,36 @@ acceptance:
   - no_open_blocking_concerns
   - human_authorisation
   - migration_obligations_satisfied
-escapes: []
+escapes:
+- id: E1
+  at: '2026-10-02T06:11:58Z'
+  summary: The README names the pinned model claude-sonnet-4-6 and then says in brackets that the literal
+    is not restated here. The sentence contradicts itself.
+  files:
+  - k-12Harness:README.md
+  found_by: shane
+  found_at: '2026-09-29T00:00:00Z'
+  reference:
+    kind: idea
+    id: IDEA-109
+  reason: It shipped in k-12Harness v1.2.1. The semantic reviewer did not raise it and its recheck looked
+    only at the one finding it had already raised. I found it by reading the released README.
+  authorised_by: shane
+- id: E2
+  at: '2026-10-02T06:12:06Z'
+  summary: The README states that the M1 to M5 build order is complete end to end. Neither definition
+    the work item was bound to supports that claim.
+  files:
+  - k-12Harness:README.md
+  found_by: shane
+  found_at: '2026-09-29T00:00:00Z'
+  reference:
+    kind: idea
+    id: IDEA-109
+  reason: It shipped in k-12Harness v1.2.1. The contract required the documentation to describe the pipeline
+    without overstating it, the semantic reviewer judged that satisfied, and I found the overstatement
+    by reading the released README.
+  authorised_by: shane
 lock:
   owner: shane@Mimir.local
   acquired_at: '2026-09-29T08:04:41Z'
