@@ -1,0 +1,302 @@
+id: 20261003T131828
+created: '2026-10-03T13:18:28Z'
+method:
+  id: coding-harness
+  version: 0.19.0
+  commit: 49b6fe0925741a6046ca3184bc1b76d89663df7e
+  bound_at: '2026-10-03T13:18:28Z'
+  bound_by: shane@Mimir.local
+  release:
+    state: released
+    tag: coding-harness/v0.19.0
+    checkout_commit: c03a93d364778ba43e41428be121b285eb5ec4e6
+  history:
+  - commit: 49b6fe0925741a6046ca3184bc1b76d89663df7e
+    version: 0.19.0
+    bound_at: '2026-10-03T13:18:28Z'
+    bound_by: shane@Mimir.local
+    operation: init
+    release:
+      state: released
+      tag: coding-harness/v0.19.0
+      checkout_commit: c03a93d364778ba43e41428be121b285eb5ec4e6
+artifact_schema_version: 0.8.0
+origin: null
+request: '# Request
+
+
+  ## Objective
+
+
+  When `run.py` prints an outcome as text, standard output holds the outcome and nothing else, and the
+  confidence block shows the data layer''s grade as its value and weakest input, with each component''s
+  grade where the response carries them, instead of a printed Python dictionary.
+
+
+  ## Target repository
+
+
+  `k-12Harness`
+
+
+  ## What should happen
+
+
+  1. Render the saved real response `docs/reviews/2026-10-poc-review/_work/envelopes/L01.json` (question
+  VC-POC-01, Camberwell Grammar School) as an answer. The confidence block shows the grade "Observed"
+  and its weakest input "Observed", read from `confidence.grade.value` and `confidence.grade.weakest_input`.
+  It still shows the four ratings as the response states them: forecast `not_applicable`, linkage `high`,
+  source `high`, temporal `medium`. No line of the block contains `{` or `''adjustments''`.
+
+  2. Render `docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json` (VC-POC-13).
+  Its `confidence.grade.component_grades` names two components, `sa2_age_projection` and `sa2_projection`,
+  each "Indicative". The block shows each component with its own grade (architecture §6, rule 5).
+
+  3. Run the command line in its default text mode. No line of standard output is a log record (a JSON
+  object with a `"level"` key). The log file `logs/harness.log` still receives its records.
+
+
+  ## What should be refused or fail
+
+
+  1. A response whose `confidence` has no `grade`, or a `grade` with no `value`: the block shows the ratings
+  only and says no grade was stated. The harness does not supply a grade of its own (ADR-009).
+
+  2. `--json` mode: standard output is exactly one JSON document, the same as before this change. A test
+  that parses it fails if anything else is printed.
+
+  3. The existing logging tests in `tests/unit/test_logging_config.py` still pass unchanged: `harness.*`
+  loggers follow the single `LOG_LEVEL` setting and the transport libraries stay quiet (ADR-016, finding
+  3).
+
+
+  ## Known acceptance inputs
+
+
+  - The two saved responses above, read by tests from the review folder where they are filed, and the
+  live record of the first: `docs/reviews/2026-10-poc-review/04_runs.jsonl`, record L01, whose `rendered_stdout`
+  shows both defects.
+
+  - `run.py`, function `render_text` (the confidence lines are near line 105 at commit `e4bd76b`).
+
+  - `tests/unit/test_run_cli.py`, `test_confidence_renders_as_the_axes_the_data_layer_stated` (line 72):
+  it asserts that the block''s keys equal the keys of `confidence` "with no overall grade added". That
+  was the rule before the contract carried a grade. It must change to match ADR-009''s rule for a stated
+  grade, without allowing a grade the response did not state.
+
+  - `tests/unit/test_demo.py` asserts only that the heading "Confidence (as stated by the data layer):"
+  is present, so the demo''s tests do not depend on the block''s content.
+
+  - `logging_config.yaml` (the console handler writes to `ext://sys.stdout`) and `config/settings.py`
+  (`LOG_LEVEL` defaults to `DEBUG`).
+
+  - The grade''s shape, including `component_grades`: `contract/poc_evidence_contract.v0.3.0.schema.json`
+  (line 404).
+
+
+  ## Gaps not yet settled
+
+
+  - GAP: where console log records go. I found no position on it in the decisions log, the architecture
+  document, the runbook or the logging configuration, beyond the rule that one setting governs the level.
+  Three ways meet the objective: send the console handler to standard error; switch console logging off
+  for the command line; or change the default level. Changing the default level also changes what the
+  log file records.
+
+  - GAP: the shape of `weakest_input` was seen in one response (`{"grade": "Observed"}`). Other responses
+  may carry more keys.
+
+  - GAP: a `Modelled` grade must show its backtest block (ADR-009). The only Modelled question is gated
+  and never rendered today. Out of scope here; say so in the contract.
+
+
+  ## Out of scope
+
+
+  Any change to what is answered, to the JSON output, to the log file''s content, or to the rendering
+  of anything except the confidence block.'
+narrative: null
+class: null
+state: abandoned
+parent: null
+children: []
+transitions:
+- at: '2026-10-03T13:54:58Z'
+  transition: F15
+  event: abandon
+  from: draft
+  to: abandoned
+  by: shane
+  reason: Abandoned because a pinned review file, 04_runs.jsonl at 168,596 bytes, exceeds the planner's
+    160,000-byte file limit and a pinned file cannot be removed, so every planner run fails; restarting
+    as a new work item with five pinned files.
+  reason_source: supplied
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by shane
+size_estimate:
+  files: null
+  subsystems: []
+  scale: null
+definitions:
+- ref: contract/poc_evidence_contract.v0.3.0.schema.json
+  repo: k-12Harness
+  authority: 3
+  revision: sha256:5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+  sha256: 5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+- ref: docs/architecture.md
+  repo: k-12Harness
+  authority: 2
+  revision: sha256:66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+  sha256: 66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+- ref: docs/decisions.md
+  repo: k-12Harness
+  authority: 1
+  revision: sha256:8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+  sha256: 8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+- ref: docs/reviews/2026-10-poc-review/04_runs.jsonl
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:79b95ea78d20225f61551e59812c1992f6eb3eaeb6b9386499491d1f77c4a403
+  sha256: 79b95ea78d20225f61551e59812c1992f6eb3eaeb6b9386499491d1f77c4a403
+- ref: docs/reviews/2026-10-poc-review/07_interface_readiness.md
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:4af8da1481917e5df8e7fb5a1ec42f02848f77f9cdc03c5fd6559c468be29602
+  sha256: 4af8da1481917e5df8e7fb5a1ec42f02848f77f9cdc03c5fd6559c468be29602
+- ref: docs/reviews/2026-10-poc-review/09_REPORT.md
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:a53d0599ecaab49b99c36b1efaee5b7327565f222652cca58ad07fa54928b24c
+  sha256: a53d0599ecaab49b99c36b1efaee5b7327565f222652cca58ad07fa54928b24c
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+  sha256: 417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+  sha256: c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+executor_context: null
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope:
+- id: work-store
+  repo: /Users/shane/Projects/work/k-12MarketIntelligence
+  store_directory: k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: main
+  base_commit: 8733ffda2d0d11424f42d01ebc69d3ff381295db
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: 8733ffda2d0d11424f42d01ebc69d3ff381295db
+  verify: null
+  declared_files: []
+  declared: false
+- id: k-12Harness
+  repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  governance: diff-allowlist
+  branch: wi/20261003T131828
+  base_commit: 37505d3d095c0580b7fda25c79628d1a20f3c4ac
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: 37505d3d095c0580b7fda25c79628d1a20f3c4ac
+  verify: .venv/bin/python -m pytest tests/ -q
+  declared_files: []
+  declared: false
+scope_version: 1
+scope_sha256: 6047964d8286cd00cc537ca98a7c4f20d804de8ad067768a1624a194d2474481
+risk:
+  initial: null
+  current: null
+  maximum: null
+  rationale: null
+  obligations: []
+  escalations: []
+  deescalations: []
+contract:
+  current: null
+  versions: []
+decisions: []
+constraints: []
+concerns: []
+review_reconciliations: []
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: a10577a843a86d3bd4cd7dd73b741b138e3594fa42bb609a2df684c315abcab8
+  created_at: '2026-10-03T13:18:28Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+attempts:
+- attempt: 1
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-03T13:34:38Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 9
+  closed_at: '2026-10-03T13:34:38Z'
+  failure_kind: validation
+  failure_reason: capability
+continuations: []
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: null
+  decisions: []
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+  semantic_attempts: []
+effort:
+  controller_commands: 1
+  model_sessions_launched: 1
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+work_packages: []
+findings: []
+improvements: []
+planning_review:
+  rounds: []
+lock:
+  owner: null
+  acquired_at: null
+  released_at: null
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []
+migration_obligations: []
