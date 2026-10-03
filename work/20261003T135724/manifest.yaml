@@ -1,0 +1,435 @@
+id: 20261003T135724
+created: '2026-10-03T13:57:24Z'
+method:
+  id: coding-harness
+  version: 0.19.0
+  commit: 49b6fe0925741a6046ca3184bc1b76d89663df7e
+  bound_at: '2026-10-03T13:57:24Z'
+  bound_by: shane@Mimir.local
+  release:
+    state: released
+    tag: coding-harness/v0.19.0
+    checkout_commit: c03a93d364778ba43e41428be121b285eb5ec4e6
+  history:
+  - commit: 49b6fe0925741a6046ca3184bc1b76d89663df7e
+    version: 0.19.0
+    bound_at: '2026-10-03T13:57:24Z'
+    bound_by: shane@Mimir.local
+    operation: init
+    release:
+      state: released
+      tag: coding-harness/v0.19.0
+      checkout_commit: c03a93d364778ba43e41428be121b285eb5ec4e6
+artifact_schema_version: 0.8.0
+origin: null
+request: '# Request
+
+
+  ## Objective
+
+
+  When `run.py` prints an outcome as text, standard output holds the outcome and nothing else, and the
+  confidence block shows the data layer''s grade as its value and weakest input, with each component''s
+  grade where the response carries them, instead of a printed Python dictionary.
+
+
+  ## Target repository
+
+
+  `k-12Harness`
+
+
+  ## What should happen
+
+
+  1. Render the saved real response `docs/reviews/2026-10-poc-review/_work/envelopes/L01.json` (question
+  VC-POC-01, Camberwell Grammar School) as an answer. The confidence block shows the grade "Observed"
+  and its weakest input "Observed", read from `confidence.grade.value` and `confidence.grade.weakest_input`.
+  It still shows the four ratings as the response states them: forecast `not_applicable`, linkage `high`,
+  source `high`, temporal `medium`. No line of the block contains `{` or `''adjustments''`.
+
+  2. Render `docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json` (VC-POC-13).
+  Its `confidence.grade.component_grades` names two components, `sa2_age_projection` and `sa2_projection`,
+  each "Indicative". The block shows each component with its own grade (architecture §6, rule 5).
+
+  3. Run the command line in its default text mode. No line of standard output is a log record (a JSON
+  object with a `"level"` key). The log file `logs/harness.log` still receives its records.
+
+
+  ## What should be refused or fail
+
+
+  1. A response whose `confidence` has no `grade`, or a `grade` with no `value`: the block shows the ratings
+  only and says no grade was stated. The harness does not supply a grade of its own (ADR-009).
+
+  2. `--json` mode: standard output is exactly one JSON document, the same as before this change. A test
+  that parses it fails if anything else is printed.
+
+  3. The existing logging tests in `tests/unit/test_logging_config.py` still pass unchanged: `harness.*`
+  loggers follow the single `LOG_LEVEL` setting and the transport libraries stay quiet (ADR-016, finding
+  3).
+
+
+  ## Known acceptance inputs
+
+
+  - The two saved responses above, read by tests from the review folder where they are filed.
+
+  - `run.py`, function `render_text` (the confidence lines are near line 105 at commit `e4bd76b`).
+
+  - `tests/unit/test_run_cli.py`, `test_confidence_renders_as_the_axes_the_data_layer_stated` (line 72):
+  it asserts that the block''s keys equal the keys of `confidence` "with no overall grade added". That
+  was the rule before the contract carried a grade. It must change to match ADR-009''s rule for a stated
+  grade, without allowing a grade the response did not state.
+
+  - `tests/unit/test_demo.py` asserts only that the heading "Confidence (as stated by the data layer):"
+  is present, so the demo''s tests do not depend on the block''s content.
+
+  - `logging_config.yaml` (the console handler writes to `ext://sys.stdout`) and `config/settings.py`
+  (`LOG_LEVEL` defaults to `DEBUG`).
+
+  - The grade''s shape, including `component_grades`: `contract/poc_evidence_contract.v0.3.0.schema.json`
+  (line 404).
+
+
+  ## Gaps not yet settled
+
+
+  - GAP: where console log records go. I found no position on it in the decisions log, the architecture
+  document, the runbook or the logging configuration, beyond the rule that one setting governs the level.
+  Three ways meet the objective: send the console handler to standard error; switch console logging off
+  for the command line; or change the default level. Changing the default level also changes what the
+  log file records.
+
+  - GAP: the shape of `weakest_input` was seen in one response (`{"grade": "Observed"}`). Other responses
+  may carry more keys.
+
+  - GAP: a `Modelled` grade must show its backtest block (ADR-009). The only Modelled question is gated
+  and never rendered today. Out of scope here; say so in the contract.
+
+
+  ## Out of scope
+
+
+  Any change to what is answered, to the JSON output, to the log file''s content, or to the rendering
+  of anything except the confidence block.'
+narrative: null
+class: null
+state: classified
+parent: null
+children: []
+transitions:
+- at: '2026-10-03T14:11:37Z'
+  transition: T1
+  event: plan-ready
+  from: draft
+  to: planned
+  by: shane@Mimir.local
+  reason: 5 definition references resolve at their recorded revisions; 0 open planning concern(s) recorded
+    as structured entries; planning artifact 001-plan.md; base commit, branch and tree state recorded
+    for every scope entry; size estimate files=4 scale=small; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: definitions_resolved
+    evidence: 5 definition references resolve at their recorded revisions
+  - guard: definition_conflicts_are_structured
+    evidence: 0 open planning concern(s) recorded as structured entries
+  - guard: planning_artifact_exists
+    evidence: planning artifact 001-plan.md
+  - guard: base_state_recorded
+    evidence: base commit, branch and tree state recorded for every scope entry
+  - guard: size_estimate_present
+    evidence: size estimate files=4 scale=small
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-03T14:11:47Z'
+  transition: T2
+  event: risk
+  from: planned
+  to: classified
+  by: shane
+  reason: 'Low: the change is to how the command line prints an answer and where console log lines go;
+    a defect is visible as soon as anyone runs the command, is caught by the new tests, reaches no other
+    system because nothing reads log lines from standard output, and is undone by reverting one commit.'
+  reason_source: supplied
+  guards:
+  - guard: risk_classified
+    evidence: risk low with rationale
+  - guard: human_authorisation
+    evidence: authorised by shane
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+size_estimate:
+  files: 4
+  scale: small
+  subsystems:
+  - cli
+  - logging-config
+  - tests
+  - releases
+  source: planner
+definitions:
+- ref: contract/poc_evidence_contract.v0.3.0.schema.json
+  repo: k-12Harness
+  authority: 3
+  revision: sha256:5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+  sha256: 5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+- ref: docs/architecture.md
+  repo: k-12Harness
+  authority: 2
+  revision: sha256:66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+  sha256: 66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+- ref: docs/decisions.md
+  repo: k-12Harness
+  authority: 1
+  revision: sha256:8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+  sha256: 8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+  sha256: 417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+  sha256: c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+executor_context: null
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope:
+- id: work-store
+  repo: /Users/shane/Projects/work/k-12MarketIntelligence
+  store_directory: k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: main
+  base_commit: 967b4690db40ba3b4a62384b034e85a431f78083
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: 967b4690db40ba3b4a62384b034e85a431f78083
+  verify: null
+  declared_files: []
+  declared: false
+- id: k-12Harness
+  repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  governance: diff-allowlist
+  branch: wi/20261003T135724
+  base_commit: 37505d3d095c0580b7fda25c79628d1a20f3c4ac
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: 37505d3d095c0580b7fda25c79628d1a20f3c4ac
+  verify: .venv/bin/python -m pytest tests/ -q
+  declared_files: []
+  declared: false
+scope_version: 1
+scope_sha256: 71ee1adf8e94488144973b39be318f985f607c2daae2b250c33c662d1b24fb8e
+risk:
+  initial: low
+  current: low
+  maximum: low
+  rationale: 'Low: the change is to how the command line prints an answer and where console log lines
+    go; a defect is visible as soon as anyone runs the command, is caught by the new tests, reaches no
+    other system because nothing reads log lines from standard output, and is undone by reverting one
+    commit.'
+  obligations:
+  - planning
+  - contract
+  - deterministic
+  - semantic
+  escalations: []
+  deescalations: []
+contract:
+  current: null
+  versions: []
+decisions: []
+constraints: []
+concerns: []
+review_reconciliations: []
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: 03e05cc2a997ade3273a52ec791a935dc154e46f146b0113c2e9382d6c01d5e2
+  created_at: '2026-10-03T13:57:24Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+- status: current
+  supersedes: null
+  id: A1
+  type: planning_plan
+  path: planning/001-plan.md
+  version: 1
+  sha256: 62570902b2fd3456e50cc9fcd932547c4c02f9aa5e0e38d39ceb69c1c561f6c1
+  created_at: '2026-10-03T14:09:17Z'
+  produced_by_attempt: 1
+attempts:
+- attempt: 1
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-03T14:06:52Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-03T14:09:17Z'
+  turns: 3
+  transport_attempts: 3
+  usage:
+    input_tokens: 6
+    cache_creation_input_tokens: 275594
+    cache_read_input_tokens: 1274
+    output_tokens: 16435
+  initial_input_tokens: 41016
+  peak_input_tokens: 75943
+  files_read:
+  - root2:request.md
+  - root2:manifest.yaml
+  - root1:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root1:docs/architecture.md
+  - root1:docs/decisions.md
+  - root1:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root1:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  - root1:run.py
+  - root1:tests/unit/test_run_cli.py
+  - root1:logging_config.yaml
+  - root1:harness/logging_config.py
+  - root1:tests/unit/test_logging_config.py
+  - root1:config/settings.py
+  - root1:tests/unit/test_demo.py
+  - root1:CLAUDE.md
+  - root1:harness/outputs.py
+  - root1:demo.py
+  - root1:releases/README.md
+  - root1:releases/_template.md
+  - root1:.github/workflows/pr-checks.yml
+  - root1:.claude/hooks/require-release-notes.sh
+  - root1:RUNBOOK.md
+  - root1:harness/rendering.py
+  requested_files_read:
+  - root1:run.py
+  - root1:tests/unit/test_run_cli.py
+  - root1:logging_config.yaml
+  - root1:harness/logging_config.py
+  - root1:tests/unit/test_logging_config.py
+  - root1:config/settings.py
+  - root1:tests/unit/test_demo.py
+  - root1:CLAUDE.md
+  - root1:harness/outputs.py
+  - root1:demo.py
+  - root1:releases/README.md
+  - root1:releases/_template.md
+  - root1:.github/workflows/pr-checks.yml
+  - root1:.claude/hooks/require-release-notes.sh
+  - root1:RUNBOOK.md
+  - root1:harness/rendering.py
+  plan: planning/001-plan.md
+  size_estimate:
+    files: 4
+    scale: small
+    subsystems:
+    - cli
+    - logging-config
+    - tests
+    - releases
+    source: planner
+  headroom: 0.2051
+  growth_per_turn: 11642.3
+- attempt: 2
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-10-03T14:15:37Z'
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 9
+  closed_at: '2026-10-03T14:15:43Z'
+  failure_kind: validation
+  failure_reason: capability
+- attempt: 3
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-10-03T23:08:58Z'
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 9
+  closed_at: '2026-10-03T23:09:05Z'
+  failure_kind: validation
+  failure_reason: capability
+continuations: []
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: null
+  decisions: []
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+  semantic_attempts: []
+effort:
+  controller_commands: 2
+  model_sessions_launched: 3
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+work_packages: []
+findings: []
+improvements: []
+planning_review:
+  rounds: []
+lock:
+  owner: null
+  acquired_at: null
+  released_at: null
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []
+migration_obligations: []
