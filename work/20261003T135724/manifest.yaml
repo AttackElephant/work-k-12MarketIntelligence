@@ -115,7 +115,7 @@ request: '# Request
   of anything except the confidence block.'
 narrative: null
 class: null
-state: classified
+state: abandoned
 parent: null
 children: []
 transitions:
@@ -159,6 +159,20 @@ transitions:
     evidence: authorised by shane
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-10-04T00:12:43Z'
+  transition: F15
+  event: abandon
+  from: classified
+  to: abandoned
+  by: claude-opus-5-5
+  reason: 'Abandoned at the contract step: the contract drafter failed twice the same way, asking to read
+    an earlier work item''s contract from the work store under the wrong location label, and one failed
+    read aborts the whole run. The method is being fixed; this request restarts as a new work item on
+    the fixed release.'
+  reason_source: supplied
+  guards:
+  - guard: human_authorisation
+    evidence: authorised by claude-opus-5-5
 size_estimate:
   files: 4
   scale: small
@@ -410,7 +424,7 @@ verification:
   semantic_reviews: []
   semantic_attempts: []
 effort:
-  controller_commands: 2
+  controller_commands: 3
   model_sessions_launched: 3
 checkpoints: []
 acceptance:
