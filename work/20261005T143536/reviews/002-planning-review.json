@@ -1,0 +1,15 @@
+{
+  "covers": [
+    "PF-1"
+  ],
+  "findings": [],
+  "kind": "targeted",
+  "resolutions": {
+    "PF-1": {
+      "rationale": "The delta changes the planned text-mode unit test to require stdout to equal exactly `cli.render_text(<the Unsupported the fake returned>)` followed by one newline. This rejects arbitrary diagnostics, warnings, or other non-log output, and the full-test-suite acceptance criterion executes that test.",
+      "state": "resolved"
+    }
+  },
+  "round": 2,
+  "summary": "The remediation resolves the sole open finding and introduces no new material or blocking findings."
+}

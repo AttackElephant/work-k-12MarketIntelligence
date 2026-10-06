@@ -1,0 +1,184 @@
+{
+  "captured_at": "2026-10-06T02:27:49Z",
+  "changes": {
+    "added": [
+      "acceptance/002-contract-review.md",
+      "acceptance/002-dry-run.json",
+      "acceptance/002-dry-run/001-l01-block-shows-stated-grade.log",
+      "acceptance/002-dry-run/002-vc-poc-13-block-shows-component-grades.log",
+      "acceptance/002-dry-run/003-no-stated-grade-shows-ratings-only.log",
+      "acceptance/002-dry-run/004-text-mode-stdout-carries-no-log-record.log",
+      "acceptance/002-dry-run/005-json-mode-stdout-is-one-document.log",
+      "acceptance/002-dry-run/006-release-note-present.log",
+      "acceptance/002-dry-run/007-full-test-suite.log",
+      "acceptance/002-dry-run/008-focused-cli-demo-logging-tests.log",
+      "acceptance/002-dry-run/009-protected-files-unchanged.log",
+      "execution/007-executor.md",
+      "reviews/001-plan-reviewed.md",
+      "reviews/001-planning-review.json",
+      "reviews/002-plan-reviewed.md",
+      "reviews/002-planning-review.json"
+    ],
+    "changed": [
+      "planning/001-plan.md"
+    ],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "a0624b57104a80566b80dc6deeea3d201ec3d57e1c93fbfa9cdfcae40ea620bf",
+      "size": 25743
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911",
+      "size": 26142
+    },
+    "acceptance/001-dry-run.json": {
+      "kind": "file",
+      "sha256": "ef03b25164b9234d8024230237d1a7eb93c71edac0180650cba245610b54c8d5",
+      "size": 24329
+    },
+    "acceptance/001-dry-run/001-l01-block-shows-stated-grade.log": {
+      "kind": "file",
+      "sha256": "2f8c0e47383a1112833aac00fd7f2b9214556e4387ebae26e177efb8467287c1",
+      "size": 2800
+    },
+    "acceptance/001-dry-run/002-vc-poc-13-block-shows-component-grades.log": {
+      "kind": "file",
+      "sha256": "145563f58efb8ffac0b092e3ae4a743a6941c7bccef68182b300d88604e9f764",
+      "size": 3218
+    },
+    "acceptance/001-dry-run/003-no-stated-grade-shows-ratings-only.log": {
+      "kind": "file",
+      "sha256": "82d4c961013d0a47632138ff6b0c53e3f465462205f3f934da296cdbb43b593f",
+      "size": 3638
+    },
+    "acceptance/001-dry-run/004-text-mode-stdout-carries-no-log-record.log": {
+      "kind": "file",
+      "sha256": "7d296493cc62366ceab7589cd0235712c968314048786c91d81d43919ca9f2da",
+      "size": 4648
+    },
+    "acceptance/001-dry-run/005-json-mode-stdout-is-one-document.log": {
+      "kind": "file",
+      "sha256": "f7b68c2882839d2a0456f37ce2b4c48980c868e99d3a648b7fec5e9de191c1bc",
+      "size": 3658
+    },
+    "acceptance/001-dry-run/006-release-note-present.log": {
+      "kind": "file",
+      "sha256": "b9b1fdd9beb55891327f5e86f44d897cf6e14ead6e81b821a6ea83e5921b2b60",
+      "size": 286
+    },
+    "acceptance/001-dry-run/007-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "480c6b0233b36219f823aa76ddc51f0c0d286a92512290bad3967f4cf9bc1538",
+      "size": 1258
+    },
+    "acceptance/001-dry-run/008-focused-cli-demo-logging-tests.log": {
+      "kind": "file",
+      "sha256": "6b2fbe3bac7b623bc566eefaaae97c83af1233aa9ac9913a77407e6d10da399f",
+      "size": 343
+    },
+    "acceptance/001-dry-run/009-protected-files-unchanged.log": {
+      "kind": "file",
+      "sha256": "42b9b9eddbfe473293d502a702169ed30b8bae4975fa74a322c5759935b5df49",
+      "size": 370
+    },
+    "acceptance/002-contract-review.md": {
+      "kind": "file",
+      "sha256": "7ff824cfd517ba14a50b190681718514bb8d67ce78a434403db11356bd2707c0",
+      "size": 25194
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1",
+      "size": 25593
+    },
+    "acceptance/002-dry-run.json": {
+      "kind": "file",
+      "sha256": "40997ec3273e7927cdd2ce5ef3d915d0e8d8b97415c01f1837b3da81d4bac83d",
+      "size": 24329
+    },
+    "acceptance/002-dry-run/001-l01-block-shows-stated-grade.log": {
+      "kind": "file",
+      "sha256": "a5a996f1f346bd84d7cc727ba18486fad598dc3dd792db6132a43b6e806ec263",
+      "size": 2800
+    },
+    "acceptance/002-dry-run/002-vc-poc-13-block-shows-component-grades.log": {
+      "kind": "file",
+      "sha256": "f7ac498e41f1c73295505df9450b61017639f67ca048ffebf496a5c1b7eee29d",
+      "size": 3218
+    },
+    "acceptance/002-dry-run/003-no-stated-grade-shows-ratings-only.log": {
+      "kind": "file",
+      "sha256": "1f11de8abb7d4582819ed82db881ee06d9e338fafd8fef8d1e9cc737bb1c2cbe",
+      "size": 3638
+    },
+    "acceptance/002-dry-run/004-text-mode-stdout-carries-no-log-record.log": {
+      "kind": "file",
+      "sha256": "789ed0797f9871034fb8653d130ee12d8d97cf5ee1296a1702e7a49df053cfc4",
+      "size": 4648
+    },
+    "acceptance/002-dry-run/005-json-mode-stdout-is-one-document.log": {
+      "kind": "file",
+      "sha256": "846c27c7a98ee3c38826c775abdb38a7a3d62dd39e358b10a3ff7c4a1b94b1a7",
+      "size": 3658
+    },
+    "acceptance/002-dry-run/006-release-note-present.log": {
+      "kind": "file",
+      "sha256": "a46cd11c692d2bb68c74bfa5dcab1988976031cb29523c76adef9388770d8de7",
+      "size": 286
+    },
+    "acceptance/002-dry-run/007-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "17a3c1f6d4fd1377f2f459a8ffa10a4c49c1f7bd09d851f86a76b751bfc0864a",
+      "size": 1258
+    },
+    "acceptance/002-dry-run/008-focused-cli-demo-logging-tests.log": {
+      "kind": "file",
+      "sha256": "c85a4b8553839e2e4968a494af61e11a0fcc3cf146d1013fbd4948e57dc5d9ce",
+      "size": 343
+    },
+    "acceptance/002-dry-run/009-protected-files-unchanged.log": {
+      "kind": "file",
+      "sha256": "47247d4f42e0de3a95ee2ea6bc1295e8109847e562736d7f411b327f7620e36d",
+      "size": 370
+    },
+    "execution/007-executor.md": {
+      "kind": "file",
+      "sha256": "5eb4e88cc9379b81b8447839d1abffbeceda900e7453fae97db1ca6f1d79b446",
+      "size": 2106
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "abe00d75aa3fb82e42ade6bb0dac33029576a0db8225b2a9efcabda7a9faf2d6",
+      "size": 16061
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "e987cb36768308be87f2f83a92c4a94794eb02ee013e60b5b91c0f7a785789ac",
+      "size": 3873
+    },
+    "reviews/001-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50",
+      "size": 15907
+    },
+    "reviews/001-planning-review.json": {
+      "kind": "file",
+      "sha256": "d66edd23216aa8aebc68ae93e715f0d065fc87a8654866d274858e871e2900b5",
+      "size": 2615
+    },
+    "reviews/002-plan-reviewed.md": {
+      "kind": "file",
+      "sha256": "abe00d75aa3fb82e42ade6bb0dac33029576a0db8225b2a9efcabda7a9faf2d6",
+      "size": 16061
+    },
+    "reviews/002-planning-review.json": {
+      "kind": "file",
+      "sha256": "623edc6d5fa48a15aec27f9581c28565d2b2e6d9c03fcdf7b3e6fde6167701f7",
+      "size": 596
+    }
+  }
+}

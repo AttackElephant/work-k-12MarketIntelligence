@@ -1,0 +1,15 @@
+started: 2026-10-06T02:45:09Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-c", "import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"grade: Observed\" in lines, \"stated grade line missing\"; assert \"weakest input: Observed\" in lines, \"weakest input line missing\"; assert all(a in lines for a in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")), \"an axis rating is missing\"; assert not any(\"{\" in l or \"adjustments\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"L01-BLOCK-OK\")"]
+
+forecast: not_applicable
+linkage: high
+source: high
+temporal: medium
+grade: Observed
+weakest input: Observed
+L01-BLOCK-OK
+
+ended: 2026-10-06T02:45:09Z
+exit_code: 0
+duration_seconds: 0.658

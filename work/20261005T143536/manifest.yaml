@@ -1,0 +1,1909 @@
+id: 20261005T143536
+created: '2026-10-05T14:35:36Z'
+method:
+  id: coding-harness
+  version: 0.22.1
+  commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+  bound_at: '2026-10-05T14:35:36Z'
+  bound_by: shane@Mimir.local
+  release:
+    state: released
+    tag: coding-harness/v0.22.1
+    checkout_commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+  history:
+  - commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+    version: 0.22.1
+    bound_at: '2026-10-05T14:35:36Z'
+    bound_by: shane@Mimir.local
+    operation: init
+    release:
+      state: released
+      tag: coding-harness/v0.22.1
+      checkout_commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+artifact_schema_version: 0.9.0
+origin: null
+request: '# Request
+
+
+  ## Objective
+
+
+  When `run.py` prints an outcome as text, standard output holds the outcome and nothing else, and the
+  confidence block shows the data layer''s grade as its value and weakest input, with each component''s
+  grade where the response carries them, instead of a printed Python dictionary.
+
+
+  ## Target repository
+
+
+  `k-12Harness`
+
+
+  ## What should happen
+
+
+  1. Render the saved real response `docs/reviews/2026-10-poc-review/_work/envelopes/L01.json` (question
+  VC-POC-01, Camberwell Grammar School) as an answer. The confidence block shows the grade "Observed"
+  and its weakest input "Observed", read from `confidence.grade.value` and `confidence.grade.weakest_input`.
+  It still shows the four ratings as the response states them: forecast `not_applicable`, linkage `high`,
+  source `high`, temporal `medium`. No line of the block contains `{` or `''adjustments''`.
+
+  2. Render `docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json` (VC-POC-13).
+  Its `confidence.grade.component_grades` names two components, `sa2_age_projection` and `sa2_projection`,
+  each "Indicative". The block shows each component with its own grade (architecture §6, rule 5).
+
+  3. Run the command line in its default text mode. No line of standard output is a log record (a JSON
+  object with a `"level"` key). The log file `logs/harness.log` still receives its records.
+
+
+  ## What should be refused or fail
+
+
+  1. A response whose `confidence` has no `grade`, or a `grade` with no `value`: the block shows the ratings
+  only and says no grade was stated. The harness does not supply a grade of its own (ADR-009).
+
+  2. `--json` mode: standard output is exactly one JSON document, the same as before this change. A test
+  that parses it fails if anything else is printed.
+
+  3. The existing logging tests in `tests/unit/test_logging_config.py` still pass unchanged: `harness.*`
+  loggers follow the single `LOG_LEVEL` setting and the transport libraries stay quiet (ADR-016, finding
+  3).
+
+
+  ## Known acceptance inputs
+
+
+  - The two saved responses above, read by tests from the review folder where they are filed.
+
+  - `run.py`, function `render_text` (the confidence lines are near line 105 at commit `e4bd76b`).
+
+  - `tests/unit/test_run_cli.py`, `test_confidence_renders_as_the_axes_the_data_layer_stated` (line 72):
+  it asserts that the block''s keys equal the keys of `confidence` "with no overall grade added". That
+  was the rule before the contract carried a grade. It must change to match ADR-009''s rule for a stated
+  grade, without allowing a grade the response did not state.
+
+  - `tests/unit/test_demo.py` asserts only that the heading "Confidence (as stated by the data layer):"
+  is present, so the demo''s tests do not depend on the block''s content.
+
+  - `logging_config.yaml` (the console handler writes to `ext://sys.stdout`) and `config/settings.py`
+  (`LOG_LEVEL` defaults to `DEBUG`).
+
+  - The grade''s shape, including `component_grades`: `contract/poc_evidence_contract.v0.3.0.schema.json`
+  (line 404).
+
+
+  ## Gaps not yet settled
+
+
+  - GAP: where console log records go. I found no position on it in the decisions log, the architecture
+  document, the runbook or the logging configuration, beyond the rule that one setting governs the level.
+  Three ways meet the objective: send the console handler to standard error; switch console logging off
+  for the command line; or change the default level. Changing the default level also changes what the
+  log file records.
+
+  - GAP: the shape of `weakest_input` was seen in one response (`{"grade": "Observed"}`). Other responses
+  may carry more keys.
+
+  - GAP: a `Modelled` grade must show its backtest block (ADR-009). The only Modelled question is gated
+  and never rendered today. Out of scope here; say so in the contract.
+
+
+  ## Out of scope
+
+
+  Any change to what is answered, to the JSON output, to the log file''s content, or to the rendering
+  of anything except the confidence block.'
+narrative: null
+class: null
+state: verified_det
+parent: null
+children: []
+transitions:
+- at: '2026-10-06T00:53:17Z'
+  transition: T1
+  event: plan-ready
+  from: draft
+  to: planned
+  by: shane@Mac.gateway
+  reason: 5 definition references resolve at their recorded revisions; 0 open planning concern(s) recorded
+    as structured entries; planning artifact 001-plan.md; base commit, branch and tree state recorded
+    for every scope entry; size estimate files=4 scale=small; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: definitions_resolved
+    evidence: 5 definition references resolve at their recorded revisions
+  - guard: definition_conflicts_are_structured
+    evidence: 0 open planning concern(s) recorded as structured entries
+  - guard: planning_artifact_exists
+    evidence: planning artifact 001-plan.md
+  - guard: base_state_recorded
+    evidence: base commit, branch and tree state recorded for every scope entry
+  - guard: size_estimate_present
+    evidence: size estimate files=4 scale=small
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-06T01:29:31Z'
+  transition: T2
+  event: risk
+  from: planned
+  to: classified
+  by: claude-opus-5-5
+  reason: The change edits run.py and logging_config.yaml, whose approved floor is normal, and adds tests
+    and a release note. A wrong confidence block, or a log record left on standard output, would reach
+    whoever or whatever reads the command line or the demo before anyone noticed, and the new tests are
+    what would catch it. Nothing touches the contract, the method declaration, the HTTP API or the SQL
+    views, so high does not apply.
+  reason_source: supplied
+  guards:
+  - guard: risk_classified
+    evidence: risk normal with rationale
+  - guard: decision_authorised
+    evidence: model-eligible classify, decided by anthropic/claude-opus-5-5 (anthropic)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: eligibility
+    decision_sha256: 856f4375ea809d0d5e5ed70062913465b83a062c8bfd2934aa2d1e940d453fb3
+    evidence_sha256: 9628293ff3d3542e2a2adc371c9f7109a08645e3fd1298f01734a251eff42d85
+    verdict:
+      decision: classify
+      eligible: true
+      reasons: []
+      evidence_sha256: ab5e29b4f46ed673db658788d0b8258fc619e93507c2170b7b5a01ee797b1be4
+  eligibility:
+    decision: classify
+    eligible: true
+    reasons: []
+    evidence_sha256: ab5e29b4f46ed673db658788d0b8258fc619e93507c2170b7b5a01ee797b1be4
+    applied: true
+    evidence:
+      exceptions:
+      - id: X-12
+        kind: attempt-failed
+        seq: 12
+        event_sha256: 09748be8915b726e53a5da767a4daee2f05354a28932a7303d25494cf463f5e4
+        summary: 'attempt 1 (planner) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: planner
+          attempt: 1
+        condition: handled
+        handled_by: EH-1
+      risk_floor:
+        section: risk_floor
+        version: 1
+        sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+        approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+        confirmed_by: shane
+      plan_floor:
+        stage: plan
+        floor: normal
+        known: true
+        unknown: []
+        under_declared: []
+        matches:
+          logging_config.yaml:
+          - pipeline
+          releases/_next/cli-confidence-grade-and-clean-stdout.md:
+          - description-and-evidence
+          run.py:
+          - entry-points
+          tests/unit/test_run_cli.py:
+          - description-and-evidence
+        implied: []
+        declared: []
+        assessed:
+        - run.py
+        - logging_config.yaml
+        - tests/unit/test_run_cli.py
+        - releases/_next/cli-confidence-grade-and-clean-stdout.md
+- at: '2026-10-06T02:08:36Z'
+  transition: T3
+  event: acceptance-ready
+  from: classified
+  to: contracted
+  by: shane
+  reason: Contract v2 is approved as the definition of done. Its behaviour criteria check the stated grade
+    and weakest input for L01, each component's grade for VC-POC-13, the ratings-only block when no grade
+    is stated, standard output in text and JSON modes, and the release note; its regression checks keep
+    the full suite, the CLI, demo and logging tests, and the protected files unchanged. The five behaviour
+    checks failed at the base for their stated reasons, the base run raised no flag, and both owner decisions
+    are carried as DECIDED.
+  reason_source: supplied
+  guards:
+  - guard: contract_current_and_intact
+    evidence: contract v2 intact (0350efd74f69)
+  - guard: contract_deterministic_criteria
+    evidence: 9 deterministic criteria
+  - guard: owner_decisions_recorded
+    evidence: 'every DECISION: entry of the current contract has a blocking concern'
+  - guard: decision_authorised
+    evidence: authorised by shane (human confirmation recorded; identity not independently enforced)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: 1beb2eb910084ec5c2d373a37acd17d7c7582deea57ff941b5127513f704a5df
+    evidence_sha256: 3234b1c4aeec463d955ae7d082f68c4ad4b67bb0a2c0d68521151972b4d8879e
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
+  eligibility:
+    decision: contract-approval
+    eligible: false
+    reasons:
+    - no behaviour criterion demonstrably failed at the base (PR 2's rule, by measurement)
+    - the contract carries owner-decision entries (DECISION or DECIDED)
+    - no independent contract-adequacy review of this contract is recorded
+    evidence_sha256: a29a5b8bd832ff0f5a288311b215b5fc2bd293fe0e71dfba11ece890aaf4dbe0
+    applied: false
+    evidence:
+      exceptions:
+      - id: X-12
+        kind: attempt-failed
+        seq: 12
+        event_sha256: 09748be8915b726e53a5da767a4daee2f05354a28932a7303d25494cf463f5e4
+        summary: 'attempt 1 (planner) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: planner
+          attempt: 1
+        condition: handled
+        handled_by: EH-1
+      - id: X-28
+        kind: concern
+        seq: 28
+        event_sha256: e9761127acc16e6badcb2d4526b2044275fe8d49e3544cb313173fbcbd0458e5
+        summary: concern C1 (owner-decision)
+        severity: blocking
+        provenance:
+          event: human.concern-opened
+          concern: C1
+          origin: contracting
+          form: owner-decision
+          opened_by: model
+        condition: handled
+        handled_by: concern C1 resolved with a human confirmation (event 39)
+      - id: X-29
+        kind: concern
+        seq: 29
+        event_sha256: 93a0aae28f1102dc71c62b57d7864c69e8217e1ed50a5d07d1a05aba5f52489d
+        summary: concern C2 (owner-decision)
+        severity: blocking
+        provenance:
+          event: human.concern-opened
+          concern: C2
+          origin: contracting
+          form: owner-decision
+          opened_by: model
+        condition: handled
+        handled_by: concern C2 resolved with a human confirmation (event 40)
+      - id: X-41
+        kind: behaviour-alternative
+        seq: 41
+        event_sha256: a54c2abc9a9270a8d8465e342bfb9076f8ce5c3c1f4a00556fcc256fd8735823
+        summary: no check showed the requested change at the base
+        severity: null
+        provenance:
+          event: contract.behaviour-alternative-recorded
+          contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+        condition: handled
+        handled_by: its own human confirmation
+      contract:
+        version: 2
+        sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+      risk_floor:
+        section: risk_floor
+        version: 1
+        sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+        approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+        confirmed_by: shane
+      contract_floor:
+        stage: contract
+        floor: normal
+        known: true
+        unknown: []
+        under_declared: []
+        matches:
+          logging_config.yaml:
+          - pipeline
+          releases/_next/cli-confidence-grade-and-clean-stdout.md:
+          - description-and-evidence
+          run.py:
+          - entry-points
+          tests/unit/test_run_cli.py:
+          - description-and-evidence
+        implied: []
+        declared: []
+        assessed:
+        - logging_config.yaml
+        - releases/_next/cli-confidence-grade-and-clean-stdout.md
+        - run.py
+        - tests/unit/test_run_cli.py
+- at: '2026-10-06T02:26:31Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mac.gateway
+  reason: 'challenge is not an obligation; contract v2 dry-run at the base commit; no criterion shows
+    the requested change at the base; a recorded human alternative (event 41) names the evidence that
+    will; owner decisions carried: decision-console-routing (C1), decision-routing-adr (C2); no semantic
+    contract defect is held; 2 planning review round(s) recorded against the current plan; every finding
+    is dispositioned; no review feedback is waiting and no upstream review cycle is open; no open blocking
+    concerns; no open migration obligations'
+  reason_source: derived
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: contract_dry_run_current
+    evidence: contract v2 dry-run at the base commit
+  - guard: behaviour_demonstrated_at_base
+    evidence: no criterion shows the requested change at the base; a recorded human alternative (event
+      41) names the evidence that will
+  - guard: owner_decisions_carried
+    evidence: 'owner decisions carried: decision-console-routing (C1), decision-routing-adr (C2)'
+  - guard: no_held_semantic_defect
+    evidence: no semantic contract defect is held
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no review feedback is waiting and no upstream review cycle is open
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-06T02:26:51Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mac.gateway
+  reason: 'run_executor: dispatch at T0'
+  reason_source: annotation
+  guards:
+  - guard: planning_review_complete
+    evidence: 2 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: review_readiness_current
+    evidence: latest readiness transition needed no reconciliation and no review feedback is waiting
+  - guard: scope_revalidated
+    evidence: revalidated work-store@bd42cefb7c26 (evidence, branch only), k-12Harness@b3e722ceef0e
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''contract'', ''planning'']'
+  - guard: headroom_guard_passed
+    evidence: headroom 0.2442 (48830 of 200000 tokens)
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-06T02:27:50Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mac.gateway
+  reason: 'run_executor: executor returned'
+  reason_source: annotation
+  guards:
+  - guard: attempt_closed
+    evidence: 7 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v2 intact (0350efd74f69)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 4 file(s) within 4 declared from b3e722ceef0e'
+  - guard: executor_tool_policy_honoured
+    evidence: attempt 7 advertised exactly the requested tools ['Bash', 'Edit', 'Glob', 'Grep', 'Read',
+      'Write'] under permission mode 'acceptEdits' with scoped rules ['Bash(.venv/bin/python -m pytest
+      *)']
+  - guard: contracted_outputs_exist
+    evidence: 4 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 003-artifact-inventory.json: append-only; planning/001-plan.md equals
+      the latest reviewed plan'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-06T02:47:06Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mac.gateway
+  reason: no sandbox incident is recorded; 9 deterministic criteria pass against contract v2 in execution
+    cycle 68 across V001; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: sandbox_incidents_acknowledged
+    evidence: no sandbox incident is recorded
+  - guard: deterministic_criteria_pass
+    evidence: 9 deterministic criteria pass against contract v2 in execution cycle 68 across V001
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+size_estimate:
+  files: 4
+  scale: small
+  subsystems:
+  - cli
+  - logging
+  - tests
+  - releases
+  source: planner
+  paths:
+  - run.py
+  - logging_config.yaml
+  - tests/unit/test_run_cli.py
+  - releases/_next/cli-confidence-grade-and-clean-stdout.md
+  interfaces: []
+  data: []
+definitions:
+- ref: contract/poc_evidence_contract.v0.3.0.schema.json
+  repo: k-12Harness
+  authority: 3
+  revision: sha256:5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+  sha256: 5813be6d6e050dcf6a85f57b90bf1fb3440a836b0eae0979aa31df0db7e533a8
+- ref: docs/architecture.md
+  repo: k-12Harness
+  authority: 2
+  revision: sha256:66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+  sha256: 66bec194eeeaacfacb2438c292361f10311ad832397feab5102a839b64647f83
+- ref: docs/decisions.md
+  repo: k-12Harness
+  authority: 1
+  revision: sha256:8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+  sha256: 8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+  sha256: 417a4cd7800735df620b5c009eab92e6826265d54606515387c0bd024a1a0320
+- ref: docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+  sha256: c5db989ea2ba3840b581a1b1d78f3b120dc54b964cdf50d63f094b19017374db
+executor_context: null
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope:
+- id: work-store
+  repo: /Users/shane/Projects/work/k-12MarketIntelligence
+  store_directory: k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: main
+  base_commit: bd42cefb7c26317463ee1a3a6c9efc14f9a59c5e
+  dirty: true
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: bd42cefb7c26317463ee1a3a6c9efc14f9a59c5e
+  verify: null
+  declared_files: []
+  declared: true
+- id: k-12Harness
+  repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  governance: diff-allowlist
+  branch: wi/20261005T143536
+  base_commit: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+  verify: .venv/bin/python -m pytest tests/ -q
+  declared_files:
+  - logging_config.yaml
+  - releases/_next/cli-confidence-grade-and-clean-stdout.md
+  - run.py
+  - tests/unit/test_run_cli.py
+  declared: true
+  method_adoption:
+    event_seq: 2
+    outcome: adopted
+    case: older
+    version: 0.22.1
+    pin: 0.22.1
+    parent: 718cd1d1cdae686dcec87aeb9a717f0b6fb63c9e
+    commit: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    head: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    sha256: d93ec32273bf081b2693e9c78050e0ea12d531b38e8d659e423c17fbaf644882
+    origin:
+      basis: refs/remotes/origin/HEAD
+      commit: 718cd1d1cdae686dcec87aeb9a717f0b6fb63c9e
+      default_branch: main
+      ref: refs/remotes/origin/main
+      ref_commit: 718cd1d1cdae686dcec87aeb9a717f0b6fb63c9e
+scope_version: 2
+scope_sha256: f420775083e28d6828cfc6d48e0ffe476f2640da3f808a7f3d8e55ec3556776f
+risk:
+  initial: normal
+  current: normal
+  maximum: normal
+  rationale: The change edits run.py and logging_config.yaml, whose approved floor is normal, and adds
+    tests and a release note. A wrong confidence block, or a log record left on standard output, would
+    reach whoever or whatever reads the command line or the demo before anyone noticed, and the new tests
+    are what would catch it. Nothing touches the contract, the method declaration, the HTTP API or the
+    SQL views, so high does not apply.
+  obligations:
+  - planning
+  - contract
+  - planning_review
+  - deterministic
+  - semantic
+  escalations: []
+  deescalations: []
+  floors:
+  - stage: plan
+    floor: normal
+    known: true
+    unknown: []
+    under_declared: []
+    matches:
+      logging_config.yaml:
+      - pipeline
+      releases/_next/cli-confidence-grade-and-clean-stdout.md:
+      - description-and-evidence
+      run.py:
+      - entry-points
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - run.py
+    - logging_config.yaml
+    - tests/unit/test_run_cli.py
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    event_seq: 19
+  - stage: contract
+    floor: normal
+    known: true
+    unknown: []
+    under_declared: []
+    matches:
+      logging_config.yaml:
+      - pipeline
+      releases/_next/cli-confidence-grade-and-clean-stdout.md:
+      - description-and-evidence
+      run.py:
+      - entry-points
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - logging_config.yaml
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    - run.py
+    - tests/unit/test_run_cli.py
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    contract_sha256: 854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911
+    event_seq: 30
+  - stage: contract
+    floor: normal
+    known: true
+    unknown: []
+    under_declared: []
+    matches:
+      logging_config.yaml:
+      - pipeline
+      releases/_next/cli-confidence-grade-and-clean-stdout.md:
+      - description-and-evidence
+      run.py:
+      - entry-points
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - logging_config.yaml
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    - run.py
+    - tests/unit/test_run_cli.py
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+    event_seq: 37
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: eligibility
+    decision_sha256: 2a79287c63ddef0155ae22583f33a1ca88d929ef41b75ccee3fdb90fd818820e
+    evidence_sha256: a826edcd631ce8ac6de38de56ac227e04f74463a20156d56230e2ea09d07581a
+    verdict:
+      decision: classify
+      eligible: true
+      reasons: []
+      evidence_sha256: ab5e29b4f46ed673db658788d0b8258fc619e93507c2170b7b5a01ee797b1be4
+contract:
+  current: 2
+  versions:
+  - version: 1
+    path: acceptance/001-contract.yaml
+    artifact: A2
+    sha256: 854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911
+    status: superseded
+    reason: initial acceptance contract
+    reason_source: derived
+    plan_sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+    recorded_at: '2026-10-06T02:02:23Z'
+  - version: 2
+    path: acceptance/002-contract.yaml
+    artifact: A5
+    sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+    status: current
+    reason: 'The owner answered both decisions. C1 (decision-console-routing): option (a), console log
+      records go to standard error for every entry point by changing handlers.console.stream in logging_config.yaml
+      to ext://sys.stderr, with levels, the log file and the LOG_LEVEL default unchanged. C2 (decision-routing-adr):
+      option (a), no ADR in this work item and docs/decisions.md is not edited; the routing choice is
+      written back to the decisions log after acceptance. Replace each DECISION entry with DECIDED (C1)
+      and DECIDED (C2) carrying these answers, and change nothing else.'
+    reason_source: supplied
+    plan_sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+    recorded_at: '2026-10-06T02:05:41Z'
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: 95eb249237b4bfbd7b1f6f06211f1d2a9b0611dd30589c3289ca783027e4b0eb
+      evidence_sha256: 954486e4085f9e4ee235b72c2b372596ea6f8177f66301d14cfda75628fefde2
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+decisions: []
+constraints: []
+concerns:
+- id: C1
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: where console log records go so that standard output carries only the outcome. No
+    document in the Definition Pack takes a position on this. Options: (a) the plan option, which changes
+    handlers.console.stream in logging_config.yaml to ext://sys.stderr for every entry point; (b) switch
+    console logging off for the command line only, inside run.py, leaving logging_config.yaml unchanged
+    and demo.py, evals.live and capture.py still logging to standard output; (c) change the LOG_LEVEL
+    default, which the request notes also changes what the log file records and which therefore conflicts
+    with must_not_change (log file content, LOG_LEVEL default) and with test_logging_config.py. Affects:
+    required_outputs (logging_config.yaml is required under (a) and must not change under (b)), the compatibility
+    entry on other entry points, observable_behaviour text-stdout-outcome-only, and the release note summary.
+    The criteria text-mode-stdout-carries-no-log-record and json-mode-stdout-is-one-document hold under
+    (a) or (b). This version is written on option (a).'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-console-routing). Put it to the owner; the version that carries the answer reads DECIDED
+    (C<n>): where this entry was.'
+  blocking: true
+  status: resolved
+  opened_at: '2026-10-06T02:02:38Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: 'Option (a): console log records go to standard error for every entry point, by changing
+    handlers.console.stream in logging_config.yaml to ext://sys.stderr. Levels, the log file and the LOG_LEVEL
+    default do not change. Carried as DECIDED (C1) in contract version 2.'
+  resolved_at: '2026-10-06T02:05:57Z'
+  decision_entry: decision-console-routing
+  contract_version: 1
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  resolved_by: claude-opus-5-5
+  resolution_actor:
+    kind: model
+    name: claude-opus-5-5
+    step: contract-owner-decision
+    state: classified
+    method:
+      id: coding-harness
+      version: 0.22.1
+      commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+    provider: anthropic
+    model: claude-opus-5-5
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: 2dcc47db1d64d06061cc54f6059066e088364fb9b02bf37a35b52e8ec86de8de
+    evidence_sha256: abc999602b7e9128bf5e28d4c012d3df9992ab3f5a26c09ff5e66b8a2585cc16
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
+- id: C2
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: whether the console-routing choice is recorded as a new ADR. Options: (a) the plan
+    option, with no ADR in this work item and docs/decisions.md untouched; (b) append a new ADR in this
+    work item, which adds docs/decisions.md to permitted_files and removes it from must_not_change. Affects:
+    permitted_files, must_not_change (docs/decisions.md), semantic release-note-and-docstrings. This version
+    is written on option (a).'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-routing-adr). Put it to the owner; the version that carries the answer reads DECIDED (C<n>):
+    where this entry was.'
+  blocking: true
+  status: resolved
+  opened_at: '2026-10-06T02:02:38Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: 'Option (a): no ADR is written in this work item and docs/decisions.md is not edited. The
+    console-routing choice is written back to the decisions log by its own pull request after acceptance.
+    Carried as DECIDED (C2) in contract version 2.'
+  resolved_at: '2026-10-06T02:08:00Z'
+  decision_entry: decision-routing-adr
+  contract_version: 1
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  resolved_by: claude-opus-5-5
+  resolution_actor:
+    kind: model
+    name: claude-opus-5-5
+    step: contract-owner-decision
+    state: classified
+    method:
+      id: coding-harness
+      version: 0.22.1
+      commit: da3f370d4ab6cb52cf9ad21145745b50239cbecc
+    provider: anthropic
+    model: claude-opus-5-5
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: d530338612416826d4ff1dae4dcf759702b5debd4ceb697b3fb1362cef5c8564
+    evidence_sha256: c1ef83c0d3cfd5a2c8372fab7d946e910a6c20a6711d304f075b958309a7ada6
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
+review_reconciliations: []
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: e987cb36768308be87f2f83a92c4a94794eb02ee013e60b5b91c0f7a785789ac
+  created_at: '2026-10-05T14:35:36Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+- status: current
+  supersedes: null
+  id: A1
+  type: planning_plan
+  path: planning/001-plan.md
+  version: 1
+  sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+  created_at: '2026-10-06T00:52:50Z'
+  produced_by_attempt: 2
+- status: superseded
+  supersedes: null
+  id: A2
+  type: acceptance_contract
+  path: acceptance/001-contract.yaml
+  version: 1
+  sha256: 854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911
+  created_at: '2026-10-06T02:02:23Z'
+  produced_by_attempt: 3
+- status: superseded
+  supersedes: null
+  id: A3
+  type: contract_review_view
+  path: acceptance/001-contract-review.md
+  version: 1
+  sha256: a0624b57104a80566b80dc6deeea3d201ec3d57e1c93fbfa9cdfcae40ea620bf
+  created_at: '2026-10-06T02:02:23Z'
+  produced_by_attempt: 3
+  derived_from: A2
+- status: superseded
+  supersedes: null
+  id: A4
+  type: contract_dry_run
+  path: acceptance/001-dry-run.json
+  version: 1
+  sha256: ef03b25164b9234d8024230237d1a7eb93c71edac0180650cba245610b54c8d5
+  contract_sha256: 854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911
+  flagged: []
+  created_at: '2026-10-06T02:02:38Z'
+  produced_by_attempt: 3
+- status: current
+  supersedes: null
+  id: A5
+  type: acceptance_contract
+  path: acceptance/002-contract.yaml
+  version: 2
+  sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+  created_at: '2026-10-06T02:05:41Z'
+  produced_by_attempt: 4
+- status: current
+  supersedes: null
+  id: A6
+  type: contract_review_view
+  path: acceptance/002-contract-review.md
+  version: 2
+  sha256: 7ff824cfd517ba14a50b190681718514bb8d67ce78a434403db11356bd2707c0
+  created_at: '2026-10-06T02:05:41Z'
+  produced_by_attempt: 4
+  derived_from: A5
+- status: current
+  supersedes: null
+  id: A7
+  type: contract_dry_run
+  path: acceptance/002-dry-run.json
+  version: 2
+  sha256: 40997ec3273e7927cdd2ce5ef3d915d0e8d8b97415c01f1837b3da81d4bac83d
+  contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+  flagged: []
+  created_at: '2026-10-06T02:05:56Z'
+  produced_by_attempt: 4
+- status: current
+  supersedes: null
+  id: A8
+  type: planning_review
+  path: reviews/001-planning-review.json
+  version: 1
+  sha256: d66edd23216aa8aebc68ae93e715f0d065fc87a8654866d274858e871e2900b5
+  created_at: '2026-10-06T02:15:46Z'
+  produced_by_attempt: 5
+  planning_review_round: 1
+- status: current
+  supersedes: null
+  id: A9
+  type: planning_review_plan_snapshot
+  path: reviews/001-plan-reviewed.md
+  version: 1
+  sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+  created_at: '2026-10-06T02:15:46Z'
+  produced_by_attempt: 5
+  planning_review_round: 1
+- status: current
+  supersedes: null
+  id: A10
+  type: planning_review
+  path: reviews/002-planning-review.json
+  version: 2
+  sha256: 623edc6d5fa48a15aec27f9581c28565d2b2e6d9c03fcdf7b3e6fde6167701f7
+  created_at: '2026-10-06T02:19:05Z'
+  produced_by_attempt: 6
+  planning_review_round: 2
+- status: current
+  supersedes: null
+  id: A11
+  type: planning_review_plan_snapshot
+  path: reviews/002-plan-reviewed.md
+  version: 2
+  sha256: abe00d75aa3fb82e42ade6bb0dac33029576a0db8225b2a9efcabda7a9faf2d6
+  created_at: '2026-10-06T02:19:05Z'
+  produced_by_attempt: 6
+  planning_review_round: 2
+attempts:
+- attempt: 1
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-05T22:26:59Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 7
+  closed_at: '2026-10-06T00:04:55Z'
+  failure_kind: transport
+  failure_reason: harness_error
+  failure_detail: 'unknown
+
+    api_retry
+
+    unknown
+
+    api_retry
+
+    server_error
+
+    success'
+  failure_detail_source: provider
+- attempt: 2
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-06T00:50:17Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-06T00:52:50Z'
+  turns: 3
+  transport_attempts: 3
+  usage:
+    input_tokens: 6
+    cache_creation_input_tokens: 296390
+    cache_read_input_tokens: 1778
+    output_tokens: 17420
+  initial_input_tokens: 35391
+  peak_input_tokens: 88092
+  files_read:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:logging_config.yaml
+  - root0:harness/logging_config.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:config/settings.py
+  - root0:.method.yaml
+  - root0:demo.py
+  - root0:tests/unit/test_demo.py
+  - root0:CLAUDE.md
+  - root0:.claude/hooks/require-release-notes.sh
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:releases/README.md
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:harness/rendering.py
+  - root0:evals/build_stub_fixtures.py
+  - root0:tests/unit/test_rendering.py
+  - root0:RUNBOOK.md
+  requested_files_read:
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:logging_config.yaml
+  - root0:harness/logging_config.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:config/settings.py
+  - root0:.method.yaml
+  - root0:demo.py
+  - root0:tests/unit/test_demo.py
+  - root0:CLAUDE.md
+  - root0:.claude/hooks/require-release-notes.sh
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:releases/README.md
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:harness/rendering.py
+  - root0:evals/build_stub_fixtures.py
+  - root0:tests/unit/test_rendering.py
+  - root0:RUNBOOK.md
+  delivered_files:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:logging_config.yaml
+  - root0:harness/logging_config.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:config/settings.py
+  - root0:.method.yaml
+  - root0:demo.py
+  - root0:tests/unit/test_demo.py
+  - root0:CLAUDE.md
+  - root0:.claude/hooks/require-release-notes.sh
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:releases/README.md
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:harness/rendering.py
+  - root0:evals/build_stub_fixtures.py
+  - root0:tests/unit/test_rendering.py
+  - root0:RUNBOOK.md
+  inspected_files:
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:logging_config.yaml
+  - root0:harness/logging_config.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:config/settings.py
+  - root0:.method.yaml
+  - root0:demo.py
+  - root0:tests/unit/test_demo.py
+  - root0:CLAUDE.md
+  - root0:.claude/hooks/require-release-notes.sh
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:releases/README.md
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:harness/rendering.py
+  - root0:evals/build_stub_fixtures.py
+  - root0:tests/unit/test_rendering.py
+  - root0:RUNBOOK.md
+  plan: planning/001-plan.md
+  size_estimate:
+    files: 4
+    scale: small
+    subsystems:
+    - cli
+    - logging
+    - tests
+    - releases
+    source: planner
+    paths:
+    - run.py
+    - logging_config.yaml
+    - tests/unit/test_run_cli.py
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    interfaces: []
+    data: []
+  headroom: 0.177
+  growth_per_turn: 17567.0
+- attempt: 3
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-10-06T01:58:57Z'
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-06T02:02:23Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 4
+    cache_creation_input_tokens: 161336
+    cache_read_input_tokens: 889
+    output_tokens: 23588
+  initial_input_tokens: 44054
+  peak_input_tokens: 60034
+  files_read:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:pytest.ini
+  - root0:logging_config.yaml
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:config/settings.py
+  - root0:harness/logging_config.py
+  requested_files_read:
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:pytest.ini
+  - root0:logging_config.yaml
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:config/settings.py
+  - root0:harness/logging_config.py
+  delivered_files:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:pytest.ini
+  - root0:logging_config.yaml
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:config/settings.py
+  - root0:harness/logging_config.py
+  inspected_files:
+  - root0:run.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:pytest.ini
+  - root0:logging_config.yaml
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/conftest.py
+  - root0:harness/outputs.py
+  - root0:config/settings.py
+  - root0:harness/logging_config.py
+  contract: acceptance/001-contract.yaml
+  headroom: 0.2203
+  growth_per_turn: 7990.0
+- attempt: 4
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-10-06T02:04:15Z'
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-06T02:05:41Z'
+  turns: 1
+  transport_attempts: 1
+  usage:
+    input_tokens: 2
+    cache_creation_input_tokens: 81974
+    cache_read_input_tokens: 889
+    output_tokens: 12170
+  initial_input_tokens: 52911
+  peak_input_tokens: 52911
+  files_read:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root1:acceptance/001-contract.yaml
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  delivered_files:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root1:acceptance/001-contract.yaml
+  - root0:contract/poc_evidence_contract.v0.3.0.schema.json
+  - root0:docs/architecture.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/L01.json
+  - root0:docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json
+  contract: acceptance/002-contract.yaml
+  headroom: 0.2646
+  growth_per_turn: 0.0
+- attempt: 5
+  role: planning-review
+  state: planning-review
+  status: closed
+  opened_at: '2026-10-06T02:15:17Z'
+  planning_review_round: 1
+  planning_review_sequence: 1
+  planning_review_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planning-review
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-06T02:15:45Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 24198
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 1160
+    reasoning_output_tokens: 714
+  context_bytes: 46134
+- attempt: 6
+  role: planning-review
+  state: planning-review
+  status: closed
+  opened_at: '2026-10-06T02:18:54Z'
+  planning_review_round: 2
+  planning_review_sequence: 2
+  planning_review_kind: targeted
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planning-review
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-06T02:19:05Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 20035
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 325
+    reasoning_output_tokens: 215
+  context_bytes: 28856
+  covers:
+  - PF-1
+- attempt: 7
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-10-06T02:26:51Z'
+  provider: anthropic
+  model: claude-sonnet-5-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-10-03'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  edit_tools:
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Bash(.venv/bin/python -m pytest *)
+  exit_code: 0
+  closed_at: '2026-10-06T02:27:49Z'
+  prompt_path: capture/prompts/007-executor.md
+  prompt_sha256: eff03edf5a578233af6d9c22bb6e3487af0c58ce20a485f78276d7f429a71c0c
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.283 (Claude Code)
+    actual_changed_paths:
+    - logging_config.yaml
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    - run.py
+    - tests/unit/test_run_cli.py
+    ignored_paths_created: []
+    reported_reads:
+    - run.py
+    - logging_config.yaml
+    - tests/unit/test_run_cli.py
+    reported_writes:
+    - logging_config.yaml
+    - run.py
+    - releases/_next/cli-confidence-grade-and-clean-stdout.md
+    - tests/unit/test_run_cli.py
+    shell_commands:
+    - cd /Users/shane/Projects/k-12Harness; cat releases/_template.md; ls releases/_next; grep -rn "ext://sys.stdout\|Confidence
+      (as stated" --include=* . -I --exclude-dir=.git --exclude-dir=.venv --exclude-dir=docs | head -20
+    - cd /Users/shane/Projects/k-12Harness; grep -rIn "sys.stdout\|Confidence (as stated\|printed dictionary"
+      --exclude-dir=.git --exclude-dir=.venv --exclude-dir=docs --exclude-dir=logs . | grep -v "^./run.py"
+      | head -20; ls releases/_next
+    - cd /Users/shane/Projects/k-12Harness; .venv/bin/python -m pytest tests/ -q 2>&1 | tail -15
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 15
+    total_cost_usd: 0.3022224
+    malformed_events: 0
+    returncode: 0
+    requested_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    permission_rules:
+    - Bash(.venv/bin/python -m pytest *)
+    advertised_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    unexpected_tools: []
+    permission_mode: acceptEdits
+    init_events: 1
+    sandbox_incidents: []
+  transport_attempts: 1
+  usage:
+    input_tokens: 10
+    cache_creation_input_tokens: 51569
+    cache_read_input_tokens: 166782
+    output_tokens: 6257
+    output_tokens_details:
+      thinking_tokens: 66
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 51569
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 761
+      cache_read_input_tokens: 48147
+      cache_creation_input_tokens: 3422
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 3422
+      type: message
+    speed: standard
+  elapsed_seconds: 57.615964042022824
+  read_context_files: 7
+  effective_context_sha256: 1899929044d9e16ef048d181f36fdfd43dc5561fb2e3126fecc1df5e9669ef55
+  native_log_bytes: 527662
+continuations: []
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: T0
+  decisions:
+  - at: '2026-10-06T02:26:50Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: anthropic
+    model: claude-sonnet-5-5
+    transport: claude
+    selector: tier:T0
+    context_window: 200000
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-10-03'
+    effort: medium
+    timeout_seconds: 1200.0
+    deadline_seconds: 1260.0
+    transient_retries: 3
+    streaming: auto
+    edit_tools:
+    - Read
+    - Edit
+    - Write
+    - Grep
+    - Glob
+    - Bash(.venv/bin/python -m pytest *)
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs:
+  - id: V001
+    at: '2026-10-06T02:45:09Z'
+    status: passed
+    contract: acceptance/002-contract.yaml
+    contract_version: 2
+    contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+    execution_cycle:
+      transition_event: 68
+      transition_sha256: 7d0d656acb8afde69472f4200e7afde344670b09dbbd3529bba8c47213b15dda
+    candidate_sha256: 897d5bc3114d6d12c13ff3385c112c7e3f95281db9407557c64bbe6a80ade804
+    selected_criteria:
+    - l01-block-shows-stated-grade
+    - vc-poc-13-block-shows-component-grades
+    - no-stated-grade-shows-ratings-only
+    - text-mode-stdout-carries-no-log-record
+    - json-mode-stdout-is-one-document
+    - release-note-present
+    - full-test-suite
+    - focused-cli-demo-logging-tests
+    - protected-files-unchanged
+    results:
+    - id: l01-block-shows-stated-grade
+      repo: k-12Harness
+      command: '.venv/bin/python -c ''import json, run; from harness.outputs import AnswerDraft, RenderedAnswer;
+        env = json.load(open("docs/reviews/2026-10-poc-review/_work/envelopes/L01.json")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env["question_id"],
+        answer="probe"), env); lines = [l.strip().lstrip("- ").strip() for l in run.render_text(out).split("Confidence
+        (as stated by the data layer):")[1].split("\n\n")[0].strip().splitlines()]; print("\n".join(lines));
+        assert "grade: Observed" in lines, "stated grade line missing"; assert "weakest input: Observed"
+        in lines, "weakest input line missing"; assert all(a in lines for a in ("forecast: not_applicable",
+        "linkage: high", "source: high", "temporal: medium")), "an axis rating is missing"; assert not
+        any("{" in l or "adjustments" in l for l in lines), "a printed dictionary is in the block"; print("L01-BLOCK-OK")'''
+      expected: 'Exits 0 and prints L01-BLOCK-OK. On the base commit it fails: render_answer prints confidence.grade
+        as a Python dictionary ("grade: {''adjustments'': [], ...}"), so there is no "grade: Observed"
+        line and a block line contains "{". It passes once the helper renders grade.value, weakest_input.grade
+        and the four ratings, and no repr.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/001-l01-block-shows-stated-grade.log
+      log_sha256: 651894bae9d0f5034f2e586da4c1188f8ff03ca02fd4826fb940efe31003eb69
+    - id: vc-poc-13-block-shows-component-grades
+      repo: k-12Harness
+      command: '.venv/bin/python -c ''import json, run; from harness.outputs import AnswerDraft, RenderedAnswer;
+        env = json.load(open("docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json"));
+        out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env["question_id"], answer="probe"),
+        env); lines = [l.strip().lstrip("- ").strip() for l in run.render_text(out).split("Confidence
+        (as stated by the data layer):")[1].split("\n\n")[0].strip().splitlines()]; print("\n".join(lines));
+        assert "component sa2_age_projection: Indicative" in lines, "sa2_age_projection grade missing";
+        assert "component sa2_projection: Indicative" in lines, "sa2_projection grade missing"; assert
+        "grade: Indicative" in lines and "weakest input: Indicative" in lines, "headline grade missing";
+        assert not any("{" in l for l in lines), "a printed dictionary is in the block"; print("VC-POC-13-BLOCK-OK")'''
+      expected: 'Exits 0 and prints VC-POC-13-BLOCK-OK. On the base commit it fails because component_grades
+        appears only inside the printed grade dictionary, with no line per component. It passes once each
+        entry of confidence.grade.component_grades renders as "component <name>: <value>".'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/002-vc-poc-13-block-shows-component-grades.log
+      log_sha256: 2ed41f890664f665a1673eb56d5a1c93a9c32a57d91db4ca3b42593b79a410d4
+    - id: no-stated-grade-shows-ratings-only
+      repo: k-12Harness
+      command: '.venv/bin/python -c ''import copy, json, run; from harness.outputs import AnswerDraft,
+        RenderedAnswer; base = json.load(open("docs/reviews/2026-10-poc-review/_work/envelopes/L01.json"));
+        a = copy.deepcopy(base); del a["confidence"]["grade"]; b = copy.deepcopy(base); del b["confidence"]["grade"]["value"];
+        blk = lambda env: [l.strip().lstrip("- ").strip() for l in run.render_text(RenderedAnswer.from_envelope(AnswerDraft(question_id=env["question_id"],
+        answer="probe"), env)).split("Confidence (as stated by the data layer):")[1].split("\n\n")[0].strip().splitlines()];
+        blocks = [blk(a), blk(b)]; print(blocks); assert all(all(x in ls for x in ("forecast: not_applicable",
+        "linkage: high", "source: high", "temporal: medium")) for ls in blocks), "an axis rating is missing";
+        assert all(any(l.startswith("grade:") and "not stated" in l for l in ls) for ls in blocks), "no-grade
+        wording missing"; assert not any(w in l for ls in blocks for l in ls for w in ("Observed", "Derived",
+        "Modelled", "Indicative", "Unsupported")), "a grade word was shown"; print("NO-GRADE-OK")'''
+      expected: 'Exits 0 and prints NO-GRADE-OK. On the base commit it fails. With grade removed, no line
+        says a grade was not stated. With grade.value removed, the printed dictionary still carries Observed
+        (current_ceiling, maximum_grade, weakest_input). It passes once a missing grade or value renders
+        the ratings plus "grade: not stated by the data layer" and no grade word.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/003-no-stated-grade-shows-ratings-only.log
+      log_sha256: adf8d512f2c4dad8a5027c85359434e24edca911139c57bb880938684012e29b
+    - id: text-mode-stdout-carries-no-log-record
+      repo: k-12Harness
+      command: '.venv/bin/python -c ''import asyncio, io, json, logging, pathlib, sys, tempfile; import
+        run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp());
+        settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = "DEBUG"; cli.require_credentials = lambda: None;
+        cli.build_client = lambda use_stub: object(); cli.converse = lambda *a, **k: (logging.getLogger("harness.agent").warning("probe-log-record"),
+        asyncio.sleep(0, result=Unsupported(reason_kind="not_in_registry", reason="probe refusal")))[1];
+        buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main(["--no-interactive",
+        "probe question"]); sys.stdout = real; out = buf.getvalue(); print(out); records = [l for l in
+        out.splitlines() if l.strip().startswith("{") and "\"level\"" in l]; log_text = (tmp / "logs"
+        / "harness.log").read_text(encoding="utf-8"); assert code == cli.EXIT_UNSUPPORTED, code; assert
+        "probe refusal" in out, "outcome not printed"; assert not records, "log records on stdout: %r"
+        % records; assert "probe-log-record" in log_text, "log file did not receive the record"; print("TEXT-STDOUT-OK")'''
+      expected: 'Exits 0 and prints TEXT-STDOUT-OK. The real configure_logging runs inside cli.main, and
+        a probe record is logged on harness.agent. On the base commit it fails because the console handler
+        is bound to sys.stdout, so the JSON record with "level" lands on standard output. It passes once
+        console records go to standard error (DECIDED (C1): handlers.console.stream is ext://sys.stderr),
+        the refusal is still printed and the record still reaches <PROJECT_ROOT>/logs/harness.log.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/004-text-mode-stdout-carries-no-log-record.log
+      log_sha256: e7ae62ab0685103dc7168775de14f2dec45db5821b63ffd49749a9b872968388
+    - id: json-mode-stdout-is-one-document
+      repo: k-12Harness
+      command: '.venv/bin/python -c ''import asyncio, io, json, logging, pathlib, sys, tempfile; import
+        run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp());
+        settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = "DEBUG"; cli.require_credentials = lambda: None;
+        cli.build_client = lambda use_stub: object(); refusal = Unsupported(reason_kind="not_in_registry",
+        reason="probe refusal"); cli.converse = lambda *a, **k: (logging.getLogger("harness.agent").warning("probe-log-record"),
+        asyncio.sleep(0, result=refusal))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf;
+        code = cli.main(["--json", "--no-interactive", "probe question"]); sys.stdout = real; out = buf.getvalue();
+        doc = json.loads(out); log_text = (tmp / "logs" / "harness.log").read_text(encoding="utf-8");
+        assert code == cli.EXIT_UNSUPPORTED, code; assert doc == refusal.model_dump(mode="json"), doc;
+        assert out == refusal.model_dump_json(indent=2) + "\n", "stdout is not exactly the document";
+        assert "probe-log-record" in log_text, "log file did not receive the record"; print("JSON-STDOUT-OK")'''
+      expected: 'Exits 0 and prints JSON-STDOUT-OK. On the base commit it fails: the probe log record
+        is written to standard output before the document, so json.loads raises "Extra data". It passes
+        once standard output in --json mode is exactly output.model_dump_json(indent=2) followed by a
+        newline, with the document unchanged and the log file still receiving the record.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/005-json-mode-stdout-is-one-document.log
+      log_sha256: 78565d26e144389e4a0900bcaadbcce5a4c3b22e9e215f226f3f0e434cd9d265
+    - id: release-note-present
+      repo: k-12Harness
+      command: grep -Ei 'type.*minor' releases/_next/cli-confidence-grade-and-clean-stdout.md
+      expected: Exits 0, printing the Type line. Fails on the base commit because the release note does
+        not exist yet. Passes once the note, copied from releases/_template.md, declares Type minor.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/006-release-note-present.log
+      log_sha256: 7cd1bc15b69623a9d16064afde13cdb9a110b777cca981997739248bb1abd783
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The repository verify command exits zero with no failures, errors or unexpected passes.
+        It includes the rewritten and new tests in tests/unit/test_run_cli.py, tests/unit/test_demo.py
+        (heading, limitations, provenance, no renderer of its own) and tests/unit/test_logging_config.py.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/007-full-test-suite.log
+      log_sha256: eeddc833d7dbf132093f987d64edbd465160fc21f7d437ed7706e276dfcd832c
+    - id: focused-cli-demo-logging-tests
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_run_cli.py tests/unit/test_demo.py tests/unit/test_logging_config.py
+        -q
+      expected: Exits zero before and after. The logging tests pass unchanged (harness.* loggers follow
+        LOG_LEVEL; anthropic, httpx and httpcore stay at WARNING), and the demo tests still find the heading
+        "Confidence (as stated by the data layer):".
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/008-focused-cli-demo-logging-tests.log
+      log_sha256: 317f05a01400b55c6283bfd64d09b5d1d2aa11e4cfc244f0f99427c9a5e4aefe
+    - id: protected-files-unchanged
+      repo: k-12Harness
+      command: git diff --exit-code b3e722ceef0e75c372db0c9c629a0e7ff8647579 -- tests/unit/test_logging_config.py
+        harness/logging_config.py config/settings.py harness/outputs.py harness/rendering.py demo.py contract/
+        docs/architecture.md
+      expected: Exits 0 with no diff. The logging tests, the logging loader, the LOG_LEVEL default, the
+        output model, the rendering gate, the demo, the pinned contract and the architecture document
+        are identical to the base commit.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/009-protected-files-unchanged.log
+      log_sha256: ab8802f5e0657a875d4737d1042186f2ac1e50e3acbf694fd66fc681f9fd3c80
+    expectations_not_evaluated: []
+    ended_at: '2026-10-06T02:45:29Z'
+  semantic_reviews: []
+  semantic_attempts: []
+effort:
+  controller_commands: 13
+  model_sessions_launched: 7
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+work_packages: []
+findings:
+- id: PF-1
+  origin: planning
+  review: PR1
+  round: 1
+  severity: blocking
+  summary: The text-mode acceptance check permits arbitrary non-log output on stdout.
+  detail: The request and observable behaviour `text-stdout-outcome-only` require stdout to contain the
+    rendered outcome and nothing else. However, the planned unit test and deterministic command only reject
+    lines that look like JSON objects with a `"level"` key and confirm that the refusal text is present.
+    An implementation could print diagnostics, warnings, or non-JSON log text to stdout and still pass.
+    The test must compare stdout exactly with the expected rendered outcome, as the JSON-mode criterion
+    already does.
+  required_change: null
+  evidence: null
+  references:
+  - Request — Objective
+  - Request — What should happen 3
+  - Plan — Proposed changes 3
+  - Acceptance contract — observable_behaviour.text-stdout-outcome-only
+  - Acceptance contract — deterministic.text-mode-stdout-carries-no-log-record
+  work_package: null
+  regression: false
+  carried_into: null
+  status: dispositioned
+  raised_at: '2026-10-06T02:15:46Z'
+  disposition:
+    kind: remediate
+    rationale: 'The finding is right: the objective says standard output holds the outcome and nothing
+      else, and the planned text-mode test only rejects JSON log records. The plan''s text-mode test is
+      tightened to require standard output to equal exactly the rendered refusal followed by one newline,
+      as the JSON-mode test already does, so the full-suite criterion enforces it; the contract stays
+      as approved.'
+    authorised_by: shane
+    at: '2026-10-06T02:18:08Z'
+    residual_risk: null
+    reference: null
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: 58c629cbcbf906788b7cdcd3aa9f5f3936e3510ee5ce686421ff46b2bd9825f8
+      evidence_sha256: 32f728859b68c142e4dce10583272d0d384080567ec7873d874af9d92b16a50f
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+  dispositioned_at: '2026-10-06T02:18:08Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: The delta changes the planned text-mode unit test to require stdout to equal exactly `cli.render_text(<the
+      Unsupported the fake returned>)` followed by one newline. This rejects arbitrary diagnostics, warnings,
+      or other non-log output, and the full-test-suite acceptance criterion executes that test.
+- id: PF-2
+  origin: planning
+  review: PR1
+  round: 1
+  severity: blocking
+  summary: Several deterministic commands cannot satisfy their declared exact stdout match under ordinary
+    regex semantics.
+  detail: The L01 and VC-POC-13 commands print every confidence line before their success marker; the
+    no-grade command prints the blocks; and the text-mode command prints the rendered outcome. Their `expect.stdout_matches`
+    values are nevertheless anchored as if the marker were the entire stdout, for example `^L01-BLOCK-OK$`
+    and `^TEXT-STDOUT-OK$`. Unless the acceptance runner applies undocumented multiline line-search semantics,
+    these checks fail after a correct implementation. The commands should suppress preceding diagnostic
+    output or the expectations should explicitly match the complete output using defined matcher semantics.
+  required_change: null
+  evidence: null
+  references:
+  - Acceptance contract — deterministic.l01-block-shows-stated-grade
+  - Acceptance contract — deterministic.vc-poc-13-block-shows-component-grades
+  - Acceptance contract — deterministic.no-stated-grade-shows-ratings-only
+  - Acceptance contract — deterministic.text-mode-stdout-carries-no-log-record
+  work_package: null
+  regression: false
+  carried_into: null
+  status: dispositioned
+  raised_at: '2026-10-06T02:15:46Z'
+  disposition:
+    kind: reject
+    rationale: 'The finding is mistaken about the matcher: the method''s deterministic runner applies
+      stdout_matches with re.search and re.MULTILINE (scripts/run_deterministic.py, evaluate), so the
+      anchored success markers match the final line of output after the printed diagnostics, and these
+      checks pass after a correct implementation.'
+    authorised_by: shane
+    at: '2026-10-06T02:18:04Z'
+    residual_risk: null
+    reference: null
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: a75fdb6fcb78fb4e806bc167e6d7a0e3284d692f773fc202703876c2f2f89a15
+      evidence_sha256: 4272a2d80cc6b3c01e257799126318b3f83cdb9471858dc18b9eb38b17565921
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+  dispositioned_at: '2026-10-06T02:18:04Z'
+improvements: []
+planning_review:
+  rounds:
+  - id: PR1
+    number: 1
+    sequence: 1
+    kind: general
+    at: '2026-10-06T02:15:46Z'
+    attempt: 5
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:planning-review
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+    plan:
+      path: planning/001-plan.md
+      sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+    plan_snapshot: reviews/001-plan-reviewed.md
+    plan_snapshot_sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+    contract:
+      version: 2
+      sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+    artifact: reviews/001-planning-review.json
+    artifact_id: A8
+    sha256: d66edd23216aa8aebc68ae93e715f0d065fc87a8654866d274858e871e2900b5
+    covers: []
+    resolutions: {}
+    findings:
+    - PF-1
+    - PF-2
+    reopened: []
+    summary: The approach is broadly aligned, but the acceptance contract does not deterministically enforce
+      its central stdout requirement and several deterministic stdout expectations are inconsistent with
+      their commands.
+    context_bytes: 46134
+  - id: PR2
+    number: 2
+    sequence: 2
+    kind: targeted
+    at: '2026-10-06T02:19:05Z'
+    attempt: 6
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:planning-review
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+    plan:
+      path: planning/001-plan.md
+      sha256: abe00d75aa3fb82e42ade6bb0dac33029576a0db8225b2a9efcabda7a9faf2d6
+    plan_snapshot: reviews/002-plan-reviewed.md
+    plan_snapshot_sha256: abe00d75aa3fb82e42ade6bb0dac33029576a0db8225b2a9efcabda7a9faf2d6
+    contract:
+      version: 2
+      sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+    artifact: reviews/002-planning-review.json
+    artifact_id: A10
+    sha256: 623edc6d5fa48a15aec27f9581c28565d2b2e6d9c03fcdf7b3e6fde6167701f7
+    covers:
+    - PF-1
+    resolutions:
+      PF-1:
+        state: resolved
+        rationale: The delta changes the planned text-mode unit test to require stdout to equal exactly
+          `cli.render_text(<the Unsupported the fake returned>)` followed by one newline. This rejects
+          arbitrary diagnostics, warnings, or other non-log output, and the full-test-suite acceptance
+          criterion executes that test.
+    findings: []
+    reopened: []
+    summary: The remediation resolves the sole open finding and introduces no new material or blocking
+      findings.
+    context_bytes: 28856
+lock:
+  owner: shane@Mac.gateway
+  acquired_at: '2026-10-06T02:26:51Z'
+  released_at: '2026-10-06T02:27:49Z'
+  attempt: 7
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []
+declarations:
+  k-12Harness:
+    base: b3e722ceef0e75c372db0c9c629a0e7ff8647579
+    definition_set:
+      approved: true
+      section: definition_set
+      version: 1
+      sha256: 1db375732c810984b30dba58aaa83cfffeb70e273980684c35abbfe3520429f3
+      approval_sha256: 7f1af0679586361ee4ca61c7db49df292166534bb5dafc8d898165b7d6cdde3b
+      confirmed_by: shane
+    risk_floor:
+      approved: true
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    declares_definition_set: true
+migration_obligations: []
+exception_handling:
+- id: EH-1
+  exceptions:
+  - id: X-12
+    event_seq: 12
+    event_sha256: 09748be8915b726e53a5da767a4daee2f05354a28932a7303d25494cf463f5e4
+    kind: attempt-failed
+  recovery:
+    kind: proceed
+    role: null
+    route: null
+    attempts: null
+  artifacts:
+    plan_sha256: 014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50
+    contract_sha256: null
+    scope_sha256: aa7ed6429a5d20fba3bd3377127355d7a63b4684c813a5ce4d32601c04f999bc
+    declarations: 97d71b163500b970173b3569d53ade5a7016393e7467f8a576ec1ac82cfad89a
+  authorises:
+  - accept
+  - checkpoint
+  - classify
+  - contract-approval
+  - pull-request
+  - push
+  reason: 'Planner attempt 1 failed only because the laptop lid was closed during the run: the machine
+    slept, lost its network, and the Claude CLI stopped with ENOTFOUND after ten retries. Nothing in the
+    request, the pinned files or the route was at fault, and attempt 2 on the same route produced the
+    plan now recorded, so no recovery remains to do.'
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: 91157e18b1ec3adafcd063cb3cff7151e021e5d2ff54fc2d7d62e703bb0d1b55
+    evidence_sha256: 57c01a80d594f931a703bd52e4c8a7ed19ca45e909949ca037bb1bc544f434e0
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced

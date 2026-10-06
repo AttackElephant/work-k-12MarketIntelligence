@@ -1,0 +1,10 @@
+started: 2026-10-06T02:45:11Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-c", "import copy, json, run; from harness.outputs import AnswerDraft, RenderedAnswer; base = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); a = copy.deepcopy(base); del a[\"confidence\"][\"grade\"]; b = copy.deepcopy(base); del b[\"confidence\"][\"grade\"][\"value\"]; blk = lambda env: [l.strip().lstrip(\"- \").strip() for l in run.render_text(RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env)).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; blocks = [blk(a), blk(b)]; print(blocks); assert all(all(x in ls for x in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")) for ls in blocks), \"an axis rating is missing\"; assert all(any(l.startswith(\"grade:\") and \"not stated\" in l for l in ls) for ls in blocks), \"no-grade wording missing\"; assert not any(w in l for ls in blocks for l in ls for w in (\"Observed\", \"Derived\", \"Modelled\", \"Indicative\", \"Unsupported\")), \"a grade word was shown\"; print(\"NO-GRADE-OK\")"]
+
+[['forecast: not_applicable', 'linkage: high', 'source: high', 'temporal: medium', 'grade: not stated by the data layer'], ['forecast: not_applicable', 'linkage: high', 'source: high', 'temporal: medium', 'grade: not stated by the data layer']]
+NO-GRADE-OK
+
+ended: 2026-10-06T02:45:11Z
+exit_code: 0
+duration_seconds: 0.417

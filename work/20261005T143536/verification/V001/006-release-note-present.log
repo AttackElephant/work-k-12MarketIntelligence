@@ -1,0 +1,9 @@
+started: 2026-10-06T02:45:13Z
+cwd: /Users/shane/Projects/k-12Harness
+command: ["grep", "-Ei", "type.*minor", "releases/_next/cli-confidence-grade-and-clean-stdout.md"]
+
+**Type:** minor
+
+ended: 2026-10-06T02:45:13Z
+exit_code: 0
+duration_seconds: 0.003

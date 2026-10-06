@@ -1,0 +1,15 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-s28ytty6/k-12harness
+command: [".venv/bin/python", "-c", "import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"grade: Observed\" in lines, \"stated grade line missing\"; assert \"weakest input: Observed\" in lines, \"weakest input line missing\"; assert all(a in lines for a in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")), \"an axis rating is missing\"; assert not any(\"{\" in l or \"adjustments\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"L01-BLOCK-OK\")"]
+
+forecast: not_applicable
+grade: {'adjustments': [], 'backtest': {'eligibility': 'not_applicable'}, 'current_ceiling': 'Observed', 'maximum_grade': 'Observed', 'rule_id': 'restated_published_facts', 'value': 'Observed', 'weakest_input': {'grade': 'Observed'}}
+linkage: high
+source: high
+temporal: medium
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open("docs/reviews/2026-10-poc-review/_work/envelopes/L01.json")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env["question_id"], answer="probe"), env); lines = [l.strip().lstrip("- ").strip() for l in run.render_text(out).split("Confidence (as stated by the data layer):")[1].split("\n\n")[0].strip().splitlines()]; print("\n".join(lines)); assert "grade: Observed" in lines, "stated grade line missing"; assert "weakest input: Observed" in lines, "weakest input line missing"; assert all(a in lines for a in ("forecast: not_applicable", "linkage: high", "source: high", "temporal: medium")), "an axis rating is missing"; assert not any("{" in l or "adjustments" in l for l in lines), "a printed dictionary is in the block"; print("L01-BLOCK-OK")
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stated grade line missing
+
+exit_code: 1

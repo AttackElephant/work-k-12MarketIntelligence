@@ -1,0 +1,6 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-odp29okx/k-12harness
+command: ["grep", "-Ei", "type.*minor", "releases/_next/cli-confidence-grade-and-clean-stdout.md"]
+
+grep: releases/_next/cli-confidence-grade-and-clean-stdout.md: No such file or directory
+
+exit_code: 2

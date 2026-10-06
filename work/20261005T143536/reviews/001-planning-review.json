@@ -1,0 +1,34 @@
+{
+  "covers": [],
+  "findings": [
+    {
+      "detail": "The request and observable behaviour `text-stdout-outcome-only` require stdout to contain the rendered outcome and nothing else. However, the planned unit test and deterministic command only reject lines that look like JSON objects with a `\"level\"` key and confirm that the refusal text is present. An implementation could print diagnostics, warnings, or non-JSON log text to stdout and still pass. The test must compare stdout exactly with the expected rendered outcome, as the JSON-mode criterion already does.",
+      "id": "stdout-outcome-only-not-enforced",
+      "sections": [
+        "Request \u2014 Objective",
+        "Request \u2014 What should happen 3",
+        "Plan \u2014 Proposed changes 3",
+        "Acceptance contract \u2014 observable_behaviour.text-stdout-outcome-only",
+        "Acceptance contract \u2014 deterministic.text-mode-stdout-carries-no-log-record"
+      ],
+      "severity": "blocking",
+      "summary": "The text-mode acceptance check permits arbitrary non-log output on stdout."
+    },
+    {
+      "detail": "The L01 and VC-POC-13 commands print every confidence line before their success marker; the no-grade command prints the blocks; and the text-mode command prints the rendered outcome. Their `expect.stdout_matches` values are nevertheless anchored as if the marker were the entire stdout, for example `^L01-BLOCK-OK$` and `^TEXT-STDOUT-OK$`. Unless the acceptance runner applies undocumented multiline line-search semantics, these checks fail after a correct implementation. The commands should suppress preceding diagnostic output or the expectations should explicitly match the complete output using defined matcher semantics.",
+      "id": "deterministic-stdout-regexes-are",
+      "sections": [
+        "Acceptance contract \u2014 deterministic.l01-block-shows-stated-grade",
+        "Acceptance contract \u2014 deterministic.vc-poc-13-block-shows-component-grades",
+        "Acceptance contract \u2014 deterministic.no-stated-grade-shows-ratings-only",
+        "Acceptance contract \u2014 deterministic.text-mode-stdout-carries-no-log-record"
+      ],
+      "severity": "blocking",
+      "summary": "Several deterministic commands cannot satisfy their declared exact stdout match under ordinary regex semantics."
+    }
+  ],
+  "kind": "general",
+  "resolutions": {},
+  "round": 1,
+  "summary": "The approach is broadly aligned, but the acceptance contract does not deterministically enforce its central stdout requirement and several deterministic stdout expectations are inconsistent with their commands."
+}

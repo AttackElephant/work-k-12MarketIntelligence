@@ -1,0 +1,5 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-s28ytty6/k-12harness
+command: ["git", "diff", "--exit-code", "b3e722ceef0e75c372db0c9c629a0e7ff8647579", "--", "tests/unit/test_logging_config.py", "harness/logging_config.py", "config/settings.py", "harness/outputs.py", "harness/rendering.py", "demo.py", "contract/", "docs/architecture.md"]
+
+
+exit_code: 0

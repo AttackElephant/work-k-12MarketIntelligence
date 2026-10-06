@@ -1,0 +1,200 @@
+method:
+  coding-harness: 0.16.2
+work_root: /Users/shane/Projects/work/k-12MarketIntelligence
+verify: ".venv/bin/python -m pytest tests/ -q"
+
+# The delivery contract the method's deliver.py integrates (adapter
+# merge-release-notes). This is the existing arrangement in releases/README.md,
+# declared rather than detected: every PR adds one releases/_next/<slug>.md from
+# releases/_template.md and never touches VERSION; release.yml bumps VERSION at
+# merge, commits to main and tags v<version> on that CI commit (not the merge
+# commit); everything is pushed to origin.
+delivery:
+  kind: merge-release-notes
+  notes_dir: releases/_next
+  template: releases/_template.md
+  version_file: VERSION
+  tag_format: v{version}
+  remote: origin
+
+# Path classes for the mechanical part of the version policy (MAJOR is always a
+# recorded human decision; the note carries **Decided by:** and **Decision:**).
+# Glob rules: `**` crosses directories, `*` does not, a bare name matches at the
+# root only. A path in both lists is an ambiguity the method refuses, except that
+# an exact path beats a pattern; a path in neither list is refused too.
+#
+# minor: behaviour. The harness, its prompts (the frozen system prompt, ADR-006),
+# the pinned contract and its schemas (ADR-008), evals, server, SQL, config, the
+# root entry points and their dependencies, CI workflows, the Claude Code hooks
+# that gate PRs, and this declaration itself.
+# patch: description and evidence. Tests, docs, release notes, root Markdown,
+# recorded captures, and the contract correspondence in contract/*.md.
+# VERSION is deliberately in neither list: it is assigned at merge by release.yml
+# and a PR that changes it is refused by pr-checks.yml and the local hook.
+release:
+  minor_paths:
+    - ".method.yaml"
+    - ".claude/hooks/require-release-notes.sh"
+    - "harness/**"
+    - "prompts/**"
+    - "contract/*.json"
+    - "contract/question_schemas/**"
+    - "evals/**"
+    - "server/**"
+    - "sql/**"
+    - "config/**"
+    - "*.py"
+    - "requirements*.txt"
+    - "setup.sh"
+    - "pytest.ini"
+    - "logging_config.yaml"
+    - ".github/**"
+    - ".claude/**"
+  patch_paths:
+    - "tests/**"
+    - "docs/**"
+    - "releases/**"
+    - "captures/**"
+    - "contract/*.md"
+    - "*.md"
+    - ".env.example"
+    - ".gitignore"
+
+# The product declarations the coding-harness method reads (its eligibility.md §7;
+# governance.md, "The product declarations"). Each section is versioned and
+# approved separately in declaration_approvals, which declarations.py approve
+# appends; a changed section takes a new version and a new approval. The method
+# reads them only from a commit on the default branch, never a working tree.
+#
+# definition_set: the files a work item may pin as definitions or supporting
+# evidence, which are required, and the ranks each may take (1 wins a conflict).
+definition_set:
+  version: 1
+  definitions:
+    - path: docs/decisions.md
+      role: definition
+      required: true            # every intake note pins it
+      ranks: [1]
+    - path: docs/architecture.md
+      role: definition
+      required: false           # item 02 pins no architecture section
+      ranks: [2]
+    - pattern: "contract/*.json"
+      role: definition
+      required: false
+      ranks: [3]
+    - pattern: "contract/question_schemas/v0.3.0/*.json"
+      role: definition
+      required: false
+      ranks: [3]
+    - path: prompts/input_catalog.snapshot.json
+      role: definition
+      required: false           # item 08: the vocabulary snapshot outside contract/
+      ranks: [3]
+    - pattern: "docs/reviews/2026-10-poc-review/*.md"
+      role: evidence
+      required: false
+      ranks: [9]
+    - pattern: "docs/reviews/2026-10-poc-review/_work/**"
+      role: evidence
+      required: false
+      ranks: [9]
+    - pattern: "docs/reviews/2026-10-poc-review/supporting/**"
+      role: evidence
+      required: false
+      ranks: [9]
+  order:
+    - [docs/decisions.md, docs/architecture.md]
+
+# risk_floor: the least risk level a change to each path forces, by consequence
+# if the work ships wrong (the method's authority.md), not by release class. A
+# path takes the highest floor of every entry it matches; a path absent at the
+# work item's base also takes new_files.floor, whatever else matches it.
+risk_floor:
+  version: 1
+  classes:
+    - id: pinned-contract
+      floor: high
+      paths: ["contract/*.json", "contract/question_schemas/**"]
+      why: the pinned contract the data side and every answer read (ADR-008); a wrong schema is acted on before anyone sees it
+    - id: contract-correspondence
+      floor: normal
+      paths: ["contract/*.md"]
+      why: the agreed reading of the contract; read by the data side
+    - id: method-declaration
+      floor: high
+      paths: [".method.yaml", "VERSION"]
+      why: the pin, the delivery contract, the release classes and these declarations; VERSION is assigned by release.yml only
+    - id: pipeline
+      floor: normal
+      paths: ["harness/**", "prompts/**", "config/**", "logging_config.yaml"]
+      why: what reaches a user's answer; found by the tests or a review, undone by a follow-up change
+    - id: entry-points
+      floor: normal
+      paths: ["*.py", "requirements*.txt", "setup.sh", "pytest.ini"]
+      why: how the product is run and installed
+    - id: gates
+      floor: normal
+      paths: [".github/**", ".claude/**"]
+      why: the checks that gate every pull request
+    - id: evaluation
+      floor: normal
+      paths: ["evals/**"]
+      why: a wrong grader misreports quality to every later decision
+    - id: description-and-evidence
+      floor: low
+      paths: ["tests/**", "docs/**", "releases/**", "captures/**", "*.md", ".env.example", ".gitignore"]
+      why: description and recorded evidence; visible to the reader, reversed by one revert
+  interfaces:
+    - id: http-api
+      floor: high
+      paths: ["server/**"]
+      why: an external contract other programs call
+    - id: answer-object
+      floor: normal
+      paths: ["harness/answer_view.py", "harness/outputs.py", "harness/rendering.py"]
+      why: the answer a user or a caller reads (ADR-022)
+  data:
+    - id: usage-views
+      floor: high
+      paths: ["sql/**"]
+      why: views others query; a wrong view changes figures acted on
+    - id: usage-log
+      floor: normal
+      paths: ["harness/usage.py"]
+      why: the usage records cost and capacity decisions rest on (ADR-005, ADR-021)
+  new_files:
+    floor: normal
+
+# Approvals of the declarations above, one entry per approved version; written by declarations.py approve.
+declaration_approvals:
+  - section: definition_set
+    version: 1
+    sha256: 1db375732c810984b30dba58aaa83cfffeb70e273980684c35abbfe3520429f3
+    decision: 'Approve definition_set version 1 for k-12Harness: the decisions log is required at rank 1, the architecture is optional at rank 2, the pinned contract JSON, question schemas and input-catalog snapshot are at rank 3, and the 2026-10 review files are supporting evidence at rank 9; the PRD and the oversized runs log are not in the set.'
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: 798f28a2e64d81a38845bf1d4ff232926c2b8899241b38a3c239f937e0d5c956
+      evidence_sha256: 43ce04ebdc9cc989621244d9de66c3c73d624394c7358c0261cc3dd702385971
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+    approved_at: '2026-10-05T08:24:11Z'
+  - section: risk_floor
+    version: 1
+    sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+    decision: 'Approve risk_floor version 1 for k-12Harness: high for the pinned contract JSON and question schemas, the method declaration and VERSION, the HTTP API and the SQL views; normal for the contract correspondence in contract/*.md, the pipeline, answer output, usage log, entry points, gates and evaluation; low for existing tests, documentation and recorded evidence; every new file is at least normal, new tests and documentation included.'
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: 551d335f3cfcfa763973a5436b3b9f04405af0e42e2ed2bb4c1ee6e7ca40c34a
+      evidence_sha256: 2a6ea3b2784c7cdf93f29ebe1b06b200afb27552f48d651914e3c2f71e19448b
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+    approved_at: '2026-10-05T08:24:16Z'

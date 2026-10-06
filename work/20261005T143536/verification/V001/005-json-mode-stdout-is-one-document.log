@@ -1,0 +1,11 @@
+started: 2026-10-06T02:45:12Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-c", "import asyncio, io, json, logging, pathlib, sys, tempfile; import run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp()); settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = \"DEBUG\"; cli.require_credentials = lambda: None; cli.build_client = lambda use_stub: object(); refusal = Unsupported(reason_kind=\"not_in_registry\", reason=\"probe refusal\"); cli.converse = lambda *a, **k: (logging.getLogger(\"harness.agent\").warning(\"probe-log-record\"), asyncio.sleep(0, result=refusal))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main([\"--json\", \"--no-interactive\", \"probe question\"]); sys.stdout = real; out = buf.getvalue(); doc = json.loads(out); log_text = (tmp / \"logs\" / \"harness.log\").read_text(encoding=\"utf-8\"); assert code == cli.EXIT_UNSUPPORTED, code; assert doc == refusal.model_dump(mode=\"json\"), doc; assert out == refusal.model_dump_json(indent=2) + \"\\n\", \"stdout is not exactly the document\"; assert \"probe-log-record\" in log_text, \"log file did not receive the record\"; print(\"JSON-STDOUT-OK\")"]
+
+{"level": "WARNING", "logger": "harness.agent", "message": "probe-log-record", "error_class": null, "retryable": null, "subsystem": null, "request_id": null, "retry_count": null, "status_code": null, "user_facing": null, "timestamp": "2026-10-06T02:45:13.072399+00:00"}
+{"level": "DEBUG", "logger": "asyncio", "message": "Using selector: KqueueSelector", "error_class": null, "retryable": null, "subsystem": null, "request_id": null, "retry_count": null, "status_code": null, "user_facing": null, "timestamp": "2026-10-06T02:45:13.072650+00:00"}
+JSON-STDOUT-OK
+
+ended: 2026-10-06T02:45:13Z
+exit_code: 0
+duration_seconds: 0.454

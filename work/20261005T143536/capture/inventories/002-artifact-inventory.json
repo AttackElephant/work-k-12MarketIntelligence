@@ -1,0 +1,98 @@
+{
+  "captured_at": "2026-10-06T02:05:41Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract-review.md",
+      "acceptance/001-dry-run.json",
+      "acceptance/001-dry-run/001-l01-block-shows-stated-grade.log",
+      "acceptance/001-dry-run/002-vc-poc-13-block-shows-component-grades.log",
+      "acceptance/001-dry-run/003-no-stated-grade-shows-ratings-only.log",
+      "acceptance/001-dry-run/004-text-mode-stdout-carries-no-log-record.log",
+      "acceptance/001-dry-run/005-json-mode-stdout-is-one-document.log",
+      "acceptance/001-dry-run/006-release-note-present.log",
+      "acceptance/001-dry-run/007-full-test-suite.log",
+      "acceptance/001-dry-run/008-focused-cli-demo-logging-tests.log",
+      "acceptance/001-dry-run/009-protected-files-unchanged.log",
+      "acceptance/002-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "a0624b57104a80566b80dc6deeea3d201ec3d57e1c93fbfa9cdfcae40ea620bf",
+      "size": 25743
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911",
+      "size": 26142
+    },
+    "acceptance/001-dry-run.json": {
+      "kind": "file",
+      "sha256": "ef03b25164b9234d8024230237d1a7eb93c71edac0180650cba245610b54c8d5",
+      "size": 24329
+    },
+    "acceptance/001-dry-run/001-l01-block-shows-stated-grade.log": {
+      "kind": "file",
+      "sha256": "2f8c0e47383a1112833aac00fd7f2b9214556e4387ebae26e177efb8467287c1",
+      "size": 2800
+    },
+    "acceptance/001-dry-run/002-vc-poc-13-block-shows-component-grades.log": {
+      "kind": "file",
+      "sha256": "145563f58efb8ffac0b092e3ae4a743a6941c7bccef68182b300d88604e9f764",
+      "size": 3218
+    },
+    "acceptance/001-dry-run/003-no-stated-grade-shows-ratings-only.log": {
+      "kind": "file",
+      "sha256": "82d4c961013d0a47632138ff6b0c53e3f465462205f3f934da296cdbb43b593f",
+      "size": 3638
+    },
+    "acceptance/001-dry-run/004-text-mode-stdout-carries-no-log-record.log": {
+      "kind": "file",
+      "sha256": "7d296493cc62366ceab7589cd0235712c968314048786c91d81d43919ca9f2da",
+      "size": 4648
+    },
+    "acceptance/001-dry-run/005-json-mode-stdout-is-one-document.log": {
+      "kind": "file",
+      "sha256": "f7b68c2882839d2a0456f37ce2b4c48980c868e99d3a648b7fec5e9de191c1bc",
+      "size": 3658
+    },
+    "acceptance/001-dry-run/006-release-note-present.log": {
+      "kind": "file",
+      "sha256": "b9b1fdd9beb55891327f5e86f44d897cf6e14ead6e81b821a6ea83e5921b2b60",
+      "size": 286
+    },
+    "acceptance/001-dry-run/007-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "480c6b0233b36219f823aa76ddc51f0c0d286a92512290bad3967f4cf9bc1538",
+      "size": 1258
+    },
+    "acceptance/001-dry-run/008-focused-cli-demo-logging-tests.log": {
+      "kind": "file",
+      "sha256": "6b2fbe3bac7b623bc566eefaaae97c83af1233aa9ac9913a77407e6d10da399f",
+      "size": 343
+    },
+    "acceptance/001-dry-run/009-protected-files-unchanged.log": {
+      "kind": "file",
+      "sha256": "42b9b9eddbfe473293d502a702169ed30b8bae4975fa74a322c5759935b5df49",
+      "size": 370
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1",
+      "size": 25593
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "014a0c7ec6ccc07f44d61897cef47c4b690ce3c7cc972363f9f35e7fe025ff50",
+      "size": 15907
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "e987cb36768308be87f2f83a92c4a94794eb02ee013e60b5b91c0f7a785789ac",
+      "size": 3873
+    }
+  }
+}

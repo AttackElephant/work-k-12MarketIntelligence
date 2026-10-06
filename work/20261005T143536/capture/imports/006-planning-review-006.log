@@ -1,0 +1,5 @@
+{"attempt": 1, "route": {"billing": "subscription", "context_window": 400000, "deadline_seconds": 600.0, "last_verified": "2026-09-08", "model": "gpt-5.6-sol", "model_class": "frontier", "provider": "openai", "selector": "role:planning-review", "streaming": "auto", "timeout_seconds": 360.0, "transport": "codex"}}
+{"type":"thread.started","thread_id":"01a10f01-befa-77f0-92dd-5d096205a514"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"The remediation resolves the sole open finding and introduces no new material or blocking findings.\",\"resolutions\":[{\"finding\":\"PF-1\",\"state\":\"resolved\",\"rationale\":\"The delta changes the planned text-mode unit test to require stdout to equal exactly `cli.render_text(<the Unsupported the fake returned>)` followed by one newline. This rejects arbitrary diagnostics, warnings, or other non-log output, and the full-test-suite acceptance criterion executes that test.\"}],\"findings\":[]}"}}
+{"type":"turn.completed","usage":{"input_tokens":20035,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":325,"reasoning_output_tokens":215}}

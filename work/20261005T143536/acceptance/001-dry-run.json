@@ -1,0 +1,205 @@
+{
+  "at": "2026-10-06T02:02:38Z",
+  "bases": {
+    "k-12Harness": "b3e722ceef0e75c372db0c9c629a0e7ff8647579"
+  },
+  "contract": "acceptance/001-contract.yaml",
+  "contract_sha256": "854b4215b6821c9b97178c72f1789bddf7318c56f135c6a0df1f1d158fabb911",
+  "contract_version": 1,
+  "environment_dirs": {
+    "k-12Harness": [
+      ".venv"
+    ]
+  },
+  "flagged": [],
+  "results": [
+    {
+      "command": ".venv/bin/python -c 'import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"grade: Observed\" in lines, \"stated grade line missing\"; assert \"weakest input: Observed\" in lines, \"weakest input line missing\"; assert all(a in lines for a in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")), \"an axis rating is missing\"; assert not any(\"{\" in l or \"adjustments\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"L01-BLOCK-OK\")'",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "l01-block-shows-stated-grade",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/001-l01-block-shows-stated-grade.log",
+      "log_sha256": "2f8c0e47383a1112833aac00fd7f2b9214556e4387ebae26e177efb8467287c1",
+      "output_tail": [
+        "forecast: not_applicable",
+        "grade: {'adjustments': [], 'backtest': {'eligibility': 'not_applicable'}, 'current_ceiling': 'Observed', 'maximum_grade': 'Observed', 'rule_id': 'restated_published_facts', 'value': 'Observed', 'weakest_input': {'grade': 'Observed'}}",
+        "linkage: high",
+        "source: high",
+        "temporal: medium",
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"grade: Observed\" in lines, \"stated grade line missing\"; assert \"weakest input: Observed\" in lines, \"weakest input line missing\"; assert all(a in lines for a in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")), \"an axis rating is missing\"; assert not any(\"{\" in l or \"adjustments\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"L01-BLOCK-OK\")",
+        "                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "AssertionError: stated grade line missing"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -c 'import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"component sa2_age_projection: Indicative\" in lines, \"sa2_age_projection grade missing\"; assert \"component sa2_projection: Indicative\" in lines, \"sa2_projection grade missing\"; assert \"grade: Indicative\" in lines and \"weakest input: Indicative\" in lines, \"headline grade missing\"; assert not any(\"{\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"VC-POC-13-BLOCK-OK\")'",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "vc-poc-13-block-shows-component-grades",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/002-vc-poc-13-block-shows-component-grades.log",
+      "log_sha256": "145563f58efb8ffac0b092e3ae4a743a6941c7bccef68182b300d88604e9f764",
+      "output_tail": [
+        "forecast: low",
+        "grade: {'adjustments': [], 'backtest': {'eligibility': 'eligible', 'promotion_from': 'Indicative', 'promotion_to': 'Modelled', 'protocol_id': 'vif_projection_local_backtest', 'status': 'blocked'}, 'component_grades': {'sa2_age_projection': {'rule_id': 'publisher_projection_no_local_backtest', 'value': 'Indicative'}, 'sa2_projection': {'rule_id': 'publisher_projection_no_local_backtest', 'value': 'Indicative'}}, 'current_ceiling': 'Indicative', 'maximum_grade': 'Modelled', 'rule_id': 'publisher_projection_no_local_backtest', 'value': 'Indicative', 'weakest_input': {'grade': 'Indicative'}}",
+        "linkage: high",
+        "source: high",
+        "temporal: medium",
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import json, run; from harness.outputs import AnswerDraft, RenderedAnswer; env = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/direct_VC-POC-13_579499.json\")); out = RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env); lines = [l.strip().lstrip(\"- \").strip() for l in run.render_text(out).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; print(\"\\n\".join(lines)); assert \"component sa2_age_projection: Indicative\" in lines, \"sa2_age_projection grade missing\"; assert \"component sa2_projection: Indicative\" in lines, \"sa2_projection grade missing\"; assert \"grade: Indicative\" in lines and \"weakest input: Indicative\" in lines, \"headline grade missing\"; assert not any(\"{\" in l for l in lines), \"a printed dictionary is in the block\"; print(\"VC-POC-13-BLOCK-OK\")",
+        "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "AssertionError: sa2_age_projection grade missing"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -c 'import copy, json, run; from harness.outputs import AnswerDraft, RenderedAnswer; base = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); a = copy.deepcopy(base); del a[\"confidence\"][\"grade\"]; b = copy.deepcopy(base); del b[\"confidence\"][\"grade\"][\"value\"]; blk = lambda env: [l.strip().lstrip(\"- \").strip() for l in run.render_text(RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env)).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; blocks = [blk(a), blk(b)]; print(blocks); assert all(all(x in ls for x in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")) for ls in blocks), \"an axis rating is missing\"; assert all(any(l.startswith(\"grade:\") and \"not stated\" in l for l in ls) for ls in blocks), \"no-grade wording missing\"; assert not any(w in l for ls in blocks for l in ls for w in (\"Observed\", \"Derived\", \"Modelled\", \"Indicative\", \"Unsupported\")), \"a grade word was shown\"; print(\"NO-GRADE-OK\")'",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "no-stated-grade-shows-ratings-only",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/003-no-stated-grade-shows-ratings-only.log",
+      "log_sha256": "82d4c961013d0a47632138ff6b0c53e3f465462205f3f934da296cdbb43b593f",
+      "output_tail": [
+        "[['forecast: not_applicable', 'linkage: high', 'source: high', 'temporal: medium'], ['forecast: not_applicable', \"grade: {'adjustments': [], 'backtest': {'eligibility': 'not_applicable'}, 'current_ceiling': 'Observed', 'maximum_grade': 'Observed', 'rule_id': 'restated_published_facts', 'weakest_input': {'grade': 'Observed'}}\", 'linkage: high', 'source: high', 'temporal: medium']]",
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import copy, json, run; from harness.outputs import AnswerDraft, RenderedAnswer; base = json.load(open(\"docs/reviews/2026-10-poc-review/_work/envelopes/L01.json\")); a = copy.deepcopy(base); del a[\"confidence\"][\"grade\"]; b = copy.deepcopy(base); del b[\"confidence\"][\"grade\"][\"value\"]; blk = lambda env: [l.strip().lstrip(\"- \").strip() for l in run.render_text(RenderedAnswer.from_envelope(AnswerDraft(question_id=env[\"question_id\"], answer=\"probe\"), env)).split(\"Confidence (as stated by the data layer):\")[1].split(\"\\n\\n\")[0].strip().splitlines()]; blocks = [blk(a), blk(b)]; print(blocks); assert all(all(x in ls for x in (\"forecast: not_applicable\", \"linkage: high\", \"source: high\", \"temporal: medium\")) for ls in blocks), \"an axis rating is missing\"; assert all(any(l.startswith(\"grade:\") and \"not stated\" in l for l in ls) for ls in blocks), \"no-grade wording missing\"; assert not any(w in l for ls in blocks for l in ls for w in (\"Observed\", \"Derived\", \"Modelled\", \"Indicative\", \"Unsupported\")), \"a grade word was shown\"; print(\"NO-GRADE-OK\")",
+        "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "AssertionError: no-grade wording missing"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -c 'import asyncio, io, json, logging, pathlib, sys, tempfile; import run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp()); settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = \"DEBUG\"; cli.require_credentials = lambda: None; cli.build_client = lambda use_stub: object(); cli.converse = lambda *a, **k: (logging.getLogger(\"harness.agent\").warning(\"probe-log-record\"), asyncio.sleep(0, result=Unsupported(reason_kind=\"not_in_registry\", reason=\"probe refusal\")))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main([\"--no-interactive\", \"probe question\"]); sys.stdout = real; out = buf.getvalue(); print(out); records = [l for l in out.splitlines() if l.strip().startswith(\"{\") and \"\\\"level\\\"\" in l]; log_text = (tmp / \"logs\" / \"harness.log\").read_text(encoding=\"utf-8\"); assert code == cli.EXIT_UNSUPPORTED, code; assert \"probe refusal\" in out, \"outcome not printed\"; assert not records, \"log records on stdout: %r\" % records; assert \"probe-log-record\" in log_text, \"log file did not receive the record\"; print(\"TEXT-STDOUT-OK\")'",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "text-mode-stdout-carries-no-log-record",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/004-text-mode-stdout-carries-no-log-record.log",
+      "log_sha256": "7d296493cc62366ceab7589cd0235712c968314048786c91d81d43919ca9f2da",
+      "output_tail": [
+        "{\"level\": \"WARNING\", \"logger\": \"harness.agent\", \"message\": \"probe-log-record\", \"error_class\": null, \"retryable\": null, \"subsystem\": null, \"request_id\": null, \"retry_count\": null, \"status_code\": null, \"user_facing\": null, \"timestamp\": \"2026-10-06T02:02:25.709006+00:00\"}",
+        "{\"level\": \"DEBUG\", \"logger\": \"asyncio\", \"message\": \"Using selector: KqueueSelector\", \"error_class\": null, \"retryable\": null, \"subsystem\": null, \"request_id\": null, \"retry_count\": null, \"status_code\": null, \"user_facing\": null, \"timestamp\": \"2026-10-06T02:02:25.709254+00:00\"}",
+        "Not answerable (not_in_registry):",
+        "  probe refusal",
+        "",
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import asyncio, io, json, logging, pathlib, sys, tempfile; import run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp()); settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = \"DEBUG\"; cli.require_credentials = lambda: None; cli.build_client = lambda use_stub: object(); cli.converse = lambda *a, **k: (logging.getLogger(\"harness.agent\").warning(\"probe-log-record\"), asyncio.sleep(0, result=Unsupported(reason_kind=\"not_in_registry\", reason=\"probe refusal\")))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main([\"--no-interactive\", \"probe question\"]); sys.stdout = real; out = buf.getvalue(); print(out); records = [l for l in out.splitlines() if l.strip().startswith(\"{\") and \"\\\"level\\\"\" in l]; log_text = (tmp / \"logs\" / \"harness.log\").read_text(encoding=\"utf-8\"); assert code == cli.EXIT_UNSUPPORTED, code; assert \"probe refusal\" in out, \"outcome not printed\"; assert not records, \"log records on stdout: %r\" % records; assert \"probe-log-record\" in log_text, \"log file did not receive the record\"; print(\"TEXT-STDOUT-OK\")",
+        "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^^^^^^^^^^^",
+        "AssertionError: log records on stdout: ['{\"level\": \"WARNING\", \"logger\": \"harness.agent\", \"message\": \"probe-log-record\", \"error_class\": null, \"retryable\": null, \"subsystem\": null, \"request_id\": null, \"retry_count\": null, \"status_code\": null, \"user_facing\": null, \"timestamp\": \"2026-10-06T02:02:25.709006+00:00\"}', '{\"level\": \"DEBUG\", \"logger\": \"asyncio\", \"message\": \"Using selector: KqueueSelector\", \"error_class\": null, \"retryable\": null, \"subsystem\": null, \"request_id\": null, \"retry_count\": null, \"status_code\": null, \"user_facing\": null, \"timestamp\": \"2026-10-06T02:02:25.709254+00:00\"}']"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -c 'import asyncio, io, json, logging, pathlib, sys, tempfile; import run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp()); settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = \"DEBUG\"; cli.require_credentials = lambda: None; cli.build_client = lambda use_stub: object(); refusal = Unsupported(reason_kind=\"not_in_registry\", reason=\"probe refusal\"); cli.converse = lambda *a, **k: (logging.getLogger(\"harness.agent\").warning(\"probe-log-record\"), asyncio.sleep(0, result=refusal))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main([\"--json\", \"--no-interactive\", \"probe question\"]); sys.stdout = real; out = buf.getvalue(); doc = json.loads(out); log_text = (tmp / \"logs\" / \"harness.log\").read_text(encoding=\"utf-8\"); assert code == cli.EXIT_UNSUPPORTED, code; assert doc == refusal.model_dump(mode=\"json\"), doc; assert out == refusal.model_dump_json(indent=2) + \"\\n\", \"stdout is not exactly the document\"; assert \"probe-log-record\" in log_text, \"log file did not receive the record\"; print(\"JSON-STDOUT-OK\")'",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "json-mode-stdout-is-one-document",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/005-json-mode-stdout-is-one-document.log",
+      "log_sha256": "f7b68c2882839d2a0456f37ce2b4c48980c868e99d3a648b7fec5e9de191c1bc",
+      "output_tail": [
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import asyncio, io, json, logging, pathlib, sys, tempfile; import run as cli; from config import settings; from harness.outputs import Unsupported; tmp = pathlib.Path(tempfile.mkdtemp()); settings.PROJECT_ROOT = tmp; settings.LOG_LEVEL = \"DEBUG\"; cli.require_credentials = lambda: None; cli.build_client = lambda use_stub: object(); refusal = Unsupported(reason_kind=\"not_in_registry\", reason=\"probe refusal\"); cli.converse = lambda *a, **k: (logging.getLogger(\"harness.agent\").warning(\"probe-log-record\"), asyncio.sleep(0, result=refusal))[1]; buf = io.StringIO(); real = sys.stdout; sys.stdout = buf; code = cli.main([\"--json\", \"--no-interactive\", \"probe question\"]); sys.stdout = real; out = buf.getvalue(); doc = json.loads(out); log_text = (tmp / \"logs\" / \"harness.log\").read_text(encoding=\"utf-8\"); assert code == cli.EXIT_UNSUPPORTED, code; assert doc == refusal.model_dump(mode=\"json\"), doc; assert out == refusal.model_dump_json(indent=2) + \"\\n\", \"stdout is not exactly the document\"; assert \"probe-log-record\" in log_text, \"log file did not receive the record\"; print(\"JSON-STDOUT-OK\")",
+        "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ~~~~~~~~~~^^^^^",
+        "  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py\", line 352, in loads",
+        "    return _default_decoder.decode(s)",
+        "           ~~~~~~~~~~~~~~~~~~~~~~~^^^",
+        "  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py\", line 348, in decode",
+        "    raise JSONDecodeError(\"Extra data\", s, end)",
+        "json.decoder.JSONDecodeError: Extra data: line 2 column 1 (char 270)"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "grep -Ei 'type.*minor' releases/_next/cli-confidence-grade-and-clean-stdout.md",
+      "exit_code": 2,
+      "expectation_met": false,
+      "flags": [],
+      "id": "release-note-present",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/006-release-note-present.log",
+      "log_sha256": "b9b1fdd9beb55891327f5e86f44d897cf6e14ead6e81b821a6ea83e5921b2b60",
+      "output_tail": [
+        "grep: releases/_next/cli-confidence-grade-and-clean-stdout.md: No such file or directory"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/ -q",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "full-test-suite",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/007-full-test-suite.log",
+      "log_sha256": "480c6b0233b36219f823aa76ddc51f0c0d286a92512290bad3967f4cf9bc1538",
+      "output_tail": [
+        "sssssssssss............................................................. [  8%]",
+        ".......x................................................................ [ 16%]",
+        "........................................................................ [ 24%]",
+        "........................................................................ [ 32%]",
+        "........................................................................ [ 41%]",
+        "........................................................................ [ 49%]",
+        "........................................................................ [ 57%]",
+        "........................................................................ [ 65%]",
+        "........................................................................ [ 74%]",
+        ".....................sssssssssssss........ssss.......................... [ 82%]",
+        "........................................................................ [ 90%]",
+        "........................................................................ [ 98%]",
+        "...........                                                              [100%]",
+        "846 passed, 28 skipped, 8 deselected, 1 xfailed in 10.52s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/unit/test_run_cli.py tests/unit/test_demo.py tests/unit/test_logging_config.py -q",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "focused-cli-demo-logging-tests",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/008-focused-cli-demo-logging-tests.log",
+      "log_sha256": "6b2fbe3bac7b623bc566eefaaae97c83af1233aa9ac9913a77407e6d10da399f",
+      "output_tail": [
+        ".................................................................        [100%]",
+        "65 passed in 1.29s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "git diff --exit-code b3e722ceef0e75c372db0c9c629a0e7ff8647579 -- tests/unit/test_logging_config.py harness/logging_config.py config/settings.py harness/outputs.py harness/rendering.py demo.py contract/ docs/architecture.md",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "protected-files-unchanged",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/009-protected-files-unchanged.log",
+      "log_sha256": "42b9b9eddbfe473293d502a702169ed30b8bae4975fa74a322c5759935b5df49",
+      "output_tail": [],
+      "ran": true,
+      "repo": "k-12Harness"
+    }
+  ]
+}
