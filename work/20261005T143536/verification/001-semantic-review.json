@@ -1,0 +1,10 @@
+{
+  "classification": "pass",
+  "covers": [],
+  "findings": [],
+  "kind": "general",
+  "resolutions": {},
+  "review": "S1",
+  "round": 1,
+  "summary": "The change achieves the stated objective while preserving the protected behavior and invariants. Confidence grades are rendered only from response fields, missing or malformed grades are handled without leaking nested grade data, component grades are sorted and displayed individually, and console logging is redirected to stderr without altering JSON output or file logging. The rewritten tests continue to constrain labels and response-sourced grade values rather than evading the original protection. No consequential semantic defect is evident in the supplied material."
+}
