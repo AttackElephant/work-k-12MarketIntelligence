@@ -2722,3 +2722,409 @@ exception_handling:
     evidence_sha256: 7930e7c7b9b25767781ab7510456831b1fcf285661ae51dcfd97c13c05606d97
     confirmed_by: shane
     label: human confirmation recorded; identity not independently enforced
+delivery:
+  contract:
+    kind: merge-release-notes
+    notes_dir: releases/_next
+    template: releases/_template.md
+    version_file: VERSION
+    tag_format: v{version}
+    remote: origin
+    pull_request_command: null
+    source: declared
+    path_classes:
+      minor:
+      - .method.yaml
+      - .claude/hooks/require-release-notes.sh
+      - harness/**
+      - prompts/**
+      - contract/*.json
+      - contract/question_schemas/**
+      - evals/**
+      - server/**
+      - sql/**
+      - config/**
+      - '*.py'
+      - requirements*.txt
+      - setup.sh
+      - pytest.ini
+      - logging_config.yaml
+      - .github/**
+      - .claude/**
+      patch:
+      - tests/**
+      - docs/**
+      - releases/**
+      - captures/**
+      - contract/*.md
+      - '*.md'
+      - .env.example
+      - .gitignore
+      source: declared
+  steps:
+    note:
+      repo: k-12Harness
+      branch: wi/20261005T143536
+      path: releases/_next/cli-confidence-grade-and-clean-stdout.md
+      sha256: 909c6b35c027f46df19679626355ebcbfc2414b7845256464c681403f0e8609e
+      commit: 44cea8395c9ba2e8b681194afa99e97df4e2114c
+      candidate: 44cea8395c9ba2e8b681194afa99e97df4e2114c
+      classification:
+        increment: minor
+        mechanical: minor
+        rule: 'minor: at least one changed path is a behaviour path whose content changed'
+        paths:
+        - path: .method.yaml
+          class: minor
+          pattern: .method.yaml
+          content: text
+          effective: minor
+        - path: logging_config.yaml
+          class: minor
+          pattern: logging_config.yaml
+          content: text
+          effective: minor
+        - path: releases/_next/cli-confidence-grade-and-clean-stdout.md
+          class: patch
+          pattern: releases/**
+          content: text
+          effective: patch
+        - path: run.py
+          class: minor
+          pattern: '*.py'
+          content: 'python: code'
+          effective: minor
+        - path: tests/unit/test_run_cli.py
+          class: patch
+          pattern: tests/**
+          content: 'python: code'
+          effective: patch
+        path_classes:
+          minor:
+          - .method.yaml
+          - .claude/hooks/require-release-notes.sh
+          - harness/**
+          - prompts/**
+          - contract/*.json
+          - contract/question_schemas/**
+          - evals/**
+          - server/**
+          - sql/**
+          - config/**
+          - '*.py'
+          - requirements*.txt
+          - setup.sh
+          - pytest.ini
+          - logging_config.yaml
+          - .github/**
+          - .claude/**
+          patch:
+          - tests/**
+          - docs/**
+          - releases/**
+          - captures/**
+          - contract/*.md
+          - '*.md'
+          - .env.example
+          - .gitignore
+          source: declared
+        major_decision: null
+        declared: null
+      contract_source: declared
+      adopted: the accepted candidate carries its own release note; nothing was written or committed
+      recorded: true
+      event_seq: 98
+    push:
+      repo: k-12Harness
+      remote: origin
+      branch: wi/20261005T143536
+      commit: 44cea8395c9ba2e8b681194afa99e97df4e2114c
+      remote_before: null
+      already_present: false
+      author:
+        kind: model
+        name: claude-opus-5-5
+        provider: anthropic
+      authorisation:
+        kind: eligibility
+        decision_sha256: d0c27f268f9c4d68a49a85ee10b2af9e3e90fe4036720657a0278eff60465db7
+        evidence_sha256: 3e765634405642c0331143d746889a538e4e643c657a5e371f911172760f0396
+        verdict:
+          decision: push
+          eligible: true
+          reasons: []
+          evidence_sha256: 6b2fa98ff5653dcafac647a7aa2f1122f2dd046fd0dafebe2ad9e44624bf6416
+      eligibility:
+        decision: push
+        eligible: true
+        reasons: []
+        evidence_sha256: 6b2fa98ff5653dcafac647a7aa2f1122f2dd046fd0dafebe2ad9e44624bf6416
+        applied: true
+        evidence:
+          exceptions:
+          - id: X-12
+            kind: attempt-failed
+            seq: 12
+            event_sha256: 09748be8915b726e53a5da767a4daee2f05354a28932a7303d25494cf463f5e4
+            summary: 'attempt 1 (planner) failed: harness_error'
+            severity: harness_error
+            provenance:
+              event: attempt.closed
+              role: planner
+              attempt: 1
+            condition: handled
+            handled_by: EH-2
+          - id: X-28
+            kind: concern
+            seq: 28
+            event_sha256: e9761127acc16e6badcb2d4526b2044275fe8d49e3544cb313173fbcbd0458e5
+            summary: concern C1 (owner-decision)
+            severity: blocking
+            provenance:
+              event: human.concern-opened
+              concern: C1
+              origin: contracting
+              form: owner-decision
+              opened_by: model
+            condition: handled
+            handled_by: concern C1 resolved with a human confirmation (event 39)
+          - id: X-29
+            kind: concern
+            seq: 29
+            event_sha256: 93a0aae28f1102dc71c62b57d7864c69e8217e1ed50a5d07d1a05aba5f52489d
+            summary: concern C2 (owner-decision)
+            severity: blocking
+            provenance:
+              event: human.concern-opened
+              concern: C2
+              origin: contracting
+              form: owner-decision
+              opened_by: model
+            condition: handled
+            handled_by: concern C2 resolved with a human confirmation (event 40)
+          - id: X-41
+            kind: behaviour-alternative
+            seq: 41
+            event_sha256: a54c2abc9a9270a8d8465e342bfb9076f8ce5c3c1f4a00556fcc256fd8735823
+            summary: no check showed the requested change at the base
+            severity: null
+            provenance:
+              event: contract.behaviour-alternative-recorded
+              contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+            condition: handled
+            handled_by: its own human confirmation
+          - id: X-47.1
+            kind: planning-finding
+            seq: 47
+            event_sha256: e73edeb39405358d3567b57110a815286ac1208a3a26ebaa9d133fa46425575b
+            summary: planning finding PF-1
+            severity: null
+            provenance:
+              event: planning.review-recorded
+              finding: PF-1
+            condition: handled
+            handled_by: finding disposition PF-1 (event 49)
+          - id: X-47.2
+            kind: planning-finding
+            seq: 47
+            event_sha256: e73edeb39405358d3567b57110a815286ac1208a3a26ebaa9d133fa46425575b
+            summary: planning finding PF-2
+            severity: null
+            provenance:
+              event: planning.review-recorded
+              finding: PF-2
+            condition: handled
+            handled_by: finding disposition PF-2 (event 48)
+          - id: X-87
+            kind: attempt-failed
+            seq: 87
+            event_sha256: 1f7d0ef278cd44e7e42c1a301a8c19fc1c57d84f8a90fe07a526b390e7d81514
+            summary: 'attempt 8 (verifier) failed: harness_error'
+            severity: harness_error
+            provenance:
+              event: attempt.closed
+              role: verifier
+              attempt: 8
+            condition: handled
+            handled_by: EH-3
+          - id: X-88
+            kind: review-refused
+            seq: 88
+            event_sha256: 4a9a05be461dd593135854f407c31dd16307748f079ebc027ece363c856db498
+            summary: verification.semantic-refused
+            severity: null
+            provenance:
+              event: verification.semantic-refused
+            condition: handled
+            handled_by: EH-3
+          - id: X-95
+            kind: operator-event
+            seq: 95
+            event_sha256: dc9724449669e487f0912aa6acd92990f789ec91e8db7ef188141eb8f6f54c8f
+            summary: operator.observation (unknown provenance)
+            severity: null
+            provenance:
+              event: operator.observation
+            condition: handled
+            handled_by: EH-4
+      recorded: true
+      event_seq: 99
+    pull-request:
+      repo: k-12Harness
+      branch: wi/20261005T143536
+      base: main
+      url: https://github.com/AttackElephant/k-12Harness/pull/12
+      commit: 44cea8395c9ba2e8b681194afa99e97df4e2114c
+      how: recorded
+      command_output: null
+      author:
+        kind: model
+        name: claude-opus-5-5
+        provider: anthropic
+      authorisation:
+        kind: eligibility
+        decision_sha256: 6c7c46a5a7b1d32aab175646e90a204e16758ad5a78729628d76668e6f96f14a
+        evidence_sha256: 576c6abfe843c5fde275747c1cde37661f8cd36a701c073184761a8cd7114146
+        verdict:
+          decision: pull-request
+          eligible: true
+          reasons: []
+          evidence_sha256: 6b2fa98ff5653dcafac647a7aa2f1122f2dd046fd0dafebe2ad9e44624bf6416
+      eligibility:
+        decision: pull-request
+        eligible: true
+        reasons: []
+        evidence_sha256: 6b2fa98ff5653dcafac647a7aa2f1122f2dd046fd0dafebe2ad9e44624bf6416
+        applied: true
+        evidence:
+          exceptions:
+          - id: X-12
+            kind: attempt-failed
+            seq: 12
+            event_sha256: 09748be8915b726e53a5da767a4daee2f05354a28932a7303d25494cf463f5e4
+            summary: 'attempt 1 (planner) failed: harness_error'
+            severity: harness_error
+            provenance:
+              event: attempt.closed
+              role: planner
+              attempt: 1
+            condition: handled
+            handled_by: EH-2
+          - id: X-28
+            kind: concern
+            seq: 28
+            event_sha256: e9761127acc16e6badcb2d4526b2044275fe8d49e3544cb313173fbcbd0458e5
+            summary: concern C1 (owner-decision)
+            severity: blocking
+            provenance:
+              event: human.concern-opened
+              concern: C1
+              origin: contracting
+              form: owner-decision
+              opened_by: model
+            condition: handled
+            handled_by: concern C1 resolved with a human confirmation (event 39)
+          - id: X-29
+            kind: concern
+            seq: 29
+            event_sha256: 93a0aae28f1102dc71c62b57d7864c69e8217e1ed50a5d07d1a05aba5f52489d
+            summary: concern C2 (owner-decision)
+            severity: blocking
+            provenance:
+              event: human.concern-opened
+              concern: C2
+              origin: contracting
+              form: owner-decision
+              opened_by: model
+            condition: handled
+            handled_by: concern C2 resolved with a human confirmation (event 40)
+          - id: X-41
+            kind: behaviour-alternative
+            seq: 41
+            event_sha256: a54c2abc9a9270a8d8465e342bfb9076f8ce5c3c1f4a00556fcc256fd8735823
+            summary: no check showed the requested change at the base
+            severity: null
+            provenance:
+              event: contract.behaviour-alternative-recorded
+              contract_sha256: 0350efd74f696ae5bd5056867bdc3ba9a19f7b289c185c20c11cf2efd9ef42f1
+            condition: handled
+            handled_by: its own human confirmation
+          - id: X-47.1
+            kind: planning-finding
+            seq: 47
+            event_sha256: e73edeb39405358d3567b57110a815286ac1208a3a26ebaa9d133fa46425575b
+            summary: planning finding PF-1
+            severity: null
+            provenance:
+              event: planning.review-recorded
+              finding: PF-1
+            condition: handled
+            handled_by: finding disposition PF-1 (event 49)
+          - id: X-47.2
+            kind: planning-finding
+            seq: 47
+            event_sha256: e73edeb39405358d3567b57110a815286ac1208a3a26ebaa9d133fa46425575b
+            summary: planning finding PF-2
+            severity: null
+            provenance:
+              event: planning.review-recorded
+              finding: PF-2
+            condition: handled
+            handled_by: finding disposition PF-2 (event 48)
+          - id: X-87
+            kind: attempt-failed
+            seq: 87
+            event_sha256: 1f7d0ef278cd44e7e42c1a301a8c19fc1c57d84f8a90fe07a526b390e7d81514
+            summary: 'attempt 8 (verifier) failed: harness_error'
+            severity: harness_error
+            provenance:
+              event: attempt.closed
+              role: verifier
+              attempt: 8
+            condition: handled
+            handled_by: EH-3
+          - id: X-88
+            kind: review-refused
+            seq: 88
+            event_sha256: 4a9a05be461dd593135854f407c31dd16307748f079ebc027ece363c856db498
+            summary: verification.semantic-refused
+            severity: null
+            provenance:
+              event: verification.semantic-refused
+            condition: handled
+            handled_by: EH-3
+          - id: X-95
+            kind: operator-event
+            seq: 95
+            event_sha256: dc9724449669e487f0912aa6acd92990f789ec91e8db7ef188141eb8f6f54c8f
+            summary: operator.observation (unknown provenance)
+            severity: null
+            provenance:
+              event: operator.observation
+            condition: handled
+            handled_by: EH-4
+      recorded: true
+      event_seq: 100
+    merged:
+      repo: k-12Harness
+      remote: origin
+      default_branch: main
+      merge_commit: 97b178e48dfe3f743241cd63e948b67b048d4e1a
+      merge_kind: merge
+      delivered_commit: 44cea8395c9ba2e8b681194afa99e97df4e2114c
+      pull_request: https://github.com/AttackElephant/k-12Harness/pull/12
+      verified_paths:
+      - .method.yaml
+      - logging_config.yaml
+      - releases/_next/cli-confidence-grade-and-clean-stdout.md
+      - run.py
+      - tests/unit/test_run_cli.py
+      release:
+        tag: v1.4.0
+        version: 1.4.0
+        commit: 765b7503cd5c9e1f178ea5721daaca61c0bb7b6d
+        version_file: 1.4.0
+        consistent: true
+      complete: true
+      recorded: true
+      event_seq: 101
