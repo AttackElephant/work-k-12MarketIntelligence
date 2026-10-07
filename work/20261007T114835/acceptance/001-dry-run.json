@@ -1,0 +1,179 @@
+{
+  "at": "2026-10-07T12:14:58Z",
+  "bases": {
+    "k-12Harness": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159"
+  },
+  "contract": "acceptance/001-contract.yaml",
+  "contract_sha256": "a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c",
+  "contract_version": 1,
+  "environment_dirs": {
+    "k-12Harness": [
+      ".venv"
+    ]
+  },
+  "flagged": [
+    "guard-test-fails-on-base-tree"
+  ],
+  "results": [
+    {
+      "command": ".venv/bin/python -m pytest tests/unit/test_usage_log_guard.py -q",
+      "exit_code": 4,
+      "expectation_met": false,
+      "flags": [],
+      "id": "guard-module-passes",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/001-guard-module-passes.log",
+      "log_sha256": "3d65a17b3fc0398a6a98f5cbe5d78e877b709dde67c7cc60edaced8cacb8793e",
+      "output_tail": [
+        "",
+        "no tests ran in 0.00s",
+        "ERROR: file or directory not found: tests/unit/test_usage_log_guard.py",
+        ""
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "bash -c 'R=\"$(pwd)\"; T=\"$(mktemp -d)\"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 | tar -x -C \"$T\"; if cp tests/unit/test_usage_log_guard.py \"$T/tests/unit/\"; then (cd \"$T\" && \"$R/.venv/bin/python\" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider); echo \"base_exit=$?\"; else echo \"base_exit=missing-test\"; fi; rm -rf \"$T\"'",
+      "exit_code": 0,
+      "expectation_met": false,
+      "flags": [
+        {
+          "kind": "excludes-matches-base",
+          "reason": "stdout_excludes 'base_exit=(0|missing-test)' already matches the base commit's output on the line 'base_exit=missing-test', while the exit code met the expectation; no candidate can pass unless that line disappears"
+        }
+      ],
+      "id": "guard-test-fails-on-base-tree",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/002-guard-test-fails-on-base-tree.log",
+      "log_sha256": "f69d16d552463617fdf7b410295194e08b67e26e5da1ab1c0c28f08bfe646bf4",
+      "output_tail": [
+        "base_exit=missing-test",
+        "cp: tests/unit/test_usage_log_guard.py: No such file or directory"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "bash -c 'snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \\; | sort; ls -1 logs/usage; fi; }; B=\"$(snap)\"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1; rc=$?; A=\"$(snap)\"; if [ \"$B\" = \"$A\" ]; then echo \"suite_exit=$rc usage_log=UNCHANGED\"; else echo \"suite_exit=$rc usage_log=CHANGED\"; fi'",
+      "exit_code": 0,
+      "expectation_met": false,
+      "flags": [],
+      "id": "usage-log-unchanged-by-suite",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/003-usage-log-unchanged-by-suite.log",
+      "log_sha256": "c1fd356376f4ddc5243786b63501f58d6297d2fbfacd1133c57af65b2c810a72",
+      "output_tail": [
+        "suite_exit=0 usage_log=CHANGED"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -c \"import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text(); v=t.split('## Verification',1)[1].split('\\n## ',1)[0]; ok=all([re.search(r'(?m)^\\*\\*Type:\\*\\* *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t), re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\\x60{3}bash',v)]); print('NOTES_OK' if ok else 'NOTES_BAD'); raise SystemExit(0 if ok else 1)\"",
+      "exit_code": 1,
+      "expectation_met": false,
+      "flags": [],
+      "id": "release-note-present-and-shaped",
+      "kind": "behaviour",
+      "log": "acceptance/001-dry-run/004-release-note-present-and-shaped.log",
+      "log_sha256": "62d2b9d2bc30b708d563935bf1846c0b475b80503535cb373603e03ee5ea460b",
+      "output_tail": [
+        "Traceback (most recent call last):",
+        "  File \"<string>\", line 1, in <module>",
+        "    import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text(); v=t.split('## Verification',1)[1].split('\\n## ',1)[0]; ok=all([re.search(r'(?m)^\\*\\*Type:\\*\\* *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t), re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\\x60{3}bash',v)]); print('NOTES_OK' if ok else 'NOTES_BAD'); raise SystemExit(0 if ok else 1)",
+        "                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^",
+        "  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py\", line 787, in read_text",
+        "    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:",
+        "         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py\", line 771, in open",
+        "    return io.open(self, mode, buffering, encoding, errors, newline)",
+        "           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "FileNotFoundError: [Errno 2] No such file or directory: 'releases/_next/tests-never-write-usage-log.md'"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/ -q",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "full-test-suite",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/005-full-test-suite.log",
+      "log_sha256": "98addc74025d514e6bc293d882b3d01e987f484fc5e056a0054c0043e184eb37",
+      "output_tail": [
+        "sssssssssss............................................................. [  8%]",
+        ".......x................................................................ [ 16%]",
+        "........................................................................ [ 24%]",
+        "........................................................................ [ 32%]",
+        "........................................................................ [ 40%]",
+        "........................................................................ [ 49%]",
+        "........................................................................ [ 57%]",
+        "........................................................................ [ 65%]",
+        "........................................................................ [ 73%]",
+        ".....................sssssssssssss........ssss.......................... [ 81%]",
+        "........................................................................ [ 89%]",
+        "........................................................................ [ 98%]",
+        ".................                                                        [100%]",
+        "852 passed, 28 skipped, 8 deselected, 1 xfailed in 11.68s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/unit/test_usage.py \"tests/unit/test_agent_loop.py::test_a_budget_trip_still_records_its_usage\" -q",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "recording-tests-still-pass",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/006-recording-tests-still-pass.log",
+      "log_sha256": "a324f765b521f00147452fb7b16ba6a216451fbcd1749c4b4f7ee683d2e12896",
+      "output_tail": [
+        "..........                                                               [100%]",
+        "10 passed in 0.47s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/live --collect-only -q -m live",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "live-tier-still-collects",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/007-live-tier-still-collects.log",
+      "log_sha256": "ed63274c8125108fe5cfbc645ef30c7c5beacd6a39a769848bd23050be59455b",
+      "output_tail": [
+        "tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[answer/VC-POC-REF-01]",
+        "tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[clarify/peer_filters]",
+        "tests/live/test_live_eval.py::test_one_case_per_direction_survives_a_live_run[refuse/finance]",
+        "tests/live/test_live_eval.py::test_the_frozen_prompt_is_actually_cached",
+        "tests/live/test_live_eval.py::test_stage_intent_survives_a_live_run",
+        "tests/live/test_live_eval.py::test_stage_narration_survives_a_live_run",
+        "tests/live/test_live_eval.py::test_stage_end_to_end_survives_a_live_run",
+        "tests/live/test_live_eval.py::test_a_live_run_stays_inside_the_control_envelope",
+        "",
+        "8 tests collected in 0.37s"
+      ],
+      "ran": true,
+      "repo": "k-12Harness"
+    },
+    {
+      "command": "git diff --quiet 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 -- harness config evals prompts contract server sql pytest.ini logging_config.yaml requirements.txt run.py demo.py capture.py authcheck.py VERSION .method.yaml .github .claude",
+      "exit_code": 0,
+      "expectation_met": true,
+      "flags": [],
+      "id": "no-product-code-changed",
+      "kind": "regression",
+      "log": "acceptance/001-dry-run/008-no-product-code-changed.log",
+      "log_sha256": "d332a2763dc95624590d7911803f2293c34e062163c286a33575b6d9a74711dc",
+      "output_tail": [],
+      "ran": true,
+      "repo": "k-12Harness"
+    }
+  ]
+}

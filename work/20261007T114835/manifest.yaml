@@ -98,7 +98,7 @@ request: '# Request
   Any change to what the product records in normal use. Any change to the usage record format.'
 narrative: null
 class: null
-state: planned
+state: classified
 parent: null
 children: []
 transitions:
@@ -125,6 +125,93 @@ transitions:
     evidence: size estimate files=7 scale=small
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
+- at: '2026-10-07T12:10:05Z'
+  transition: T2
+  event: risk
+  from: planned
+  to: classified
+  by: shane
+  reason: Normal. The change is limited to the test suite and a release note; no harness, configuration
+    or record-format code changes. It adds two new files, a guard test module and the release note, and
+    the approved risk declaration sets every new file at normal or above, so low is not available. If
+    it ships wrong, the likely failure is a guard that misses a writer or fails a legitimate test; the
+    full suite and the line-count check expose that, and one revert undoes it.
+  reason_source: supplied
+  guards:
+  - guard: risk_classified
+    evidence: risk normal with rationale
+  - guard: decision_authorised
+    evidence: authorised by shane (human confirmation recorded; identity not independently enforced)
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: 4204d383fa624b4a6f76785e0ecce8753971650e2d0996b017258eb4fc491b13
+    evidence_sha256: 360e46e027a20c58926a38000564df492a09e4dfc78b35a9f46554940d49af78
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
+  eligibility:
+    decision: classify
+    eligible: false
+    reasons:
+    - 'exceptional evidence X-9 (attempt-failed) is unhandled: attempt 1 (planner) failed: harness_error'
+    evidence_sha256: 0fea6e9066b886103da85d90241b46a241be42e3eeb75be16fc82528fe904c67
+    applied: false
+    evidence:
+      exceptions:
+      - id: X-9
+        kind: attempt-failed
+        seq: 9
+        event_sha256: f120308b2ceb29c53b235d0937e598006dd1323535a1f8f552a76a5405721f99
+        summary: 'attempt 1 (planner) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: planner
+          attempt: 1
+        condition: unhandled
+        handled_by: null
+      risk_floor:
+        section: risk_floor
+        version: 1
+        sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+        approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+        confirmed_by: shane
+      plan_floor:
+        stage: plan
+        floor: normal
+        known: true
+        unknown: []
+        under_declared: []
+        matches:
+          releases/_next/tests-never-write-usage-log.md:
+          - description-and-evidence
+          tests/conftest.py:
+          - description-and-evidence
+          tests/live/test_live_eval.py:
+          - description-and-evidence
+          tests/unit/test_agent_loop.py:
+          - description-and-evidence
+          tests/unit/test_live_tier.py:
+          - description-and-evidence
+          tests/unit/test_run_cli.py:
+          - description-and-evidence
+          tests/unit/test_usage_log_guard.py:
+          - description-and-evidence
+        implied: []
+        declared: []
+        assessed:
+        - tests/conftest.py
+        - tests/unit/test_usage_log_guard.py
+        - tests/unit/test_agent_loop.py
+        - tests/unit/test_run_cli.py
+        - tests/unit/test_live_tier.py
+        - tests/live/test_live_eval.py
+        - releases/_next/tests-never-write-usage-log.md
 size_estimate:
   files: 7
   scale: small
@@ -207,19 +294,196 @@ scope:
 scope_version: 1
 scope_sha256: ef50cd89b634d2312b468f04429df29cf9ac619a0cb169cd8b22496bf1ca9ac3
 risk:
-  initial: null
-  current: null
-  maximum: null
-  rationale: null
-  obligations: []
+  initial: normal
+  current: normal
+  maximum: normal
+  rationale: Normal. The change is limited to the test suite and a release note; no harness, configuration
+    or record-format code changes. It adds two new files, a guard test module and the release note, and
+    the approved risk declaration sets every new file at normal or above, so low is not available. If
+    it ships wrong, the likely failure is a guard that misses a writer or fails a legitimate test; the
+    full suite and the line-count check expose that, and one revert undoes it.
+  obligations:
+  - planning
+  - contract
+  - planning_review
+  - deterministic
+  - semantic
   escalations: []
   deescalations: []
+  floors:
+  - stage: plan
+    floor: normal
+    known: true
+    unknown: []
+    under_declared: []
+    matches:
+      releases/_next/tests-never-write-usage-log.md:
+      - description-and-evidence
+      tests/conftest.py:
+      - description-and-evidence
+      tests/live/test_live_eval.py:
+      - description-and-evidence
+      tests/unit/test_agent_loop.py:
+      - description-and-evidence
+      tests/unit/test_live_tier.py:
+      - description-and-evidence
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+      tests/unit/test_usage_log_guard.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    - releases/_next/tests-never-write-usage-log.md
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    event_seq: 16
+  - stage: contract
+    floor: normal
+    known: true
+    unknown: []
+    under_declared:
+    - tests/unit/test_demo.py is outside every path the plan declared
+    - tests/unit/test_golden_cases.py is outside every path the plan declared
+    - tests/unit/test_intent_boundary.py is outside every path the plan declared
+    - tests/unit/test_rendering.py is outside every path the plan declared
+    matches:
+      releases/_next/tests-never-write-usage-log.md:
+      - description-and-evidence
+      tests/conftest.py:
+      - description-and-evidence
+      tests/live/test_live_eval.py:
+      - description-and-evidence
+      tests/unit/test_agent_loop.py:
+      - description-and-evidence
+      tests/unit/test_demo.py:
+      - description-and-evidence
+      tests/unit/test_golden_cases.py:
+      - description-and-evidence
+      tests/unit/test_intent_boundary.py:
+      - description-and-evidence
+      tests/unit/test_live_tier.py:
+      - description-and-evidence
+      tests/unit/test_rendering.py:
+      - description-and-evidence
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+      tests/unit/test_usage_log_guard.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - releases/_next/tests-never-write-usage-log.md
+    - tests/conftest.py
+    - tests/live/test_live_eval.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_demo.py
+    - tests/unit/test_golden_cases.py
+    - tests/unit/test_intent_boundary.py
+    - tests/unit/test_live_tier.py
+    - tests/unit/test_rendering.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_usage_log_guard.py
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    contract_sha256: a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c
+    event_seq: 27
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: e737840b1a1ec5fc1dc57d30ad769dca743fc8ac42fab8e189665bafe4867be9
+    evidence_sha256: 56d458fb10e7570295a16bec525865f90de4096bc34ac1cf5e016b9fca64324f
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
 contract:
-  current: null
-  versions: []
+  current: 1
+  versions:
+  - version: 1
+    path: acceptance/001-contract.yaml
+    artifact: A2
+    sha256: a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c
+    status: current
+    reason: initial acceptance contract
+    reason_source: derived
+    plan_sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
+    recorded_at: '2026-10-07T12:14:32Z'
 decisions: []
 constraints: []
-concerns: []
+concerns:
+- id: C1
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: may the controller''s dry run against base commit 6d3dd93 execute the base test
+    suite in place? The base code has no guard, so `full-test-suite` and `usage-log-unchanged-by-suite`,
+    run on base, append scripted-model records to the real `logs/usage/`. The plan avoided exactly that
+    for its own base check. Options: (a) accept it: the directory is untracked, already contaminated,
+    and cleaning it is out of scope; the contract stands as written. (b) no base run may write there:
+    both criteria run only on the candidate, and a human records the base result as accepted; or they
+    are rewritten to run the suite in an isolated copy of the tree (as `guard-test-fails-on-base-tree`
+    does), with the base failure shown by a copy-based count of the copy''s own `logs/usage/`. Affects:
+    deterministic `full-test-suite` and `usage-log-unchanged-by-suite`, and observable_behaviour suite-leaves-usage-log-unchanged.
+    This contract is written on option (a), because the repository''s declared verify command must be
+    run and the plan''s verification step 2 runs the suite in place.'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-base-dry-run-writes). Put it to the owner; the version that carries the answer reads DECIDED
+    (C<n>): where this entry was.'
+  blocking: true
+  status: open
+  opened_at: '2026-10-07T12:14:58Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: null
+  resolved_at: null
+  decision_entry: decision-base-dry-run-writes
+  contract_version: 1
+  author: &id001
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+    attempt: 3
+- id: C2
+  origin_stage: contracting
+  raised_by: contract author via DECISION marker; opened by create_contract.py
+  summary: 'DECISION: should paid live-tier runs (`tests/live/test_live_eval.py`, run by hand with `-m
+    live`) still record usage in the real `logs/usage/`? Options: (a) no: follow ADR-021 literally and
+    redirect the module with `usage_log_dir` (the plan''s choice); real-model live-test telemetry then
+    no longer lands in `logs/usage/`. (b) yes: exempt live-marked tests from the guard, which needs an
+    exemption rule in `tests/conftest.py`, leaves `tests/live/test_live_eval.py` unchanged, and departs
+    from ADR-021''s wording. Affects: permitted_files `tests/live/test_live_eval.py`, required_outputs
+    `tests/conftest.py` (exemption logic), compatibility ADR-021, and semantic `live-tier-consistent`.
+    This contract is written on option (a).'
+  detail: 'Marked DECISION: by the contract author in contract v1 (acceptance/001-contract.yaml, entry
+    decision-live-tier-usage). Put it to the owner; the version that carries the answer reads DECIDED
+    (C<n>): where this entry was.'
+  blocking: true
+  status: open
+  opened_at: '2026-10-07T12:14:58Z'
+  references:
+  - acceptance/001-contract.yaml
+  resolution: null
+  resolved_at: null
+  decision_entry: decision-live-tier-usage
+  contract_version: 1
+  author: *id001
 review_reconciliations: []
 artifacts:
 - id: A0
@@ -240,6 +504,37 @@ artifacts:
   sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
   created_at: '2026-10-07T12:04:33Z'
   produced_by_attempt: 2
+- status: current
+  supersedes: null
+  id: A2
+  type: acceptance_contract
+  path: acceptance/001-contract.yaml
+  version: 1
+  sha256: a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c
+  created_at: '2026-10-07T12:14:32Z'
+  produced_by_attempt: 3
+- status: current
+  supersedes: null
+  id: A3
+  type: contract_review_view
+  path: acceptance/001-contract-review.md
+  version: 1
+  sha256: f6613507f70a3d73eac1b64974f2294083a9b851d47c43bfb4ff00c7c805a192
+  created_at: '2026-10-07T12:14:32Z'
+  produced_by_attempt: 3
+  derived_from: A2
+- status: current
+  supersedes: null
+  id: A4
+  type: contract_dry_run
+  path: acceptance/001-dry-run.json
+  version: 1
+  sha256: dae5a04160bd837d833498ccdb15f47b5925c698718a6cfade4247b8aff2cfd5
+  contract_sha256: a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c
+  flagged:
+  - guard-test-fails-on-base-tree
+  created_at: '2026-10-07T12:14:58Z'
+  produced_by_attempt: 3
 attempts:
 - attempt: 1
   role: planner
@@ -468,6 +763,81 @@ attempts:
     data: []
   headroom: 0.1332
   growth_per_turn: 28815.8
+- attempt: 3
+  role: contract
+  state: contracting
+  status: closed
+  opened_at: '2026-10-07T12:10:05Z'
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-07T12:14:32Z'
+  turns: 2
+  transport_attempts: 2
+  usage:
+    input_tokens: 4
+    cache_creation_input_tokens: 130393
+    cache_read_input_tokens: 1778
+    output_tokens: 20349
+  initial_input_tokens: 35886
+  peak_input_tokens: 45397
+  files_read:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/01_orientation.md
+  - root0:docs/reviews/2026-10-poc-review/05_measurements.md
+  - root0:pytest.ini
+  - root0:tests/conftest.py
+  - root0:releases/README.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:.method.yaml
+  - root0:harness/usage.py
+  requested_files_read:
+  - root0:pytest.ini
+  - root0:tests/conftest.py
+  - root0:releases/README.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:.method.yaml
+  - root0:harness/usage.py
+  delivered_files:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root1:planning/001-plan.md
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/01_orientation.md
+  - root0:docs/reviews/2026-10-poc-review/05_measurements.md
+  - root0:pytest.ini
+  - root0:tests/conftest.py
+  - root0:releases/README.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:.method.yaml
+  - root0:harness/usage.py
+  inspected_files:
+  - root0:pytest.ini
+  - root0:tests/conftest.py
+  - root0:releases/README.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:releases/_template.md
+  - root0:.method.yaml
+  - root0:harness/usage.py
+  contract: acceptance/001-contract.yaml
+  headroom: 0.1794
+  growth_per_turn: 4755.5
 continuations: []
 routing:
   executor_ladder:
@@ -486,8 +856,8 @@ verification:
   semantic_reviews: []
   semantic_attempts: []
 effort:
-  controller_commands: 1
-  model_sessions_launched: 2
+  controller_commands: 2
+  model_sessions_launched: 3
 checkpoints: []
 acceptance:
   state: pending

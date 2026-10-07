@@ -1,0 +1,194 @@
+contract_version: 0.1.0
+artifact_version: 1
+work_item: 20261007T114835
+observable_behaviour:
+  - id: suite-leaves-usage-log-unchanged
+    behaviour: "Count the lines in every file under `logs/usage/`, run `.venv/bin/python -m pytest tests/ -q`, then count again. The counts are the same and no new file has appeared in `logs/usage/`."
+  - id: guard-stops-unredirected-recording
+    behaviour: "While the test suite runs, any call that would make `harness.usage.append_jsonl` write to the real usage directory is stopped before anything is written. This covers a call through `record_run` with no `log_dir`, a direct call with no `log_dir`, and a call with an explicit `log_dir` that resolves to the real directory or to a folder inside it. The calling test fails, and the failure message names the directory it tried to write to."
+  - id: guard-demonstrated-by-purpose-written-test
+    behaviour: "A new test module, `tests/unit/test_usage_log_guard.py`, shows the guard stopping such a write. Its guard tests fail on the base commit 6d3dd93 with `DID NOT RAISE` and pass on the candidate."
+  - id: recording-still-exercised
+    behaviour: "Tests that exercise usage recording still record, now into a temporary directory, and still pass. This covers `tests/unit/test_usage.py`, `test_a_budget_trip_still_records_its_usage`, and the legacy tool-loop tests that run with `record_usage=True`. The shared non-autouse `usage_log_dir` fixture in `tests/conftest.py` sends the recorder to `tmp_path / \"usage\"` and returns that path."
+  - id: guard-not-a-blanket-block
+    behaviour: "A call that passes an explicit temporary `log_dir`, or that runs under the `usage_log_dir` fixture, writes normally. It returns a path inside the temporary directory."
+required_outputs:
+  - repo: k-12Harness
+    path: tests/conftest.py
+    reason: "The plan's change 1: a session-scoped autouse guard around `harness.usage.append_jsonl`, plus the shared `usage_log_dir` fixture. The existing `sys.path` logic stays as it is."
+  - repo: k-12Harness
+    path: tests/unit/test_usage_log_guard.py
+    reason: "The plan's change 2: the purpose-written test that request refusal items 1 and 2 call for, with positive controls."
+  - repo: k-12Harness
+    path: releases/_next/tests-never-write-usage-log.md
+    reason: "Delivery contract (`.method.yaml` delivery, `releases/README.md`, `pr-checks.yml`): every PR adds exactly one release note. It is typed patch."
+permitted_files:
+  - repo: k-12Harness
+    path: tests/unit/test_agent_loop.py
+    reason: "Plan change 3: add a module-level `pytestmark = pytest.mark.usefixtures(\"usage_log_dir\")`. The `run()` helper and direct `ask` calls record by default."
+  - repo: k-12Harness
+    path: tests/unit/test_run_cli.py
+    reason: "Plan change 4: the same module-level opt-in marker. Four `converse` tests record by default."
+  - repo: k-12Harness
+    path: tests/unit/test_live_tier.py
+    reason: "Plan change 5: the same module-level opt-in marker. The default and end-to-end paths of `live.run_trial` record by default."
+  - repo: k-12Harness
+    path: tests/live/test_live_eval.py
+    reason: "Plan change 6: the same module-level opt-in marker, so the manual paid tier is not stopped by the guard (see decision-live-tier-usage)."
+  - repo: k-12Harness
+    path: tests/unit/test_demo.py
+    reason: "Contingent. Changed only if the guard shows a writer the plan did not list. The only change allowed is adding the `usage_log_dir` opt-in marker."
+  - repo: k-12Harness
+    path: tests/unit/test_golden_cases.py
+    reason: "Contingent. Changed only if the guard shows a writer the plan did not list. The only change allowed is adding the `usage_log_dir` opt-in marker."
+  - repo: k-12Harness
+    path: tests/unit/test_rendering.py
+    reason: "Contingent. Changed only if the guard shows a writer the plan did not list. The only change allowed is adding the `usage_log_dir` opt-in marker."
+  - repo: k-12Harness
+    path: tests/unit/test_intent_boundary.py
+    reason: "Contingent. Changed only if the guard shows a writer the plan did not list. The only change allowed is adding the `usage_log_dir` opt-in marker."
+deterministic:
+  - id: guard-module-passes
+    repo: k-12Harness
+    command: |-
+      .venv/bin/python -m pytest tests/unit/test_usage_log_guard.py -q
+    kind: behaviour
+    expected: "Fails on the base commit because `tests/unit/test_usage_log_guard.py` does not exist there: pytest exits 4 with 'file or directory not found'. Passes once the guard is in `tests/conftest.py` and the module exists: every guard test and positive control passes."
+    expect:
+      exit_code: 0
+      stdout_matches: '\d+ passed'
+      stdout_excludes: '\d+ (failed|xpassed|error)'
+  - id: guard-test-fails-on-base-tree
+    repo: k-12Harness
+    command: |-
+      bash -c 'R="$(pwd)"; T="$(mktemp -d)"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 | tar -x -C "$T"; if cp tests/unit/test_usage_log_guard.py "$T/tests/unit/"; then (cd "$T" && "$R/.venv/bin/python" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider); echo "base_exit=$?"; else echo "base_exit=missing-test"; fi; rm -rf "$T"'
+    kind: behaviour
+    expected: "Runs the candidate's guard test module against an extracted copy of the base tree. The copy's own `logs/usage/` is inside the temporary directory, so the real directory is never touched. On the base commit it fails because the test module does not exist yet: the command prints `base_exit=missing-test`. On the candidate the guard tests fail in the base copy with `DID NOT RAISE`, because base code has no guard and `record_run` swallows any `Exception`. The command then prints `base_exit=1`. This shows that the demonstration measures the change (request refusal item 2)."
+    expect:
+      exit_code: 0
+      stdout_matches: 'DID NOT RAISE'
+      stdout_excludes: 'base_exit=(0|missing-test)'
+  - id: usage-log-unchanged-by-suite
+    repo: k-12Harness
+    command: |-
+      bash -c 'snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \; | sort; ls -1 logs/usage; fi; }; B="$(snap)"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1; rc=$?; A="$(snap)"; if [ "$B" = "$A" ]; then echo "suite_exit=$rc usage_log=UNCHANGED"; else echo "suite_exit=$rc usage_log=CHANGED"; fi'
+    kind: behaviour
+    expected: "This is request item 1, checked against the real directory. It fails on the base commit because the legacy tool-loop tests in test_agent_loop.py, test_run_cli.py and test_live_tier.py append `function:*` records to `logs/usage/usage-<UTC date>.jsonl`, so the command prints `usage_log=CHANGED`. It passes once those tests use `usage_log_dir` and the guard stops any other writer: the suite exits 0 and the file names and line counts are identical before and after. See decision-base-dry-run-writes."
+    expect:
+      exit_code: 0
+      stdout_matches: '^suite_exit=0 usage_log=UNCHANGED$'
+  - id: release-note-present-and-shaped
+    repo: k-12Harness
+    command: |-
+      .venv/bin/python -c "import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text(); v=t.split('## Verification',1)[1].split('\n## ',1)[0]; ok=all([re.search(r'(?m)^\*\*Type:\*\* *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t), re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\x60{3}bash',v)]); print('NOTES_OK' if ok else 'NOTES_BAD'); raise SystemExit(0 if ok else 1)"
+    kind: behaviour
+    expected: "Fails on the base commit because `releases/_next/tests-never-write-usage-log.md` does not exist (FileNotFoundError). Passes once the note exists with a `**Type:** patch` line and the `## Local deployment`, `## Manual steps`, `## Verification` (with at least one fenced bash block) and `## Rollback` sections. The command prints NOTES_OK."
+    expect:
+      exit_code: 0
+      stdout_matches: '^NOTES_OK$'
+  - id: full-test-suite
+    repo: k-12Harness
+    command: |-
+      .venv/bin/python -m pytest tests/ -q
+    kind: regression
+    expected: "The repository's declared verify command exits zero with no failures, errors or unexpected passes. The existing strict xfail (O-8) stays xfailed. Pass, skip and xfail counts equal the base counts plus the new guard tests."
+    expect:
+      exit_code: 0
+      stdout_excludes: '\d+ (failed|xpassed|error)'
+  - id: recording-tests-still-pass
+    repo: k-12Harness
+    command: |-
+      .venv/bin/python -m pytest tests/unit/test_usage.py "tests/unit/test_agent_loop.py::test_a_budget_trip_still_records_its_usage" -q
+    kind: regression
+    expected: "The tests that assert usage records in a temporary directory pass before and after the change (request item 2)."
+    expect:
+      exit_code: 0
+      stdout_matches: '\d+ passed'
+      stdout_excludes: '\d+ (failed|xpassed|error)'
+  - id: live-tier-still-collects
+    repo: k-12Harness
+    command: |-
+      .venv/bin/python -m pytest tests/live --collect-only -q -m live
+    kind: regression
+    expected: "The manual live tier still collects under `-m live`. Nothing is run and no tokens are spent."
+    expect:
+      exit_code: 0
+      stdout_matches: '\d+ tests? collected'
+  - id: no-product-code-changed
+    repo: k-12Harness
+    command: |-
+      git diff --quiet 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 -- harness config evals prompts contract server sql pytest.ini logging_config.yaml requirements.txt run.py demo.py capture.py authcheck.py VERSION .method.yaml .github .claude
+    kind: regression
+    expected: "Exits 0: no product, configuration, evaluation, contract, entry-point, gate, VERSION or method-declaration file differs from the base commit. Exits 1 if any does."
+    expect:
+      exit_code: 0
+must_not_change:
+  - invariant: "`harness/usage.py`: the signatures and product behaviour of `append_jsonl` and `record_run`, including the `settings.USAGE_LOG_DIR` fallback and the rule that `record_run` never raises (ADR-005)."
+  - invariant: "`config/settings.py`: `USAGE_LOG_DIR = PROJECT_ROOT / \"logs\" / \"usage\"`."
+  - invariant: "The usage record format: `LlmRequestRecord`, `RunSummaryRecord` and `SCHEMA_VERSION`."
+  - invariant: "What the product records in normal use, outside the test suite."
+  - invariant: "Existing files under `logs/usage/`. They are not deleted, truncated or edited by the executor or by any test."
+  - invariant: "`pytest.ini` and its `addopts = -m \"not live\"`."
+  - invariant: "`VERSION`. No `releases/v*.md` file is added."
+  - invariant: "The assertions of existing tests. No existing test is deleted, skipped, xfailed or rewritten to get around the guard. Edits to existing test modules are limited to adding the `usage_log_dir` opt-in marker."
+  - invariant: "The existing `sys.path` logic in `tests/conftest.py`."
+failure_behaviour:
+  - condition: "A test calls `usage.record_run(...)` with no `log_dir`, and `settings.USAGE_LOG_DIR` still points at the real `logs/usage/`."
+    expected: "The guard calls `pytest.fail` before anything is written. `Failed` is a `BaseException`, so it passes through `record_run`'s `except Exception`. The test is reported as failed, not as an error, and the failure is not swallowed. The message names the resolved target directory and the protected directory, cites ADR-021, and names the fix: use the `usage_log_dir` fixture or pass `log_dir=tmp_path`. No file under `logs/usage/` is created or grows."
+  - condition: "A test calls `usage.append_jsonl(...)` directly with no `log_dir` while the real directory is in effect."
+    expected: "The same failure, raised before the directory is created or a file is opened."
+  - condition: "A test passes an explicit `log_dir` that resolves to the real directory or to a folder inside it, such as `REAL / \"x\" / \"..\"` or a subdirectory."
+    expected: "The same failure. The target is resolved before it is compared with the protected directories."
+  - condition: "A test monkeypatches `settings.USAGE_LOG_DIR` back to the real directory."
+    expected: "It is still stopped. The protected directories were captured when `tests/conftest.py` was imported, before any test ran, and the target is read from `settings` at call time."
+  - condition: "A legacy tool-loop run goes through `ask`/`converse`/`live.run_trial` with `record_usage=True` in a module that has not opted into `usage_log_dir`."
+    expected: "The test fails and names the real directory. The fix is to add the opt-in marker to that module, inside the permitted files. The guard is never weakened."
+failure_behaviour_note_placeholder: null
+compatibility:
+  - obligation: "ADR-021: 'Tests never write to `logs/usage/`.' This contract enforces only this sentence. The pipeline request and run-summary records are not part of it."
+  - obligation: "ADR-005: `record_run()` never raises in product use. The guard exists only inside the test session (`tests/conftest.py`), and product code is unchanged."
+  - obligation: "ADR-007: the live tier stays manual and excluded by default (`-m \"not live\"`), never a PR gate."
+  - obligation: "Delivery contract: exactly one `releases/_next/*.md` is added, `VERSION` is untouched, and the note is typed patch because only `tests/**` and `releases/**` change (`.method.yaml` release classes)."
+  - obligation: "The supported interpreters are CPython 3.10 to 3.13 (`pr-checks.yml` uses 3.12). `Path.is_relative_to` is available on all of them."
+compatibility_baselines: []
+contract_requirements:
+  - id: scope-is-the-file-list
+    requirement: "The permitted change set is exactly `required_outputs` plus `permitted_files` in k-12Harness. The work-store is never written by the executor. A change to the contingent test modules is allowed only when the guard shows that module writing to the real directory, and the change is limited to adding the `usage_log_dir` opt-in marker."
+  - id: guard-mechanism
+    requirement: "The guard wraps `harness.usage.append_jsonl` for the whole session, with the same signature, and fails through `pytest.fail` before any write. It does not use a teardown check, a silent redirect on its own, or a session-wide directory snapshot (plan, rejected alternatives)."
+  - id: decision-base-dry-run-writes
+    requirement: "DECISION: may the controller's dry run against base commit 6d3dd93 execute the base test suite in place? The base code has no guard, so `full-test-suite` and `usage-log-unchanged-by-suite`, run on base, append scripted-model records to the real `logs/usage/`. The plan avoided exactly that for its own base check. Options: (a) accept it: the directory is untracked, already contaminated, and cleaning it is out of scope; the contract stands as written. (b) no base run may write there: both criteria run only on the candidate, and a human records the base result as accepted; or they are rewritten to run the suite in an isolated copy of the tree (as `guard-test-fails-on-base-tree` does), with the base failure shown by a copy-based count of the copy's own `logs/usage/`. Affects: deterministic `full-test-suite` and `usage-log-unchanged-by-suite`, and observable_behaviour suite-leaves-usage-log-unchanged. This contract is written on option (a), because the repository's declared verify command must be run and the plan's verification step 2 runs the suite in place."
+  - id: decision-live-tier-usage
+    requirement: "DECISION: should paid live-tier runs (`tests/live/test_live_eval.py`, run by hand with `-m live`) still record usage in the real `logs/usage/`? Options: (a) no: follow ADR-021 literally and redirect the module with `usage_log_dir` (the plan's choice); real-model live-test telemetry then no longer lands in `logs/usage/`. (b) yes: exempt live-marked tests from the guard, which needs an exemption rule in `tests/conftest.py`, leaves `tests/live/test_live_eval.py` unchanged, and departs from ADR-021's wording. Affects: permitted_files `tests/live/test_live_eval.py`, required_outputs `tests/conftest.py` (exemption logic), compatibility ADR-021, and semantic `live-tier-consistent`. This contract is written on option (a)."
+  - id: assumption-baseexception-passes
+    requirement: "ASSUMPTION: no layer between `append_jsonl` and the test catches `BaseException` (`harness/agent.py`, `evals/live.py`, `demo.py`, `run.py`, asyncio). If one does, the snapshot assertion in the demonstration test and `usage-log-unchanged-by-suite` still show it."
+  - id: assumption-single-writer
+    requirement: "ASSUMPTION: every write to `logs/usage/` goes through `harness.usage.append_jsonl`, as it does at the base commit. A writer that bypasses it is caught only by `usage-log-unchanged-by-suite`."
+  - id: gap-writers-inferred
+    requirement: "GAP: the plan's list of writing tests is inferred from reading the code. The guard is the authoritative detector. Writers it finds are fixed by opt-in inside the permitted files. If one turns up outside them, that is recorded as a scope defect."
+  - id: gap-polluted-files
+    requirement: "GAP: the files already contaminated in `logs/usage/` stay in place and still distort usage reports. Cleaning them needs a separate decision."
+semantic:
+  - id: guard-fails-before-write
+    criterion: "The guard decides and calls `pytest.fail` inside the wrapper, before calling the original `append_jsonl`. So the directory is not created and no file is opened for a protected target, and the outcome is a test failure, not a teardown error."
+  - id: message-names-directory
+    criterion: "The failure message contains the resolved path the call tried to write to and the protected directory, cites ADR-021, and names the `usage_log_dir` fixture or `log_dir=tmp_path` as the fix. The demonstration test asserts that the real directory's path appears in the exception text."
+  - id: demonstration-is-load-bearing
+    criterion: "`tests/unit/test_usage_log_guard.py` calls `record_run` with a real run result and no `log_dir`, and also calls `append_jsonl` directly. It asserts the failure with `pytest.raises(pytest.fail.Exception)` and asserts that a read-only snapshot of the real directory is unchanged. It would fail if the guard were removed; `guard-test-fails-on-base-tree` shows this. The test never writes to the real directory, even when it fails."
+  - id: protected-dirs-captured-early
+    criterion: "The protected directories are captured when `tests/conftest.py` is imported. They are `settings.USAGE_LOG_DIR.resolve()` and a separately computed `(PROJECT_ROOT / \"logs\" / \"usage\").resolve()`, so a test's monkeypatch cannot move them. The target is resolved at call time from `log_dir` or the current `settings.USAGE_LOG_DIR`."
+  - id: positive-controls-present
+    criterion: "The guard module includes positive controls. An explicit `log_dir=tmp_path` writes and returns a path under `tmp_path`, and under `usage_log_dir` a `record_run` with no `log_dir` writes into the fixture's directory. So the guard is shown not to be a blanket block."
+  - id: opt-ins-preserve-coverage
+    criterion: "Each opt-in is a module-level `pytest.mark.usefixtures(\"usage_log_dir\")`, or the fixture itself. Recording is still exercised: no test switches to `record_usage=False`, and no test is skipped, removed or loosened to avoid the guard."
+  - id: live-tier-consistent
+    criterion: "Under decision-live-tier-usage option (a), `tests/live/test_live_eval.py` opts into `usage_log_dir`, so a manual paid run is not stopped by the guard and does not write to the real directory."
+  - id: release-note-accurate
+    criterion: "The release note states that only tests and release notes changed, says 'Nothing to do.' for local deployment and manual steps, and gives a pasteable Verification bash block (no comment lines) that compares the line counts in `logs/usage/` before and after the suite, with its expected output stated in prose."
+out_of_scope:
+  - item: "Deleting, cleaning or rewriting the files already in `logs/usage/`."
+  - item: "Whether tests write to `logs/harness.log`."
+  - item: "ADR-021's pipeline request and run-summary records, the `schema_version` bump, and any change to what the product records in normal use."
+  - item: "Any change to `harness/usage.py`, `config/settings.py` or the usage record format."
+  - item: "Running the paid live tier (`tests/live` under `-m live`) as part of verification."
+  - item: "Opting pipeline-only test modules into `usage_log_dir` ahead of the future ADR-021 pipeline-recording work, unless the guard shows them writing today."

@@ -1,0 +1,5 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-mpv59nf4/k-12harness
+command: ["git", "diff", "--quiet", "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159", "--", "harness", "config", "evals", "prompts", "contract", "server", "sql", "pytest.ini", "logging_config.yaml", "requirements.txt", "run.py", "demo.py", "capture.py", "authcheck.py", "VERSION", ".method.yaml", ".github", ".claude"]
+
+
+exit_code: 0

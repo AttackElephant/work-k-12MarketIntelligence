@@ -1,0 +1,16 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-mpv59nf4/k-12harness
+command: [".venv/bin/python", "-c", "import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text(); v=t.split('## Verification',1)[1].split('\\n## ',1)[0]; ok=all([re.search(r'(?m)^\\*\\*Type:\\*\\* *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t), re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\\x60{3}bash',v)]); print('NOTES_OK' if ok else 'NOTES_BAD'); raise SystemExit(0 if ok else 1)"]
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text(); v=t.split('## Verification',1)[1].split('\n## ',1)[0]; ok=all([re.search(r'(?m)^\*\*Type:\*\* *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t), re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\x60{3}bash',v)]); print('NOTES_OK' if ok else 'NOTES_BAD'); raise SystemExit(0 if ok else 1)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'releases/_next/tests-never-write-usage-log.md'
+
+exit_code: 1

@@ -1,0 +1,6 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-mpv59nf4/k-12harness
+command: ["bash", "-c", "snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \\; | sort; ls -1 logs/usage; fi; }; B=\"$(snap)\"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1; rc=$?; A=\"$(snap)\"; if [ \"$B\" = \"$A\" ]; then echo \"suite_exit=$rc usage_log=UNCHANGED\"; else echo \"suite_exit=$rc usage_log=CHANGED\"; fi"]
+
+suite_exit=0 usage_log=CHANGED
+
+exit_code: 0
