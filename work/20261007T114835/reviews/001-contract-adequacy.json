@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "evidence": "The request concerns preventing tests from writing to `logs/usage/` and explicitly scopes product-recording changes out; it says nothing about release artifacts. Nevertheless `required_outputs` requires `releases/_next/tests-never-write-usage-log.md`, `release-note-present-and-shaped` gates its structure, and `release-note-accurate` prescribes its prose. The cited \u201cDelivery contract (`.method.yaml` delivery, `releases/README.md`, `pr-checks.yml`)\u201d is not among the selected pinned definitions.",
+      "id": "F1",
+      "kind": "out-of-scope",
+      "owner_choice": true,
+      "summary": "The contract requires a release note and prescribes its contents even though neither the request nor any pinned definition requires one."
+    },
+    {
+      "evidence": "The request requires that running all of `.venv/bin/python -m pytest tests/ -q` leave every file under `logs/usage/` unchanged and create no new file. But `scope-is-the-file-list` says the permitted change set is exactly the enumerated files, while `gap-writers-inferred` admits that the writer list is only inferred and says a writer outside those files merely becomes \u201ca scope defect.\u201d The request requires such a writer to be redirected or stopped, so the contract cannot both forbid editing its module and require the suite-wide outcome.",
+      "id": "F2",
+      "kind": "conflict",
+      "owner_choice": true,
+      "summary": "The exact permitted-file restriction can prevent fixing a real test writer, contradicting the request\u2019s suite-wide outcome."
+    },
+    {
+      "evidence": "`live-tier-consistent` requires that \u201cA manual paid run is not stopped by the guard and records into a temporary directory,\u201d and `decision-live-tier-usage` likewise requires paid live-tier runs to record there. The only dedicated deterministic criterion, `live-tier-still-collects`, runs `pytest tests/live --collect-only`; its own expected text says \u201cNothing is run.\u201d `full-test-suite` excludes live tests through the unchanged `pytest.ini` marker configuration. Thus the checks can pass even if an executed live test is stopped by the guard or writes no temporary usage record.",
+      "id": "F3",
+      "kind": "untestable",
+      "owner_choice": false,
+      "summary": "The contract claims manual live tests record successfully into a temporary directory, but its checks only collect those tests and never exercise that behavior."
+    }
+  ],
+  "outcome": "inadequate",
+  "review": "CA1",
+  "summary": "The core guard and base-failure demonstration are substantially covered, but the contract adds an unsupported release-note deliverable, restricts fixes so undiscovered writers may remain unfixed, and does not behaviorally verify its live-tier recording guarantee."
+}
