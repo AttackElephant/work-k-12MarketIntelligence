@@ -98,7 +98,7 @@ request: '# Request
   Any change to what the product records in normal use. Any change to the usage record format.'
 narrative: null
 class: null
-state: verified_sem
+state: verified_det
 parent: null
 children: []
 transitions:
@@ -795,6 +795,78 @@ transitions:
     evidence: semantic review outcome 'revise'
   - guard: semantic_evidence_current
     evidence: semantic review S1 binds contract v2, candidate a74c046f48e4 and this execution cycle
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-07T22:48:08Z'
+  transition: F14
+  event: revise-implementation
+  from: verified_sem
+  to: executing
+  by: shane@Mimir.local
+  reason: 'Remediate semantic blocker SF-1: the guard is installed by a session fixture after test modules
+    are imported, so a test that imports append_jsonl by name keeps the unguarded function and could write
+    to logs/usage/.'
+  reason_source: annotation
+  guards:
+  - guard: continuation_prepared
+    evidence: continuation C001 binds candidate a74c046f48e4 from semantic-revision
+  - guard: continuation_budget_current
+    evidence: 'lineage at T7 event 61: 1 of 6 attempts consumed; correction tier T0'
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: lock_available
+    evidence: lock is available
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C001
+  candidate_sha256: a74c046f48e4822db367a56aec679318525c5aeccd6198cfee019bbd7438e2d3
+  budget_anchor_event: 61
+  selected_tier: T0
+- at: '2026-10-07T22:48:36Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  reason_source: annotation
+  guards:
+  - guard: attempt_closed
+    evidence: 11 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v2 intact (80c1d934d785)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 7 file(s) within 11 declared from 6d3dd93244d7'
+  - guard: executor_tool_policy_honoured
+    evidence: attempt 11 advertised exactly the requested tools ['Bash', 'Edit', 'Glob', 'Grep', 'Read',
+      'Write'] under permission mode 'acceptEdits' with scoped rules ['Bash(.venv/bin/python -m pytest
+      *)']
+  - guard: contracted_outputs_exist
+    evidence: 3 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 004-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+  continuation: C001
+  candidate_start_sha256: a74c046f48e4822db367a56aec679318525c5aeccd6198cfee019bbd7438e2d3
+- at: '2026-10-07T22:49:12Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: no sandbox incident is recorded; 8 deterministic criteria pass against contract v2 in execution
+    cycle 104 across V002; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: sandbox_incidents_acknowledged
+    evidence: no sandbox incident is recorded
+  - guard: deterministic_criteria_pass
+    evidence: 8 deterministic criteria pass against contract v2 in execution cycle 104 across V002
   - guard: migration_obligations_satisfied
     evidence: no open migration obligations
 size_estimate:
@@ -1995,7 +2067,129 @@ attempts:
     output_tokens: 762
     reasoning_output_tokens: 488
   context_bytes: 20646
-continuations: []
+- attempt: 11
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-10-07T22:48:15Z'
+  continuation: C001
+  candidate_start_sha256: a74c046f48e4822db367a56aec679318525c5aeccd6198cfee019bbd7438e2d3
+  budget_anchor_event: 61
+  provider: anthropic
+  model: claude-sonnet-5-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-10-03'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  edit_tools:
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Bash(.venv/bin/python -m pytest *)
+  exit_code: 0
+  closed_at: '2026-10-07T22:48:35Z'
+  prompt_path: capture/prompts/011-executor.md
+  prompt_sha256: 7138f076d97b425530fe6591052372deaea21c3f74263dec6fb3413cddfcee59
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.283 (Claude Code)
+    actual_changed_paths:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    ignored_paths_created: []
+    reported_reads:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    reported_writes:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    shell_commands:
+    - .venv/bin/python -m pytest tests/unit/test_usage_log_guard.py tests/unit/test_usage.py -q 2>&1 |
+      tail -5
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 8
+    total_cost_usd: 0.143907
+    malformed_events: 0
+    returncode: 0
+    requested_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    permission_rules:
+    - Bash(.venv/bin/python -m pytest *)
+    advertised_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    unexpected_tools: []
+    permission_mode: acceptEdits
+    init_events: 1
+    sandbox_incidents: []
+  transport_attempts: 1
+  usage:
+    input_tokens: 8
+    cache_creation_input_tokens: 22467
+    cache_read_input_tokens: 95570
+    output_tokens: 2089
+    output_tokens_details:
+      thinking_tokens: 316
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 22467
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 437
+      cache_read_input_tokens: 31047
+      cache_creation_input_tokens: 150
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 150
+      type: message
+    speed: standard
+  elapsed_seconds: 19.5093119579833
+  read_context_files: 5
+  effective_context_sha256: 327908553934bf36768ef7e91654af582132b1126c3777c23e8f3e9b0fcf104c
+  native_log_bytes: 134758
+continuations:
+- id: C001
+  path: continuation/C001/receipt.json
+  sha256: 1c8e519fdbc50342aae919e53991f3e8dc930ad1675e9001c39a4731f2402c98
+  status: completed
+  prepared_at: '2026-10-07T22:48:08Z'
+  source_state: verified_sem
+  kind: semantic-revision
+  candidate_sha256: a74c046f48e4822db367a56aec679318525c5aeccd6198cfee019bbd7438e2d3
+  budget_anchor_event: 61
+  attempts_consumed: 1
+  selected_tier: T0
+  event_seq: 94
+  event_sha256: 83c003731caf6553e6630baed48a27bb4ae1207bce9273cff2c6539bc553c1d6
+  activated_at: '2026-10-07T22:48:08Z'
+  completed_at: '2026-10-07T22:48:36Z'
 routing:
   executor_ladder:
   - T0
@@ -2181,6 +2375,154 @@ verification:
       log_sha256: daddb10bfc7aecded947a10e7bef2e5ccc1079221dca753946ba62fe320e0db4
     expectations_not_evaluated: []
     ended_at: '2026-10-07T22:31:51Z'
+  - id: V002
+    at: '2026-10-07T22:48:38Z'
+    status: passed
+    contract: acceptance/002-contract.yaml
+    contract_version: 2
+    contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+    execution_cycle:
+      transition_event: 104
+      transition_sha256: 2a873c84272a57392c97ac8eef8e97af0e9ea231cf0e875e1789859715bd1b8e
+    candidate_sha256: 40761c739a556521ee5a880313431559ccfbef81a6dba2a97e2969a2fc715cb8
+    selected_criteria:
+    - guard-module-passes
+    - guard-test-fails-on-base-tree
+    - usage-log-unchanged-by-suite
+    - release-note-present-and-shaped
+    - full-test-suite
+    - recording-tests-still-pass
+    - live-tier-still-collects
+    - no-product-code-changed
+    results:
+    - id: guard-module-passes
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_usage_log_guard.py -q
+      expected: 'Fails on the base commit because `tests/unit/test_usage_log_guard.py` does not exist
+        there: pytest exits 4 with ''file or directory not found''. Passes once the guard is in `tests/conftest.py`
+        and the module exists: every guard test and positive control passes.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/001-guard-module-passes.log
+      log_sha256: 47a2ba32ba39039f750b3dcde16a5fe5912adc753a6cdeca87803f60b5423088
+    - id: guard-test-fails-on-base-tree
+      repo: k-12Harness
+      command: bash -c 'R="$(pwd)"; T="$(mktemp -d)"; O="$(mktemp)"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+        | tar -x -C "$T"; if cp tests/unit/test_usage_log_guard.py "$T/tests/unit/"; then (cd "$T" &&
+        "$R/.venv/bin/python" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider) >"$O"
+        2>&1; rc=$?; cat "$O"; echo "base_exit=$rc"; grep -q "DID NOT RAISE" "$O"; s=$?; else echo "base_exit=missing-test";
+        s=1; fi; rm -rf "$T" "$O"; exit $s'
+      expected: 'Runs the candidate''s guard test module against an extracted copy of the base tree. The
+        copy''s own `logs/usage/` is inside the temporary directory, so the real directory is never touched.
+        The criterion needs both of these: the pytest output shows `DID NOT RAISE` (the command exits
+        0 only when it does), and the command prints the line `base_exit=1`. On the base commit it is
+        red because the test module does not exist yet: the command prints `base_exit=missing-test` and
+        exits 1. On the candidate it is green only when the guard tests fail in the base copy with `DID
+        NOT RAISE` (base code has no guard, and `record_run` swallows any `Exception`) and pytest exits
+        1 there, so the command prints `base_exit=1` and exits 0. This shows that the demonstration measures
+        the change (request refusal item 2). The command now ends by checking for `DID NOT RAISE` because
+        the verifier searches each pattern line by line. One `stdout_matches` cannot require two separate
+        lines, so `DID NOT RAISE` is checked through the exit code and `base_exit=1` through `stdout_matches`.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/002-guard-test-fails-on-base-tree.log
+      log_sha256: c8b7354f0d9219a50aafb62d586bb9e89cdf5430326e221548943c3ba1ae8cf0
+    - id: usage-log-unchanged-by-suite
+      repo: k-12Harness
+      command: bash -c 'snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \; |
+        sort; ls -1 logs/usage; fi; }; B="$(snap)"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1;
+        rc=$?; A="$(snap)"; if [ "$B" = "$A" ]; then echo "suite_exit=$rc usage_log=UNCHANGED"; else echo
+        "suite_exit=$rc usage_log=CHANGED"; fi'
+      expected: 'This is request item 1, checked against the real directory. It fails on the base commit
+        because the legacy tool-loop tests in test_agent_loop.py, test_run_cli.py and test_live_tier.py
+        append `function:*` records to `logs/usage/usage-<UTC date>.jsonl`, so the command prints `usage_log=CHANGED`.
+        It passes once those tests use `usage_log_dir` and the guard stops any other writer: the suite
+        exits 0 and the file names and line counts are identical before and after. See decision-base-dry-run-writes.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/003-usage-log-unchanged-by-suite.log
+      log_sha256: 13229615068d0169fc71e8f1e9f0249552c4b3583646badb31aa21ebe3fb490b
+    - id: release-note-present-and-shaped
+      repo: k-12Harness
+      command: .venv/bin/python -c "import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text();
+        v=t.split('## Verification',1)[1].split('\n## ',1)[0]; ok=all([re.search(r'(?m)^\*\*Type:\*\*
+        *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t),
+        re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\x60{3}bash',v)]); print('NOTES_OK' if ok else
+        'NOTES_BAD'); raise SystemExit(0 if ok else 1)"
+      expected: Fails on the base commit because `releases/_next/tests-never-write-usage-log.md` does
+        not exist (FileNotFoundError). Passes once the note exists with a `**Type:** patch` line and the
+        `## Local deployment`, `## Manual steps`, `## Verification` (with at least one fenced bash block)
+        and `## Rollback` sections. The command prints NOTES_OK.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/004-release-note-present-and-shaped.log
+      log_sha256: cc2497ac63f45ebe4e3ede870db9cf01d2003899e2b0f93d4f8542ec96d486fd
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The repository's declared verify command exits zero with no failures, errors or unexpected
+        passes. The existing strict xfail (O-8) stays xfailed. Pass, skip and xfail counts equal the base
+        counts plus the new guard tests.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/005-full-test-suite.log
+      log_sha256: 9d3212833a0769ef838babacb4334a62b1c514c4dc57d576f35d7ca059466e56
+    - id: recording-tests-still-pass
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_usage.py "tests/unit/test_agent_loop.py::test_a_budget_trip_still_records_its_usage"
+        -q
+      expected: The tests that assert usage records in a temporary directory pass before and after the
+        change (request item 2).
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/006-recording-tests-still-pass.log
+      log_sha256: c129fd2db70ac0becfaeb63e647fd2f68ec6e2a8df121899bc22f75fd42b89b2
+    - id: live-tier-still-collects
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/live --collect-only -q -m live
+      expected: The manual live tier still collects under `-m live`. Nothing is run and no tokens are
+        spent.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/007-live-tier-still-collects.log
+      log_sha256: ab68a4c17b4195a90d384bda0f42a3cc9b84fb315fdb9c23f9692aa17879b13c
+    - id: no-product-code-changed
+      repo: k-12Harness
+      command: git diff --quiet 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 -- harness config evals prompts
+        contract server sql pytest.ini logging_config.yaml requirements.txt run.py demo.py capture.py
+        authcheck.py VERSION .method.yaml .github .claude
+      expected: 'Exits 0: no product, configuration, evaluation, contract, entry-point, gate, VERSION
+        or method-declaration file differs from the base commit. Exits 1 if any does.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V002/008-no-product-code-changed.log
+      log_sha256: 3de6ca3711ed7585a390bfd02f16d5fab30edb41f59038fc9594369847b605f9
+    expectations_not_evaluated: []
+    ended_at: '2026-10-07T22:49:11Z'
   semantic_reviews:
   - id: S1
     at: '2026-10-07T22:43:59Z'
@@ -2240,8 +2582,8 @@ verification:
     carried_forward: []
   semantic_attempts: []
 effort:
-  controller_commands: 14
-  model_sessions_launched: 10
+  controller_commands: 17
+  model_sessions_launched: 11
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
   message: 'tests: stop the test suite writing to logs/usage/ (work item 20261007T114835)'
@@ -2588,9 +2930,9 @@ planning_review:
     context_bytes: 39723
 lock:
   owner: shane@Mimir.local
-  acquired_at: '2026-10-07T22:29:52Z'
-  released_at: '2026-10-07T22:31:20Z'
-  attempt: 9
+  acquired_at: '2026-10-07T22:48:15Z'
+  released_at: '2026-10-07T22:48:35Z'
+  attempt: 11
 capture:
   event_log: capture/events.jsonl
   sessions: []

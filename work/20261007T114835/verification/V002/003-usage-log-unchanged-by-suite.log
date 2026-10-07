@@ -1,0 +1,9 @@
+started: 2026-10-07T22:48:40Z
+cwd: /Users/shane/Projects/k-12Harness
+command: ["bash", "-c", "snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \\; | sort; ls -1 logs/usage; fi; }; B=\"$(snap)\"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1; rc=$?; A=\"$(snap)\"; if [ \"$B\" = \"$A\" ]; then echo \"suite_exit=$rc usage_log=UNCHANGED\"; else echo \"suite_exit=$rc usage_log=CHANGED\"; fi"]
+
+suite_exit=0 usage_log=UNCHANGED
+
+ended: 2026-10-07T22:48:53Z
+exit_code: 0
+duration_seconds: 13.483

@@ -1,0 +1,65 @@
+{
+  "author": {
+    "kind": "model",
+    "name": "claude-opus-5-5",
+    "provider": "anthropic"
+  },
+  "authorisation": {
+    "decision_sha256": "cd5352054598006a7167cdb0d903210186e051327c61e1bcabe5e8334a40a080",
+    "evidence_sha256": "dd6c3d7e5df5d20b401e38100cf029c8c49236f532d06e88ec6c93dd9e9c614c",
+    "kind": "not-required"
+  },
+  "budget": {
+    "anchor_event": 61,
+    "attempts_consumed": 1,
+    "per_tier_limit": 2,
+    "selected_tier": "T0",
+    "tier_attempts_consumed": 1,
+    "total_limit": 6
+  },
+  "candidate": {
+    "repositories": [
+      {
+        "branch": "wi/20261007T114835",
+        "head": "1b90a8c1d8a796fdbf36d0b3f6150aa227618edf",
+        "identity_sha256": "f94f3bac0a1385bccbd64a294859fef963f1481bf7e9e1df9b9fc6d0299ad56a",
+        "planning_base": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159",
+        "repo": "k-12Harness",
+        "staged_patch": "continuation/C001/k-12harness-staged.patch",
+        "staged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": [],
+        "unstaged_patch": "continuation/C001/k-12harness-unstaged.patch",
+        "unstaged_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unstaged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": [],
+        "untracked_archive": "continuation/C001/k-12harness-untracked.tar",
+        "untracked_archive_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652"
+      }
+    ],
+    "sha256": "a74c046f48e4822db367a56aec679318525c5aeccd6198cfee019bbd7438e2d3"
+  },
+  "contract": {
+    "path": "acceptance/002-contract.yaml",
+    "sha256": "80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460",
+    "version": 2
+  },
+  "guidance": "Install the usage-log guard before test modules are collected, so that every way a test can reach harness.usage.append_jsonl goes through it: the module attribute, a name imported with from harness.usage import append_jsonl, and record_run's internal call. Restore the original when the session ends. Keep the guard's behaviour and message unchanged: pytest.fail before any write, naming the target and the protected directory, citing ADR-021 and the usage_log_dir fixture. Keep the protected directories captured at conftest import, and keep the usage_log_dir fixture. In tests/unit/test_usage_log_guard.py, add a test that captures append_jsonl the way a test module would, by a from-import at module import time. It calls the function with no log_dir and asserts that the failure names the real directory and that the real directory's snapshot is unchanged. It must still fail with DID NOT RAISE when run against the base code. Change only tests/conftest.py and tests/unit/test_usage_log_guard.py; every existing check must still pass.",
+  "id": "C001",
+  "prepared_at": "2026-10-07T22:48:08Z",
+  "reason": "Remediate semantic blocker SF-1: the guard is installed by a session fixture after test modules are imported, so a test that imports append_jsonl by name keeps the unguarded function and could write to logs/usage/.",
+  "source": {
+    "checkpoint_at": "2026-10-07T22:43:23Z",
+    "evidence": {
+      "seq": 91,
+      "sha256": "431a441c59ff9b66ae2eb7908171aebc7372005bc4b815115073d6d2891e1913",
+      "type": "controller.transition"
+    },
+    "kind": "semantic-revision",
+    "semantic_review": "S1",
+    "summary": [
+      "semantic outcome revise: The suite passes as written, but the guard can be bypassed by a normal import form, allowing a test to write to the real usage directory."
+    ]
+  },
+  "source_state": "verified_sem"
+}

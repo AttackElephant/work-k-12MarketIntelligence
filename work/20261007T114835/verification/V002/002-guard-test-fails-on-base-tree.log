@@ -1,0 +1,80 @@
+started: 2026-10-07T22:48:39Z
+cwd: /Users/shane/Projects/k-12Harness
+command: ["bash", "-c", "R=\"$(pwd)\"; T=\"$(mktemp -d)\"; O=\"$(mktemp)\"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 | tar -x -C \"$T\"; if cp tests/unit/test_usage_log_guard.py \"$T/tests/unit/\"; then (cd \"$T\" && \"$R/.venv/bin/python\" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider) >\"$O\" 2>&1; rc=$?; cat \"$O\"; echo \"base_exit=$rc\"; grep -q \"DID NOT RAISE\" \"$O\"; s=$?; else echo \"base_exit=missing-test\"; s=1; fi; rm -rf \"$T\" \"$O\"; exit $s"]
+
+FFFFF.E                                                                  [100%]
+==================================== ERRORS ====================================
+______ ERROR at setup of test_usage_log_dir_fixture_redirects_record_run _______
+file /private/var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/tmp.G6R25jn3JW/tests/unit/test_usage_log_guard.py, line 88
+  def test_usage_log_dir_fixture_redirects_record_run(usage_log_dir):
+E       fixture 'usage_log_dir' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/private/var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/tmp.G6R25jn3JW/tests/unit/test_usage_log_guard.py:88
+=================================== FAILURES ===================================
+__ test_recording_without_a_temporary_directory_fails_and_names_the_directory __
+
+    def test_recording_without_a_temporary_directory_fails_and_names_the_directory():
+        result = _result()
+        before = _snapshot()
+>       with pytest.raises(pytest.fail.Exception) as exc:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Failed
+
+tests/unit/test_usage_log_guard.py:40: Failed
+__________ test_append_without_a_directory_is_stopped_before_writing ___________
+
+    def test_append_without_a_directory_is_stopped_before_writing():
+        before = _snapshot()
+>       with pytest.raises(pytest.fail.Exception) as exc:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Failed
+
+tests/unit/test_usage_log_guard.py:49: Failed
+______________ test_a_from_imported_append_jsonl_is_also_stopped _______________
+
+    def test_a_from_imported_append_jsonl_is_also_stopped():
+        before = _snapshot()
+>       with pytest.raises(pytest.fail.Exception) as exc:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Failed
+
+tests/unit/test_usage_log_guard.py:57: Failed
+_________ test_another_spelling_of_the_real_directory_is_still_stopped _________
+
+    def test_another_spelling_of_the_real_directory_is_still_stopped():
+        before = _snapshot()
+        for spelling in (REAL / "x" / "..", REAL / "sub"):
+>           with pytest.raises(pytest.fail.Exception) as exc:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE Failed
+
+tests/unit/test_usage_log_guard.py:66: Failed
+_ test_monkeypatching_the_setting_back_to_the_real_directory_is_still_stopped __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7cf820>
+
+    def test_monkeypatching_the_setting_back_to_the_real_directory_is_still_stopped(monkeypatch):
+        from config import settings
+    
+        monkeypatch.setattr(settings, "USAGE_LOG_DIR", REAL)
+        before = _snapshot()
+>       with pytest.raises(pytest.fail.Exception):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Failed
+
+tests/unit/test_usage_log_guard.py:77: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_usage_log_guard.py::test_recording_without_a_temporary_directory_fails_and_names_the_directory
+FAILED tests/unit/test_usage_log_guard.py::test_append_without_a_directory_is_stopped_before_writing
+FAILED tests/unit/test_usage_log_guard.py::test_a_from_imported_append_jsonl_is_also_stopped
+FAILED tests/unit/test_usage_log_guard.py::test_another_spelling_of_the_real_directory_is_still_stopped
+FAILED tests/unit/test_usage_log_guard.py::test_monkeypatching_the_setting_back_to_the_real_directory_is_still_stopped
+ERROR tests/unit/test_usage_log_guard.py::test_usage_log_dir_fixture_redirects_record_run
+5 failed, 1 passed, 1 error in 0.19s
+base_exit=1
+
+ended: 2026-10-07T22:48:39Z
+exit_code: 0
+duration_seconds: 0.454
