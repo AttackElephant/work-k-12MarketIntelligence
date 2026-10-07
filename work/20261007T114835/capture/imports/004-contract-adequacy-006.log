@@ -1,0 +1,5 @@
+{"attempt": 1, "route": {"billing": "subscription", "context_window": 400000, "deadline_seconds": 600.0, "last_verified": "2026-09-08", "model": "gpt-5.6-sol", "model_class": "frontier", "provider": "openai", "selector": "role:critic", "streaming": "auto", "timeout_seconds": 360.0, "transport": "codex"}}
+{"type":"thread.started","thread_id":"01a11678-c170-7a42-a400-cee684c5a07c"}
+{"type":"turn.started"}
+{"type":"error","message":"Selected model is at capacity. Please try a different model."}
+{"type":"turn.failed","error":{"message":"Selected model is at capacity. Please try a different model."}}

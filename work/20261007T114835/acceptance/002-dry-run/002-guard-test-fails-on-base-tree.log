@@ -1,0 +1,7 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-gqhnvjx6/k-12harness
+command: ["bash", "-c", "R=\"$(pwd)\"; T=\"$(mktemp -d)\"; O=\"$(mktemp)\"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 | tar -x -C \"$T\"; if cp tests/unit/test_usage_log_guard.py \"$T/tests/unit/\"; then (cd \"$T\" && \"$R/.venv/bin/python\" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider) >\"$O\" 2>&1; rc=$?; cat \"$O\"; echo \"base_exit=$rc\"; grep -q \"DID NOT RAISE\" \"$O\"; s=$?; else echo \"base_exit=missing-test\"; s=1; fi; rm -rf \"$T\" \"$O\"; exit $s"]
+
+base_exit=missing-test
+cp: tests/unit/test_usage_log_guard.py: No such file or directory
+
+exit_code: 1

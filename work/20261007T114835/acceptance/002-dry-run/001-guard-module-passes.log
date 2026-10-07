@@ -1,0 +1,9 @@
+cwd: /var/folders/3f/xclv_jkx34g47zp9tm5j2vc80000gn/T/dry-run-gqhnvjx6/k-12harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_usage_log_guard.py", "-q"]
+
+
+no tests ran in 0.00s
+ERROR: file or directory not found: tests/unit/test_usage_log_guard.py
+
+
+exit_code: 4

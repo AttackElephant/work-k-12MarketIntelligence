@@ -1,0 +1,92 @@
+{
+  "captured_at": "2026-10-07T13:05:29Z",
+  "changes": {
+    "added": [
+      "acceptance/001-contract-review.md",
+      "acceptance/001-dry-run.json",
+      "acceptance/001-dry-run/001-guard-module-passes.log",
+      "acceptance/001-dry-run/002-guard-test-fails-on-base-tree.log",
+      "acceptance/001-dry-run/003-usage-log-unchanged-by-suite.log",
+      "acceptance/001-dry-run/004-release-note-present-and-shaped.log",
+      "acceptance/001-dry-run/005-full-test-suite.log",
+      "acceptance/001-dry-run/006-recording-tests-still-pass.log",
+      "acceptance/001-dry-run/007-live-tier-still-collects.log",
+      "acceptance/001-dry-run/008-no-product-code-changed.log",
+      "acceptance/002-contract.yaml"
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files": {
+    "acceptance/001-contract-review.md": {
+      "kind": "file",
+      "sha256": "f6613507f70a3d73eac1b64974f2294083a9b851d47c43bfb4ff00c7c805a192",
+      "size": 18495
+    },
+    "acceptance/001-contract.yaml": {
+      "kind": "file",
+      "sha256": "a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c",
+      "size": 20418
+    },
+    "acceptance/001-dry-run.json": {
+      "kind": "file",
+      "sha256": "dae5a04160bd837d833498ccdb15f47b5925c698718a6cfade4247b8aff2cfd5",
+      "size": 9618
+    },
+    "acceptance/001-dry-run/001-guard-module-passes.log": {
+      "kind": "file",
+      "sha256": "3d65a17b3fc0398a6a98f5cbe5d78e877b709dde67c7cc60edaced8cacb8793e",
+      "size": 283
+    },
+    "acceptance/001-dry-run/002-guard-test-fails-on-base-tree.log": {
+      "kind": "file",
+      "sha256": "f69d16d552463617fdf7b410295194e08b67e26e5da1ab1c0c28f08bfe646bf4",
+      "size": 574
+    },
+    "acceptance/001-dry-run/003-usage-log-unchanged-by-suite.log": {
+      "kind": "file",
+      "sha256": "c1fd356376f4ddc5243786b63501f58d6297d2fbfacd1133c57af65b2c810a72",
+      "size": 483
+    },
+    "acceptance/001-dry-run/004-release-note-present-and-shaped.log": {
+      "kind": "file",
+      "sha256": "62d2b9d2bc30b708d563935bf1846c0b475b80503535cb373603e03ee5ea460b",
+      "size": 1883
+    },
+    "acceptance/001-dry-run/005-full-test-suite.log": {
+      "kind": "file",
+      "sha256": "98addc74025d514e6bc293d882b3d01e987f484fc5e056a0054c0043e184eb37",
+      "size": 1258
+    },
+    "acceptance/001-dry-run/006-recording-tests-still-pass.log": {
+      "kind": "file",
+      "sha256": "a324f765b521f00147452fb7b16ba6a216451fbcd1749c4b4f7ee683d2e12896",
+      "size": 354
+    },
+    "acceptance/001-dry-run/007-live-tier-still-collects.log": {
+      "kind": "file",
+      "sha256": "ed63274c8125108fe5cfbc645ef30c7c5beacd6a39a769848bd23050be59455b",
+      "size": 881
+    },
+    "acceptance/001-dry-run/008-no-product-code-changed.log": {
+      "kind": "file",
+      "sha256": "d332a2763dc95624590d7911803f2293c34e062163c286a33575b6d9a74711dc",
+      "size": 411
+    },
+    "acceptance/002-contract.yaml": {
+      "kind": "file",
+      "sha256": "80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460",
+      "size": 20092
+    },
+    "planning/001-plan.md": {
+      "kind": "file",
+      "sha256": "c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2",
+      "size": 16575
+    },
+    "request.md": {
+      "kind": "file",
+      "sha256": "0635a9619faeccce450c54c42c5d073239af10b11b76591c2bad30d9191286e0",
+      "size": 2298
+    }
+  }
+}
