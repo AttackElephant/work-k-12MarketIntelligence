@@ -98,7 +98,7 @@ request: '# Request
   Any change to what the product records in normal use. Any change to the usage record format.'
 narrative: null
 class: null
-state: contracted
+state: verified_det
 parent: null
 children: []
 transitions:
@@ -465,6 +465,111 @@ transitions:
   - F1
   - F2
   - F3
+- at: '2026-10-07T22:29:50Z'
+  transition: T5
+  event: execute-ready
+  from: contracted
+  to: ready
+  by: shane@Mimir.local
+  reason: 'challenge is not an obligation; contract v2 dry-run at the base commit; no criterion shows
+    the requested change at the base; a recorded human alternative (event 51) names the evidence that
+    will; owner decisions carried: decision-base-dry-run-writes (C1), decision-live-tier-usage (C2); no
+    semantic contract defect is held; 1 planning review round(s) recorded against the current plan; every
+    finding is dispositioned; no review feedback is waiting and no upstream review cycle is open; no open
+    blocking concerns; no open migration obligations'
+  reason_source: derived
+  guards:
+  - guard: obligations_exclude_challenge
+    evidence: challenge is not an obligation
+  - guard: contract_dry_run_current
+    evidence: contract v2 dry-run at the base commit
+  - guard: behaviour_demonstrated_at_base
+    evidence: no criterion shows the requested change at the base; a recorded human alternative (event
+      51) names the evidence that will
+  - guard: owner_decisions_carried
+    evidence: 'owner decisions carried: decision-base-dry-run-writes (C1), decision-live-tier-usage (C2)'
+  - guard: no_held_semantic_defect
+    evidence: no semantic contract defect is held
+  - guard: planning_review_complete
+    evidence: 1 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: no_applicable_review_batches
+    evidence: no review feedback is waiting and no upstream review cycle is open
+  - guard: no_open_blocking_concerns
+    evidence: no open blocking concerns
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-07T22:29:52Z'
+  transition: T7
+  event: dispatch
+  from: ready
+  to: executing
+  by: shane@Mimir.local
+  reason: 'run_executor: dispatch at T0'
+  reason_source: annotation
+  guards:
+  - guard: planning_review_complete
+    evidence: 1 planning review round(s) recorded against the current plan; every finding is dispositioned
+  - guard: review_readiness_current
+    evidence: latest readiness transition needed no reconciliation and no review feedback is waiting
+  - guard: scope_revalidated
+    evidence: revalidated work-store@5b4f69e72524 (evidence, branch only), k-12Harness@6d3dd93244d7
+  - guard: pre_execution_obligations_complete
+    evidence: 'pre-execution obligations complete: [''contract'', ''planning'']'
+  - guard: headroom_guard_passed
+    evidence: headroom 0.3329 (66572 of 200000 tokens)
+  - guard: lock_available
+    evidence: lock is available
+  - guard: tier_resolved
+    evidence: tier T0
+  - guard: frontier_execution_authorised
+    evidence: tier T0 is within the automatic ladder
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-07T22:31:20Z'
+  transition: T8
+  event: complete
+  from: executing
+  to: executed
+  by: shane@Mimir.local
+  reason: 'run_executor: executor returned'
+  reason_source: annotation
+  guards:
+  - guard: attempt_closed
+    evidence: 9 attempt(s), all closed
+  - guard: execution_artifact_exists
+    evidence: execution artifact recorded
+  - guard: contract_hash_unchanged
+    evidence: contract v2 intact (80c1d934d785)
+  - guard: changes_within_declared_scope
+    evidence: 'k-12Harness: 7 file(s) within 11 declared from 6d3dd93244d7'
+  - guard: executor_tool_policy_honoured
+    evidence: attempt 9 advertised exactly the requested tools ['Bash', 'Edit', 'Glob', 'Grep', 'Read',
+      'Write'] under permission mode 'acceptEdits' with scoped rules ['Bash(.venv/bin/python -m pytest
+      *)']
+  - guard: contracted_outputs_exist
+    evidence: 3 contracted output(s) present
+  - guard: work_item_artifacts_unchanged
+    evidence: 'artifact inventory 003-artifact-inventory.json: append-only'
+  - guard: lock_released
+    evidence: lock released
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
+- at: '2026-10-07T22:31:52Z'
+  transition: T9
+  event: verify
+  from: executed
+  to: verified_det
+  by: shane@Mimir.local
+  reason: no sandbox incident is recorded; 8 deterministic criteria pass against contract v2 in execution
+    cycle 70 across V001; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: sandbox_incidents_acknowledged
+    evidence: no sandbox incident is recorded
+  - guard: deterministic_criteria_pass
+    evidence: 8 deterministic criteria pass against contract v2 in execution cycle 70 across V001
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 7
   scale: small
@@ -964,6 +1069,26 @@ artifacts:
   sha256: 62a1855cb9827f2760a8023cfa6e113a359306c9a2ea3b0281e335be819b6070
   created_at: '2026-10-07T13:12:16Z'
   produced_by_attempt: 7
+- status: current
+  supersedes: null
+  id: A9
+  type: planning_review
+  path: reviews/001-planning-review.json
+  version: 1
+  sha256: 11b9a1a5250b98ac4f17e3692164b4d4eaea0fbdf80a9d3caa56394b534c07c7
+  created_at: '2026-10-07T22:29:49Z'
+  produced_by_attempt: 8
+  planning_review_round: 1
+- status: current
+  supersedes: null
+  id: A10
+  type: planning_review_plan_snapshot
+  path: reviews/001-plan-reviewed.md
+  version: 1
+  sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
+  created_at: '2026-10-07T22:29:49Z'
+  produced_by_attempt: 8
+  planning_review_round: 1
 attempts:
 - attempt: 1
   role: planner
@@ -1388,26 +1513,377 @@ attempts:
     output_tokens: 1065
     reasoning_output_tokens: 516
   context_bytes: 101231
+- attempt: 8
+  role: planning-review
+  state: planning-review
+  status: closed
+  opened_at: '2026-10-07T22:29:27Z'
+  planning_review_round: 1
+  planning_review_sequence: 1
+  planning_review_kind: general
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:planning-review
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-07T22:29:49Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 23943
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 1105
+    reasoning_output_tokens: 1029
+  context_bytes: 39723
+- attempt: 9
+  role: executor
+  state: executing
+  tier: T0
+  status: closed
+  opened_at: '2026-10-07T22:29:52Z'
+  provider: anthropic
+  model: claude-sonnet-5-5
+  transport: claude
+  selector: tier:T0
+  context_window: 200000
+  billing: subscription
+  model_class: executor
+  last_verified: '2026-10-03'
+  effort: medium
+  timeout_seconds: 1200.0
+  deadline_seconds: 1260.0
+  transient_retries: 3
+  streaming: auto
+  edit_tools:
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Bash(.venv/bin/python -m pytest *)
+  exit_code: 0
+  closed_at: '2026-10-07T22:31:20Z'
+  prompt_path: capture/prompts/009-executor.md
+  prompt_sha256: eac98c774c73109ac25f6ded4ff4335195915c37fc9bc0c913ecdd36c6989e86
+  edit_evidence:
+    transport: claude
+    executable: /usr/local/bin/claude
+    cli_version: 2.1.283 (Claude Code)
+    actual_changed_paths:
+    - releases/_next/tests-never-write-usage-log.md
+    - tests/conftest.py
+    - tests/live/test_live_eval.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_live_tier.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_usage_log_guard.py
+    ignored_paths_created: []
+    reported_reads:
+    - tests/conftest.py
+    - tests/unit/test_usage.py
+    - releases/_template.md
+    reported_writes:
+    - tests/conftest.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    - releases/_next/tests-never-write-usage-log.md
+    - tests/unit/test_usage_log_guard.py
+    shell_commands:
+    - cd /Users/shane/Projects/k-12Harness; for f in tests/unit/test_agent_loop.py tests/unit/test_run_cli.py
+      tests/unit/test_live_tier.py tests/live/test_live_eval.py; do echo "== $f"; grep -n "^import\|^from\|^pytestmark"
+      $f | head -30; done; ls releases/_next releases | head -20
+    - cd /Users/shane/Projects/k-12Harness; grep -n "^import\|^from\|^pytestmark" tests/unit/test_agent_loop.py
+      tests/unit/test_run_cli.py tests/unit/test_live_tier.py tests/live/test_live_eval.py; ls releases/_next
+      releases; sed -n 175,200p tests/unit/test_usage.py; grep -n "def append_jsonl" -A25 harness/usage.py
+    - "cd /Users/shane/Projects/k-12Harness; python3 - <<'EOF'\np='tests/conftest.py'\ns=open(p).read()\n\
+      s+='''\n\n# --- ADR-021: tests never write to logs/usage/ ------------------------------\nimport\
+      \ pytest  # noqa: E402\n\nfrom config import settings  # noqa: E402\nfrom harness import usage as\
+      \ _usage  # noqa: E402\n\n# Captured at import, before any test can monkeypatch settings.\nPROTECTED_USAGE_DIRS\
+      \ = (\n    settings.USAGE_LOG_DIR.resolve(),\n    (PROJECT_ROOT / \"logs\" / \"usage\").resolve(),\n\
+      )\n\n\n@pytest.fixture(scope=\"session\", autouse=True)\ndef _usage_log_guard():\n    \"\"\"Fail\
+      \ any test whose usage recording would land in the real logs/usage/.\"\"\"\n    original = _usage.append_jsonl\n\
+      \n    def guarded(records, log_dir=None):\n        target = Path(log_dir if log_dir is not None\
+      \ else settings.USAGE_LOG_DIR).resolve()\n        for protected in PROTECTED_USAGE_DIRS:\n     \
+      \       if target == protected or target.is_relative_to(protected):\n                pytest.fail(\n\
+      \                    f\"Test tried to write usage records to {target}, inside the \"\n         \
+      \           f\"protected directory {protected} (ADR-021: tests never write \"\n                \
+      \    \"to logs/usage/). Use the `usage_log_dir` fixture or pass \"\n                    \"log_dir=tmp_path.\"\
+      ,\n                    pytrace=False,\n                )\n        return original(records, log_dir)\n\
+      \n    with pytest.MonkeyPatch.context() as mp:\n        mp.setattr(_usage, \"append_jsonl\", guarded)\n\
+      \        yield\n\n\n@pytest.fixture\ndef usage_log_dir(tmp_path, monkeypatch):\n    \"\"\"Send the\
+      \ usage recorder to a temporary directory and return it.\"\"\"\n    target = tmp_path / \"usage\"\
+      \n    monkeypatch.setattr(settings, \"USAGE_LOG_DIR\", target)\n    return target\n'''\nopen(p,'w').write(s)\n\
+      M='pytestmark = pytest.mark.usefixtures(\"usage_log_dir\")\\n'\nfor p,anchor in [('tests/unit/test_agent_loop.py','from\
+      \ harness.tools import Deps, _truncate_rows, request_scope_problem\\n'),\n ('tests/unit/test_run_cli.py','from\
+      \ harness.tools import Deps\\n'),\n ('tests/unit/test_live_tier.py','from harness.intent import\
+      \ StructuredIntent\\n')]:\n    s=open(p).read(); assert anchor in s\n    s=s.replace(anchor,anchor+'\\\
+      n'+M,1); open(p,'w').write(s)\np='tests/live/test_live_eval.py'\ns=open(p).read()\ns=s.replace('pytestmark\
+      \ = pytest.mark.live\\n','pytestmark = [pytest.mark.live, pytest.mark.usefixtures(\"usage_log_dir\"\
+      )]\\n',1)\nopen(p,'w').write(s)\nEOF\ncat releases/_template.md; git log -1 --format=%h"
+    - cd /Users/shane/Projects/k-12Harness; .venv/bin/python -m pytest tests/unit/test_usage_log_guard.py
+      -q 2>&1 | tail -15; .venv/bin/python -m pytest tests/ -q 2>&1 | tail -15; git status --short
+    - cd /Users/shane/Projects/k-12Harness; bash -c 'R="$(pwd)"; T="$(mktemp -d)"; O="$(mktemp)"; git
+      archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 | tar -x -C "$T"; cp tests/unit/test_usage_log_guard.py
+      "$T/tests/unit/"; (cd "$T" && "$R/.venv/bin/python" -m pytest tests/unit/test_usage_log_guard.py
+      -q -p no:cacheprovider) >"$O" 2>&1; echo base_exit=$?; grep -c "DID NOT RAISE" "$O"; rm -rf "$T"
+      "$O"'; ls logs/usage | tail -2
+    actual_outside_scope: []
+    reported_writes_outside_scope: []
+    actual_unreported: []
+    num_turns: 17
+    total_cost_usd: 0.28316140000000006
+    malformed_events: 0
+    returncode: 0
+    requested_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    permission_rules:
+    - Bash(.venv/bin/python -m pytest *)
+    advertised_tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+    unexpected_tools: []
+    permission_mode: acceptEdits
+    init_events: 1
+    sandbox_incidents: []
+  transport_attempts: 1
+  usage:
+    input_tokens: 16
+    cache_creation_input_tokens: 37999
+    cache_read_input_tokens: 221957
+    output_tokens: 7315
+    output_tokens_details:
+      thinking_tokens: 252
+    server_tool_use:
+      web_search_requests: 0
+      web_fetch_requests: 0
+    service_tier: standard
+    cache_creation:
+      ephemeral_1h_input_tokens: 37999
+      ephemeral_5m_input_tokens: 0
+    inference_geo: not_available
+    iterations:
+    - input_tokens: 2
+      output_tokens: 971
+      cache_read_input_tokens: 37272
+      cache_creation_input_tokens: 727
+      cache_creation:
+        ephemeral_5m_input_tokens: 0
+        ephemeral_1h_input_tokens: 727
+      type: message
+    speed: standard
+  elapsed_seconds: 87.01769420801429
+  read_context_files: 5
+  effective_context_sha256: 010fdb5e83dcb8a4bfa05928496e107ef13f34ff366835a77abd24410c97b868
+  native_log_bytes: 521422
 continuations: []
 routing:
   executor_ladder:
   - T0
   - T1
   - T2
-  current_tier: null
-  decisions: []
+  current_tier: T0
+  decisions:
+  - at: '2026-10-07T22:29:51Z'
+    tier: T0
+    reason: pre-flight tier resolution
+    provider: anthropic
+    model: claude-sonnet-5-5
+    transport: claude
+    selector: tier:T0
+    context_window: 200000
+    billing: subscription
+    model_class: executor
+    last_verified: '2026-10-03'
+    effort: medium
+    timeout_seconds: 1200.0
+    deadline_seconds: 1260.0
+    transient_retries: 3
+    streaming: auto
+    edit_tools:
+    - Read
+    - Edit
+    - Write
+    - Grep
+    - Glob
+    - Bash(.venv/bin/python -m pytest *)
   frontier_execution:
     authorised: false
     authorised_by: null
     after_replan: null
     rationale: null
 verification:
-  deterministic_runs: []
+  deterministic_runs:
+  - id: V001
+    at: '2026-10-07T22:31:21Z'
+    status: passed
+    contract: acceptance/002-contract.yaml
+    contract_version: 2
+    contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+    execution_cycle:
+      transition_event: 70
+      transition_sha256: b817f1202663e1b2bb68a09b615901ba49c3739bc5d212ba5ba7e137adb2ce56
+    candidate_sha256: c8f30f8add5da33b8fbe2f6f0a7a3d002a79e92f24cf613f54569cd443217dee
+    selected_criteria:
+    - guard-module-passes
+    - guard-test-fails-on-base-tree
+    - usage-log-unchanged-by-suite
+    - release-note-present-and-shaped
+    - full-test-suite
+    - recording-tests-still-pass
+    - live-tier-still-collects
+    - no-product-code-changed
+    results:
+    - id: guard-module-passes
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_usage_log_guard.py -q
+      expected: 'Fails on the base commit because `tests/unit/test_usage_log_guard.py` does not exist
+        there: pytest exits 4 with ''file or directory not found''. Passes once the guard is in `tests/conftest.py`
+        and the module exists: every guard test and positive control passes.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/001-guard-module-passes.log
+      log_sha256: 6394a8c8ff832899557911efa47e4e2f62314622647543acd04c82d5cdb0bf1d
+    - id: guard-test-fails-on-base-tree
+      repo: k-12Harness
+      command: bash -c 'R="$(pwd)"; T="$(mktemp -d)"; O="$(mktemp)"; git archive 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+        | tar -x -C "$T"; if cp tests/unit/test_usage_log_guard.py "$T/tests/unit/"; then (cd "$T" &&
+        "$R/.venv/bin/python" -m pytest tests/unit/test_usage_log_guard.py -q -p no:cacheprovider) >"$O"
+        2>&1; rc=$?; cat "$O"; echo "base_exit=$rc"; grep -q "DID NOT RAISE" "$O"; s=$?; else echo "base_exit=missing-test";
+        s=1; fi; rm -rf "$T" "$O"; exit $s'
+      expected: 'Runs the candidate''s guard test module against an extracted copy of the base tree. The
+        copy''s own `logs/usage/` is inside the temporary directory, so the real directory is never touched.
+        The criterion needs both of these: the pytest output shows `DID NOT RAISE` (the command exits
+        0 only when it does), and the command prints the line `base_exit=1`. On the base commit it is
+        red because the test module does not exist yet: the command prints `base_exit=missing-test` and
+        exits 1. On the candidate it is green only when the guard tests fail in the base copy with `DID
+        NOT RAISE` (base code has no guard, and `record_run` swallows any `Exception`) and pytest exits
+        1 there, so the command prints `base_exit=1` and exits 0. This shows that the demonstration measures
+        the change (request refusal item 2). The command now ends by checking for `DID NOT RAISE` because
+        the verifier searches each pattern line by line. One `stdout_matches` cannot require two separate
+        lines, so `DID NOT RAISE` is checked through the exit code and `base_exit=1` through `stdout_matches`.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/002-guard-test-fails-on-base-tree.log
+      log_sha256: b7c5eb7cac1dda45bbe6c676ae71c4ed02d98b56bc74fef070973979f5ab3a12
+    - id: usage-log-unchanged-by-suite
+      repo: k-12Harness
+      command: bash -c 'snap(){ if [ -d logs/usage ]; then find logs/usage -type f -exec wc -l {} \; |
+        sort; ls -1 logs/usage; fi; }; B="$(snap)"; .venv/bin/python -m pytest tests/ -q >/dev/null 2>&1;
+        rc=$?; A="$(snap)"; if [ "$B" = "$A" ]; then echo "suite_exit=$rc usage_log=UNCHANGED"; else echo
+        "suite_exit=$rc usage_log=CHANGED"; fi'
+      expected: 'This is request item 1, checked against the real directory. It fails on the base commit
+        because the legacy tool-loop tests in test_agent_loop.py, test_run_cli.py and test_live_tier.py
+        append `function:*` records to `logs/usage/usage-<UTC date>.jsonl`, so the command prints `usage_log=CHANGED`.
+        It passes once those tests use `usage_log_dir` and the guard stops any other writer: the suite
+        exits 0 and the file names and line counts are identical before and after. See decision-base-dry-run-writes.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/003-usage-log-unchanged-by-suite.log
+      log_sha256: 704bc2b269660b76f9aee118de8e9bf2303190183494c4f289a6ddce8b44f377
+    - id: release-note-present-and-shaped
+      repo: k-12Harness
+      command: .venv/bin/python -c "import pathlib,re; t=pathlib.Path('releases/_next/tests-never-write-usage-log.md').read_text();
+        v=t.split('## Verification',1)[1].split('\n## ',1)[0]; ok=all([re.search(r'(?m)^\*\*Type:\*\*
+        *patch *$',t), re.search(r'(?m)^## Local deployment',t), re.search(r'(?m)^## Manual steps',t),
+        re.search(r'(?m)^## Rollback',t), re.search(r'(?m)^\x60{3}bash',v)]); print('NOTES_OK' if ok else
+        'NOTES_BAD'); raise SystemExit(0 if ok else 1)"
+      expected: Fails on the base commit because `releases/_next/tests-never-write-usage-log.md` does
+        not exist (FileNotFoundError). Passes once the note exists with a `**Type:** patch` line and the
+        `## Local deployment`, `## Manual steps`, `## Verification` (with at least one fenced bash block)
+        and `## Rollback` sections. The command prints NOTES_OK.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/004-release-note-present-and-shaped.log
+      log_sha256: a4267aa092acd60a04b417253214d3513c28ca6030076d7fe5b337fad02cef91
+    - id: full-test-suite
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/ -q
+      expected: The repository's declared verify command exits zero with no failures, errors or unexpected
+        passes. The existing strict xfail (O-8) stays xfailed. Pass, skip and xfail counts equal the base
+        counts plus the new guard tests.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/005-full-test-suite.log
+      log_sha256: 25a09dfb3c09dfc402febd108923040151d50698f71fb929f33349a3b68ab033
+    - id: recording-tests-still-pass
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/unit/test_usage.py "tests/unit/test_agent_loop.py::test_a_budget_trip_still_records_its_usage"
+        -q
+      expected: The tests that assert usage records in a temporary directory pass before and after the
+        change (request item 2).
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/006-recording-tests-still-pass.log
+      log_sha256: 553297187ede0b4b0bf73f1266b9245f1283920a28ba995ae2823c48a6d6b3a2
+    - id: live-tier-still-collects
+      repo: k-12Harness
+      command: .venv/bin/python -m pytest tests/live --collect-only -q -m live
+      expected: The manual live tier still collects under `-m live`. Nothing is run and no tokens are
+        spent.
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/007-live-tier-still-collects.log
+      log_sha256: 1debdf5ce90ab1210511befebe8e241fbd30021c76505320eae21de19d419cdd
+    - id: no-product-code-changed
+      repo: k-12Harness
+      command: git diff --quiet 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159 -- harness config evals prompts
+        contract server sql pytest.ini logging_config.yaml requirements.txt run.py demo.py capture.py
+        authcheck.py VERSION .method.yaml .github .claude
+      expected: 'Exits 0: no product, configuration, evaluation, contract, entry-point, gate, VERSION
+        or method-declaration file differs from the base commit. Exits 1 if any does.'
+      expectation_source: contract
+      expectation_evaluated: true
+      exit_code: 0
+      passed: true
+      failure_reasons: []
+      log: verification/V001/008-no-product-code-changed.log
+      log_sha256: daddb10bfc7aecded947a10e7bef2e5ccc1079221dca753946ba62fe320e0db4
+    expectations_not_evaluated: []
+    ended_at: '2026-10-07T22:31:51Z'
   semantic_reviews: []
   semantic_attempts: []
 effort:
-  controller_commands: 6
-  model_sessions_launched: 7
+  controller_commands: 11
+  model_sessions_launched: 9
 checkpoints: []
 acceptance:
   state: pending
@@ -1418,11 +1894,50 @@ work_packages: []
 findings: []
 improvements: []
 planning_review:
-  rounds: []
+  rounds:
+  - id: PR1
+    number: 1
+    sequence: 1
+    kind: general
+    at: '2026-10-07T22:29:49Z'
+    attempt: 8
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:planning-review
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+    plan:
+      path: planning/001-plan.md
+      sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
+    plan_snapshot: reviews/001-plan-reviewed.md
+    plan_snapshot_sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
+    contract:
+      version: 2
+      sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+    artifact: reviews/001-planning-review.json
+    artifact_id: A9
+    sha256: 11b9a1a5250b98ac4f17e3692164b4d4eaea0fbdf80a9d3caa56394b534c07c7
+    covers: []
+    resolutions: {}
+    findings: []
+    reopened: []
+    summary: No blocking or material findings. The plan addresses the requested guard, temporary-directory
+      recording, base-commit failure demonstration, existing-log preservation, live-test decision, and
+      bounded file scope. Its stated assumptions are paired with acceptance checks, and the acceptance
+      criteria are sufficiently deterministic and achievable as written.
+    context_bytes: 39723
 lock:
-  owner: null
-  acquired_at: null
-  released_at: null
+  owner: shane@Mimir.local
+  acquired_at: '2026-10-07T22:29:52Z'
+  released_at: '2026-10-07T22:31:20Z'
+  attempt: 9
 capture:
   event_log: capture/events.jsonl
   sessions: []

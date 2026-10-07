@@ -1,0 +1,10 @@
+started: 2026-10-07T22:31:49Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_usage.py", "tests/unit/test_agent_loop.py::test_a_budget_trip_still_records_its_usage", "-q"]
+
+..........                                                               [100%]
+10 passed in 0.31s
+
+ended: 2026-10-07T22:31:50Z
+exit_code: 0
+duration_seconds: 0.68

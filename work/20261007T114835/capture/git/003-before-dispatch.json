@@ -1,0 +1,11 @@
+{
+  "base": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159",
+  "branch": "wi/20261007T114835",
+  "captured_at": "2026-10-07T22:29:51Z",
+  "head": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159",
+  "label": "before-dispatch",
+  "repo": "/Users/shane/Projects/k-12Harness",
+  "status_porcelain": [],
+  "tracked_changes_from_base": [],
+  "untracked": []
+}

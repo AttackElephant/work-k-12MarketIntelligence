@@ -1,0 +1,28 @@
+{
+  "base": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159",
+  "branch": "wi/20261007T114835",
+  "captured_at": "2026-10-07T22:31:20Z",
+  "head": "6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159",
+  "label": "after-execution",
+  "repo": "/Users/shane/Projects/k-12Harness",
+  "status_porcelain": [
+    " M tests/conftest.py",
+    " M tests/live/test_live_eval.py",
+    " M tests/unit/test_agent_loop.py",
+    " M tests/unit/test_live_tier.py",
+    " M tests/unit/test_run_cli.py",
+    "?? releases/_next/tests-never-write-usage-log.md",
+    "?? tests/unit/test_usage_log_guard.py"
+  ],
+  "tracked_changes_from_base": [
+    "tests/conftest.py",
+    "tests/live/test_live_eval.py",
+    "tests/unit/test_agent_loop.py",
+    "tests/unit/test_live_tier.py",
+    "tests/unit/test_run_cli.py"
+  ],
+  "untracked": [
+    "releases/_next/tests-never-write-usage-log.md",
+    "tests/unit/test_usage_log_guard.py"
+  ]
+}

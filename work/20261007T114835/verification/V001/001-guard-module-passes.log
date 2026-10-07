@@ -1,0 +1,10 @@
+started: 2026-10-07T22:31:22Z
+cwd: /Users/shane/Projects/k-12Harness
+command: [".venv/bin/python", "-m", "pytest", "tests/unit/test_usage_log_guard.py", "-q"]
+
+......                                                                   [100%]
+6 passed in 0.05s
+
+ended: 2026-10-07T22:31:22Z
+exit_code: 0
+duration_seconds: 0.348

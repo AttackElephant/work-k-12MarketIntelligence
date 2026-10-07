@@ -1,0 +1,5 @@
+{"attempt": 1, "route": {"billing": "subscription", "context_window": 400000, "deadline_seconds": 600.0, "last_verified": "2026-09-08", "model": "gpt-5.6-sol", "model_class": "frontier", "provider": "openai", "selector": "role:planning-review", "streaming": "auto", "timeout_seconds": 360.0, "transport": "codex"}}
+{"type":"thread.started","thread_id":"01a1187c-66a2-70b2-979f-3269f9711fbe"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"No blocking or material findings. The plan addresses the requested guard, temporary-directory recording, base-commit failure demonstration, existing-log preservation, live-test decision, and bounded file scope. Its stated assumptions are paired with acceptance checks, and the acceptance criteria are sufficiently deterministic and achievable as written.\",\"findings\":[]}"}}
+{"type":"turn.completed","usage":{"input_tokens":23943,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":1105,"reasoning_output_tokens":1029}}
