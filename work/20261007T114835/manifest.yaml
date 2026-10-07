@@ -1,0 +1,182 @@
+id: 20261007T114835
+created: '2026-10-07T11:48:35Z'
+method:
+  id: coding-harness
+  version: 0.23.0
+  commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
+  bound_at: '2026-10-07T11:48:35Z'
+  bound_by: shane@Mimir.local
+  release:
+    state: released
+    tag: coding-harness/v0.23.0
+    checkout_commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
+  history:
+  - commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
+    version: 0.23.0
+    bound_at: '2026-10-07T11:48:35Z'
+    bound_by: shane@Mimir.local
+    operation: init
+    release:
+      state: released
+      tag: coding-harness/v0.23.0
+      checkout_commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
+artifact_schema_version: 0.9.0
+origin: null
+request: '# Request
+
+
+  ## Objective
+
+
+  Running the test suite never writes to the real usage log directory (`logs/usage/`), and a test that
+  tries to is stopped.
+
+
+  ## Target repository
+
+
+  `k-12Harness`
+
+
+  ## What should happen
+
+
+  1. Count the lines in every file under `logs/usage/`, run `.venv/bin/python -m pytest tests/ -q`, and
+  count again. The counts are equal, and no new file has appeared there.
+
+  2. Tests that exercise usage recording still do so, against a temporary directory, and still pass.
+
+
+  ## What should be refused or fail
+
+
+  1. A test that calls the usage recorder without sending it to a temporary directory fails, and the failure
+  names the directory it tried to write to. This must be demonstrated by a test written for the purpose,
+  not assumed.
+
+  2. The check in (1) must fail on the code as it is before this change. If it passes on the base commit,
+  the check is not measuring anything.
+
+
+  ## Known acceptance inputs
+
+
+  - The rule: ADR-021 in `docs/decisions.md`, "Tests never write to `logs/usage/`".
+
+  - `config/settings.py`: `USAGE_LOG_DIR = PROJECT_ROOT / "logs" / "usage"`.
+
+  - `harness/usage.py`: `append_jsonl` and `record_run` fall back to `settings.USAGE_LOG_DIR` when no
+  directory is given.
+
+  - The finding: `docs/reviews/2026-10-poc-review/05_measurements.md` ("`logs/usage/` is contaminated
+  by the unit test suite: 2026-09-29 has 468 lines, all `function:*` test models") and `01_orientation.md`,
+  conflict C2.
+
+  - `tests/unit/test_agent_loop.py` line 373 already redirects the directory for one test; `tests/unit/test_usage.py`
+  passes a temporary directory explicitly.
+
+
+  ## Gaps not yet settled
+
+
+  - GAP: which tests write to the real directory. The review counted the records and did not name the
+  tests.
+
+  - GAP: how the redirect is done (one shared fixture for every test, or a guard that fails on a write)
+  is for the plan. Either meets the objective. "What should be refused or fail", item 1, must hold whichever
+  is chosen.
+
+  - GAP: the files already polluted. `logs/` is not tracked by git, so they exist only on this machine.
+  Deleting or cleaning them is not part of this item and must not be done by an executor.
+
+  - GAP: tests may also write to `logs/harness.log`. Not checked, and not in scope.
+
+
+  ## Out of scope
+
+
+  Any change to what the product records in normal use. Any change to the usage record format.'
+narrative: null
+class: null
+state: draft
+parent: null
+children: []
+transitions: []
+size_estimate:
+  files: null
+  subsystems: []
+  scale: null
+definitions: []
+executor_context: null
+compatibility:
+  baselines: []
+  affected_consumers: []
+scope: []
+scope_version: 1
+scope_sha256: null
+risk:
+  initial: null
+  current: null
+  maximum: null
+  rationale: null
+  obligations: []
+  escalations: []
+  deescalations: []
+contract:
+  current: null
+  versions: []
+decisions: []
+constraints: []
+concerns: []
+review_reconciliations: []
+artifacts:
+- id: A0
+  type: request
+  path: request.md
+  version: 1
+  sha256: 0635a9619faeccce450c54c42c5d073239af10b11b76591c2bad30d9191286e0
+  created_at: '2026-10-07T11:48:35Z'
+  produced_by_attempt: null
+  status: current
+  supersedes: null
+attempts: []
+continuations: []
+routing:
+  executor_ladder:
+  - T0
+  - T1
+  - T2
+  current_tier: null
+  decisions: []
+  frontier_execution:
+    authorised: false
+    authorised_by: null
+    after_replan: null
+    rationale: null
+verification:
+  deterministic_runs: []
+  semantic_reviews: []
+  semantic_attempts: []
+effort:
+  controller_commands: 0
+  model_sessions_launched: 0
+checkpoints: []
+acceptance:
+  state: pending
+  at: null
+  gates_satisfied: []
+escapes: []
+work_packages: []
+findings: []
+improvements: []
+planning_review:
+  rounds: []
+lock:
+  owner: null
+  acquired_at: null
+  released_at: null
+capture:
+  event_log: capture/events.jsonl
+  sessions: []
+  gaps: []
+operator_observations: []
