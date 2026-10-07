@@ -106,14 +106,70 @@ size_estimate:
   files: null
   subsystems: []
   scale: null
-definitions: []
+definitions:
+- ref: docs/decisions.md
+  repo: k-12Harness
+  authority: 1
+  revision: sha256:8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+  sha256: 8324b93d07e337968cf4eda58572ace362e3a489bac4ca13335a31745972e744
+- ref: docs/reviews/2026-10-poc-review/01_orientation.md
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:ca1e8199ff1a8738077f0addba0f5fdbedde0bc0af500f1111c0aa321aeaf736
+  sha256: ca1e8199ff1a8738077f0addba0f5fdbedde0bc0af500f1111c0aa321aeaf736
+- ref: docs/reviews/2026-10-poc-review/05_measurements.md
+  repo: k-12Harness
+  authority: 9
+  revision: sha256:f211526023c04ac3f4d89ffa220a17ff3bc637b96e7f470afa38141788fabad7
+  sha256: f211526023c04ac3f4d89ffa220a17ff3bc637b96e7f470afa38141788fabad7
 executor_context: null
 compatibility:
   baselines: []
   affected_consumers: []
-scope: []
+scope:
+- id: work-store
+  repo: /Users/shane/Projects/work/k-12MarketIntelligence
+  store_directory: k-12MarketIntelligence
+  role: evidence
+  governance: append-only
+  branch: main
+  base_commit: 704b76cb4a8a8af88bbda55964837aec5667c8f5
+  dirty: false
+  dirty_explanation: the work item writes its own evidence here
+  head_at_dispatch: 704b76cb4a8a8af88bbda55964837aec5667c8f5
+  verify: null
+  declared_files: []
+  declared: false
+- id: k-12Harness
+  repo: /Users/shane/Projects/k-12Harness
+  role: execution
+  governance: diff-allowlist
+  branch: wi/20261007T114835
+  base_commit: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+  dirty: false
+  dirty_explanation: null
+  head_at_dispatch: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+  verify: .venv/bin/python -m pytest tests/ -q
+  declared_files: []
+  declared: false
+  method_adoption:
+    event_seq: 2
+    outcome: adopted
+    case: older
+    version: 0.23.0
+    pin: 0.23.0
+    parent: e122f4b3aba66255e422900f59a46f7abc9e8207
+    commit: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    head: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    sha256: 6883ae8b1769d7a0413164a1596dc30b42723817791ee115787275d64148dbe6
+    origin:
+      basis: refs/remotes/origin/HEAD
+      commit: e122f4b3aba66255e422900f59a46f7abc9e8207
+      default_branch: main
+      ref: refs/remotes/origin/main
+      ref_commit: e122f4b3aba66255e422900f59a46f7abc9e8207
 scope_version: 1
-scope_sha256: null
+scope_sha256: ef50cd89b634d2312b468f04429df29cf9ac619a0cb169cd8b22496bf1ca9ac3
 risk:
   initial: null
   current: null
@@ -139,7 +195,31 @@ artifacts:
   produced_by_attempt: null
   status: current
   supersedes: null
-attempts: []
+attempts:
+- attempt: 1
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-07T11:52:23Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 3
+  closed_at: '2026-10-07T11:52:23Z'
+  failure_kind: authentication
+  failure_reason: harness_error
+  failure_detail: CLAUDE_CODE_OAUTH_TOKEN is required for Claude subscription calls
+  failure_detail_source: host
 continuations: []
 routing:
   executor_ladder:
@@ -159,7 +239,7 @@ verification:
   semantic_attempts: []
 effort:
   controller_commands: 0
-  model_sessions_launched: 0
+  model_sessions_launched: 1
 checkpoints: []
 acceptance:
   state: pending
@@ -180,3 +260,21 @@ capture:
   sessions: []
   gaps: []
 operator_observations: []
+declarations:
+  k-12Harness:
+    base: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    definition_set:
+      approved: true
+      section: definition_set
+      version: 1
+      sha256: 1db375732c810984b30dba58aaa83cfffeb70e273980684c35abbfe3520429f3
+      approval_sha256: 7f1af0679586361ee4ca61c7db49df292166534bb5dafc8d898165b7d6cdde3b
+      confirmed_by: shane
+    risk_floor:
+      approved: true
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    declares_definition_set: true
