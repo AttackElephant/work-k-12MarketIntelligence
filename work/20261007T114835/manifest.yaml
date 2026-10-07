@@ -98,14 +98,50 @@ request: '# Request
   Any change to what the product records in normal use. Any change to the usage record format.'
 narrative: null
 class: null
-state: draft
+state: planned
 parent: null
 children: []
-transitions: []
+transitions:
+- at: '2026-10-07T12:04:33Z'
+  transition: T1
+  event: plan-ready
+  from: draft
+  to: planned
+  by: shane@Mimir.local
+  reason: 3 definition references resolve at their recorded revisions; 0 open planning concern(s) recorded
+    as structured entries; planning artifact 001-plan.md; base commit, branch and tree state recorded
+    for every scope entry; size estimate files=7 scale=small; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: definitions_resolved
+    evidence: 3 definition references resolve at their recorded revisions
+  - guard: definition_conflicts_are_structured
+    evidence: 0 open planning concern(s) recorded as structured entries
+  - guard: planning_artifact_exists
+    evidence: planning artifact 001-plan.md
+  - guard: base_state_recorded
+    evidence: base commit, branch and tree state recorded for every scope entry
+  - guard: size_estimate_present
+    evidence: size estimate files=7 scale=small
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
-  files: null
-  subsystems: []
-  scale: null
+  files: 7
+  scale: small
+  subsystems:
+  - tests
+  - releases
+  source: planner
+  paths:
+  - tests/conftest.py
+  - tests/unit/test_usage_log_guard.py
+  - tests/unit/test_agent_loop.py
+  - tests/unit/test_run_cli.py
+  - tests/unit/test_live_tier.py
+  - tests/live/test_live_eval.py
+  - releases/_next/tests-never-write-usage-log.md
+  interfaces: []
+  data: []
 definitions:
 - ref: docs/decisions.md
   repo: k-12Harness
@@ -195,6 +231,15 @@ artifacts:
   produced_by_attempt: null
   status: current
   supersedes: null
+- status: current
+  supersedes: null
+  id: A1
+  type: planning_plan
+  path: planning/001-plan.md
+  version: 1
+  sha256: c550fe0ea3b24aca138acf4e76d8992ea1fad99ea2139229587a28aa062c5fd2
+  created_at: '2026-10-07T12:04:33Z'
+  produced_by_attempt: 2
 attempts:
 - attempt: 1
   role: planner
@@ -220,6 +265,209 @@ attempts:
   failure_reason: harness_error
   failure_detail: CLAUDE_CODE_OAUTH_TOKEN is required for Claude subscription calls
   failure_detail_source: host
+- attempt: 2
+  role: planner
+  state: planning
+  status: closed
+  opened_at: '2026-10-07T11:59:29Z'
+  plan_version: 1
+  provider: anthropic
+  model: claude-opus-5-5
+  transport: claude
+  selector: role:planner
+  context_window: 200000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-10-03'
+  effort: high
+  timeout_seconds: 360.0
+  deadline_seconds: 1200.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-07T12:04:33Z'
+  turns: 4
+  transport_attempts: 4
+  usage:
+    input_tokens: 8
+    cache_creation_input_tokens: 497764
+    cache_read_input_tokens: 2667
+    output_tokens: 32850
+  initial_input_tokens: 26648
+  peak_input_tokens: 141911
+  files_read:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/01_orientation.md
+  - root0:docs/reviews/2026-10-poc-review/05_measurements.md
+  - root0:harness/usage.py
+  - root0:config/settings.py
+  - root0:tests/conftest.py
+  - root0:pytest.ini
+  - root0:.method.yaml
+  - root0:tests/unit/test_usage.py
+  - root0:tests/unit/test_agent_loop.py
+  - root0:harness/agent.py
+  - root0:CLAUDE.md
+  - root0:evals/replay.py
+  - root0:demo.py
+  - root0:run.py
+  - root0:evals/live.py
+  - root0:tests/unit/test_demo.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:tests/unit/test_live_tier.py
+  - root0:tests/unit/test_golden_cases.py
+  - root0:tests/unit/test_rendering.py
+  - root0:releases/README.md
+  - root0:releases/_template.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_retry.py
+  - root0:tests/unit/test_claude_account_cli.py
+  - root0:tests/unit/test_capture.py
+  - root0:tests/unit/test_evidence_client.py
+  - root0:tests/unit/test_answer_view.py
+  - root0:tests/unit/test_errors.py
+  - root0:tests/contract/test_real_emitter_v0_3.py
+  - root0:capture.py
+  - root0:tests/unit/test_graders.py
+  - root0:tests/unit/test_prompt.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/live/test_live_eval.py
+  requested_files_read:
+  - root0:harness/usage.py
+  - root0:config/settings.py
+  - root0:tests/conftest.py
+  - root0:pytest.ini
+  - root0:.method.yaml
+  - root0:tests/unit/test_usage.py
+  - root0:tests/unit/test_agent_loop.py
+  - root0:harness/agent.py
+  - root0:CLAUDE.md
+  - root0:evals/replay.py
+  - root0:demo.py
+  - root0:run.py
+  - root0:evals/live.py
+  - root0:tests/unit/test_demo.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:tests/unit/test_live_tier.py
+  - root0:tests/unit/test_golden_cases.py
+  - root0:tests/unit/test_rendering.py
+  - root0:releases/README.md
+  - root0:releases/_template.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_retry.py
+  - root0:tests/unit/test_claude_account_cli.py
+  - root0:tests/unit/test_capture.py
+  - root0:tests/unit/test_evidence_client.py
+  - root0:tests/unit/test_answer_view.py
+  - root0:tests/unit/test_errors.py
+  - root0:tests/contract/test_real_emitter_v0_3.py
+  - root0:capture.py
+  - root0:tests/unit/test_graders.py
+  - root0:tests/unit/test_prompt.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/live/test_live_eval.py
+  delivered_files:
+  - root1:request.md
+  - root1:manifest.yaml
+  - root0:docs/decisions.md
+  - root0:docs/reviews/2026-10-poc-review/01_orientation.md
+  - root0:docs/reviews/2026-10-poc-review/05_measurements.md
+  - root0:harness/usage.py
+  - root0:config/settings.py
+  - root0:tests/conftest.py
+  - root0:pytest.ini
+  - root0:.method.yaml
+  - root0:tests/unit/test_usage.py
+  - root0:tests/unit/test_agent_loop.py
+  - root0:harness/agent.py
+  - root0:CLAUDE.md
+  - root0:evals/replay.py
+  - root0:demo.py
+  - root0:run.py
+  - root0:evals/live.py
+  - root0:tests/unit/test_demo.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:tests/unit/test_live_tier.py
+  - root0:tests/unit/test_golden_cases.py
+  - root0:tests/unit/test_rendering.py
+  - root0:releases/README.md
+  - root0:releases/_template.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_retry.py
+  - root0:tests/unit/test_claude_account_cli.py
+  - root0:tests/unit/test_capture.py
+  - root0:tests/unit/test_evidence_client.py
+  - root0:tests/unit/test_answer_view.py
+  - root0:tests/unit/test_errors.py
+  - root0:tests/contract/test_real_emitter_v0_3.py
+  - root0:capture.py
+  - root0:tests/unit/test_graders.py
+  - root0:tests/unit/test_prompt.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/live/test_live_eval.py
+  inspected_files:
+  - root0:harness/usage.py
+  - root0:config/settings.py
+  - root0:tests/conftest.py
+  - root0:pytest.ini
+  - root0:.method.yaml
+  - root0:tests/unit/test_usage.py
+  - root0:tests/unit/test_agent_loop.py
+  - root0:harness/agent.py
+  - root0:CLAUDE.md
+  - root0:evals/replay.py
+  - root0:demo.py
+  - root0:run.py
+  - root0:evals/live.py
+  - root0:tests/unit/test_demo.py
+  - root0:tests/unit/test_run_cli.py
+  - root0:tests/unit/test_live_tier.py
+  - root0:tests/unit/test_golden_cases.py
+  - root0:tests/unit/test_rendering.py
+  - root0:releases/README.md
+  - root0:releases/_template.md
+  - root0:.github/workflows/pr-checks.yml
+  - root0:tests/unit/test_intent_boundary.py
+  - root0:tests/unit/test_planner.py
+  - root0:tests/unit/test_retry.py
+  - root0:tests/unit/test_claude_account_cli.py
+  - root0:tests/unit/test_capture.py
+  - root0:tests/unit/test_evidence_client.py
+  - root0:tests/unit/test_answer_view.py
+  - root0:tests/unit/test_errors.py
+  - root0:tests/contract/test_real_emitter_v0_3.py
+  - root0:capture.py
+  - root0:tests/unit/test_graders.py
+  - root0:tests/unit/test_prompt.py
+  - root0:tests/unit/test_logging_config.py
+  - root0:tests/live/test_live_eval.py
+  plan: planning/001-plan.md
+  size_estimate:
+    files: 7
+    scale: small
+    subsystems:
+    - tests
+    - releases
+    source: planner
+    paths:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_live_tier.py
+    - tests/live/test_live_eval.py
+    - releases/_next/tests-never-write-usage-log.md
+    interfaces: []
+    data: []
+  headroom: 0.1332
+  growth_per_turn: 28815.8
 continuations: []
 routing:
   executor_ladder:
@@ -238,8 +486,8 @@ verification:
   semantic_reviews: []
   semantic_attempts: []
 effort:
-  controller_commands: 0
-  model_sessions_launched: 1
+  controller_commands: 1
+  model_sessions_launched: 2
 checkpoints: []
 acceptance:
   state: pending
@@ -278,3 +526,4 @@ declarations:
       approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
       confirmed_by: shane
     declares_definition_set: true
+migration_obligations: []
