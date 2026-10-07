@@ -2467,6 +2467,41 @@ attempts:
   context_bytes: 15332
   covers:
   - SF-1
+- attempt: 13
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-10-07T23:03:36Z'
+  semantic_round: 2
+  semantic_kind: recheck
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 1
+  closed_at: '2026-10-07T23:03:44Z'
+  failure_kind: SemanticReviewError
+  failure_reason: harness_error
+  failure_detail: 'the verifier resolved ''SF-1: A test can retain and call'', which this recheck was
+    not given; it covers [''SF-1'']'
+  failure_detail_source: host
+  transport_attempts: 1
+  usage:
+    input_tokens: 16930
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 262
+    reasoning_output_tokens: 81
+  context_bytes: 15332
+  covers:
+  - SF-1
 continuations:
 - id: C001
   path: continuation/C001/receipt.json
@@ -2901,9 +2936,36 @@ verification:
       timeout_seconds: 360.0
       deadline_seconds: 600.0
       streaming: auto
+  - round: 2
+    kind: recheck
+    covers:
+    - SF-1
+    at: '2026-10-07T23:03:44Z'
+    attempt: 13
+    status: failed
+    failure: SemanticReviewError
+    failure_kind: null
+    reason: 'the verifier resolved ''SF-1: A test can retain and call'', which this recheck was not given;
+      it covers [''SF-1'']'
+    detail: 'the verifier resolved ''SF-1: A test can retain and call'', which this recheck was not given;
+      it covers [''SF-1'']'
+    detail_source: host
+    retry: run_verifier.py /Users/shane/Projects/work/k-12MarketIntelligence/work/20261007T114835
+    route:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
 effort:
   controller_commands: 18
-  model_sessions_launched: 12
+  model_sessions_launched: 13
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
   message: 'tests: stop the test suite writing to logs/usage/ (work item 20261007T114835)'
