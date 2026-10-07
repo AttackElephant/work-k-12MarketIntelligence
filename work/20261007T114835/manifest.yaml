@@ -1165,6 +1165,44 @@ risk:
       confirmed_by: shane
     base: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
     event_seq: 83
+  - stage: checkpoint
+    floor: normal
+    known: true
+    unknown: []
+    under_declared: []
+    matches:
+      releases/_next/tests-never-write-usage-log.md:
+      - description-and-evidence
+      tests/conftest.py:
+      - description-and-evidence
+      tests/live/test_live_eval.py:
+      - description-and-evidence
+      tests/unit/test_agent_loop.py:
+      - description-and-evidence
+      tests/unit/test_live_tier.py:
+      - description-and-evidence
+      tests/unit/test_run_cli.py:
+      - description-and-evidence
+      tests/unit/test_usage_log_guard.py:
+      - description-and-evidence
+    implied: []
+    declared: []
+    assessed:
+    - releases/_next/tests-never-write-usage-log.md
+    - tests/conftest.py
+    - tests/live/test_live_eval.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_live_tier.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_usage_log_guard.py
+    declaration:
+      section: risk_floor
+      version: 1
+      sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+      approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+      confirmed_by: shane
+    base: 6d3dd93244d7bc8b87f2bb66bf2e0dd20b03b159
+    event_seq: 117
   author:
     kind: model
     name: claude-opus-5-5
@@ -2834,6 +2872,263 @@ checkpoints:
     - usage-log-unchanged-by-suite
     runs:
     - V001
+  commit_created: true
+- at: '2026-10-07T22:52:20Z'
+  message: 'tests: install the usage-log guard before collection so from-imports are guarded (work item
+    20261007T114835)'
+  authorised_by: shane
+  commits:
+  - repo: work-store
+    branch: main
+    commit: a1aaf09a0c1d4947a5ea896f779bdfec2221e4ec
+    uncommitted:
+    - ' M harness.env'
+    - ' M work/20261007T114835/capture/events.jsonl'
+    - ' M work/20261007T114835/manifest.yaml'
+    created: false
+  - repo: k-12Harness
+    branch: wi/20261007T114835
+    commit: 8b2d90387e49776a6d534c32105d36fb60da62de
+    parent: 1b90a8c1d8a796fdbf36d0b3f6150aa227618edf
+    permitted:
+    - releases/_next/tests-never-write-usage-log.md
+    - tests/conftest.py
+    - tests/live/test_live_eval.py
+    - tests/unit/test_agent_loop.py
+    - tests/unit/test_demo.py
+    - tests/unit/test_golden_cases.py
+    - tests/unit/test_intent_boundary.py
+    - tests/unit/test_live_tier.py
+    - tests/unit/test_rendering.py
+    - tests/unit/test_run_cli.py
+    - tests/unit/test_usage_log_guard.py
+    committed_paths:
+    - tests/conftest.py
+    - tests/unit/test_usage_log_guard.py
+    uncommitted_outside_scope: []
+    created: true
+    commit_output: "[wi/20261007T114835 8b2d903] tests: install the usage-log guard before collection\
+      \ so from-imports are guarded (work item 20261007T114835)\n 2 files changed, 29 insertions(+), 7\
+      \ deletions(-)"
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: ec97c7c9a746edfdcddb2b83515a5b296703fcb3ed045eff97d3327aed6bae29
+    evidence_sha256: da7bedb925354007507ab3e969ed1f0a2515696626a028da0da489f30c619bbd
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
+  eligibility:
+    decision: checkpoint
+    eligible: false
+    reasons:
+    - 'exceptional evidence X-9 (attempt-failed) is unhandled: attempt 1 (planner) failed: harness_error'
+    - 'exceptional evidence X-24.1 (dry-run-flag) is unhandled: dry run of contract v1 flagged guard-test-fails-on-base-tree'
+    - 'exceptional evidence X-27 (scope-under-declared) is unhandled: contract: 4 under-declared'
+    - 'exceptional evidence X-29 (attempt-failed) is unhandled: attempt 4 (contract) failed: harness_error'
+    - 'exceptional evidence X-38 (scope-under-declared) is unhandled: contract: 4 under-declared'
+    - 'exceptional evidence X-42 (attempt-failed) is unhandled: attempt 6 (contract-adequacy) failed:
+      harness_error'
+    evidence_sha256: 1f804d8f22532528805f34f15482bdc6c80e6439b7b903ade15185dbefb6bfe9
+    applied: false
+    evidence:
+      exceptions:
+      - id: X-9
+        kind: attempt-failed
+        seq: 9
+        event_sha256: f120308b2ceb29c53b235d0937e598006dd1323535a1f8f552a76a5405721f99
+        summary: 'attempt 1 (planner) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: planner
+          attempt: 1
+        condition: unhandled
+        handled_by: null
+      - id: X-24.1
+        kind: dry-run-flag
+        seq: 24
+        event_sha256: 2b842f53e09a1d8d16f4bdaf2da9b6af52d9818aa7963c0161d37f10a185ffe2
+        summary: dry run of contract v1 flagged guard-test-fails-on-base-tree
+        severity: null
+        provenance:
+          event: contract.dry-run-completed
+          criterion: guard-test-fails-on-base-tree
+          contract_sha256: a7b78e6f3b44c4089049c1ffa59c5086ae4cebfdd22c248fb501b7153939067c
+        condition: unhandled
+        handled_by: null
+      - id: X-25
+        kind: concern
+        seq: 25
+        event_sha256: c2abf83886ecc3ff7a7e724cc7fa0fc521c73a75643761e873d9dc332536aad7
+        summary: concern C1 (owner-decision)
+        severity: blocking
+        provenance:
+          event: human.concern-opened
+          concern: C1
+          origin: contracting
+          form: owner-decision
+          opened_by: model
+        condition: handled
+        handled_by: concern C1 resolved with a human confirmation (event 30)
+      - id: X-26
+        kind: concern
+        seq: 26
+        event_sha256: 5be56a3b923ff91b37dfd524da4cfd7e2e1f66b3aa3289c7719c29399b739ea0
+        summary: concern C2 (owner-decision)
+        severity: blocking
+        provenance:
+          event: human.concern-opened
+          concern: C2
+          origin: contracting
+          form: owner-decision
+          opened_by: model
+        condition: handled
+        handled_by: concern C2 resolved with a human confirmation (event 31)
+      - id: X-27
+        kind: scope-under-declared
+        seq: 27
+        event_sha256: a228230f07bdd22959fae2e24c83a93f10cd4ef80cd376ec132bec8e2abde624
+        summary: 'contract: 4 under-declared'
+        severity: contract
+        provenance:
+          event: risk.floor-assessed
+          items:
+          - tests/unit/test_demo.py is outside every path the plan declared
+          - tests/unit/test_golden_cases.py is outside every path the plan declared
+          - tests/unit/test_intent_boundary.py is outside every path the plan declared
+          - tests/unit/test_rendering.py is outside every path the plan declared
+        condition: unhandled
+        handled_by: null
+      - id: X-29
+        kind: attempt-failed
+        seq: 29
+        event_sha256: 67216f62e6d7e7547eed620a6b7bc126ab0c5958eac7261a1ffb19c7b82ef4ef
+        summary: 'attempt 4 (contract) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: contract
+          attempt: 4
+        condition: unhandled
+        handled_by: null
+      - id: X-38
+        kind: scope-under-declared
+        seq: 38
+        event_sha256: 30530272a663ecefade30f9811fefd43f87054934b8f1a0160645d19b1031b94
+        summary: 'contract: 4 under-declared'
+        severity: contract
+        provenance:
+          event: risk.floor-assessed
+          items:
+          - tests/unit/test_demo.py is outside every path the plan declared
+          - tests/unit/test_golden_cases.py is outside every path the plan declared
+          - tests/unit/test_intent_boundary.py is outside every path the plan declared
+          - tests/unit/test_rendering.py is outside every path the plan declared
+        condition: unhandled
+        handled_by: null
+      - id: X-42
+        kind: attempt-failed
+        seq: 42
+        event_sha256: d943f8f0afc62d87ac80a85e67c64f640ab1596c88d14d53e2091f2bee3187ff
+        summary: 'attempt 6 (contract-adequacy) failed: harness_error'
+        severity: harness_error
+        provenance:
+          event: attempt.closed
+          role: contract-adequacy
+          attempt: 6
+        condition: unhandled
+        handled_by: null
+      - id: X-46
+        kind: adequacy-finding
+        seq: 46
+        event_sha256: bad7a2786240993b6aa679ce38b65e4f800a87e9492129891d5afaeb7508520d
+        summary: contract adequacy review CA1 did not pass
+        severity: null
+        provenance:
+          event: contract.adequacy-reviewed
+          contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+        condition: handled
+        handled_by: human contract approval (event 48)
+      - id: X-51
+        kind: behaviour-alternative
+        seq: 51
+        event_sha256: dc9958cabf3e9a03ee915ad100cb57154da57717d9e52e065eeca51788e56c76
+        summary: no check showed the requested change at the base
+        severity: null
+        provenance:
+          event: contract.behaviour-alternative-recorded
+          contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+        condition: handled
+        handled_by: its own human confirmation
+      - id: X-90.1
+        kind: semantic-finding
+        seq: 90
+        event_sha256: 3347149fabf8b5679cce757df75c917c13689f6374324336df5cc9a2fe53f123
+        summary: semantic finding SF-1
+        severity: null
+        provenance:
+          event: verification.semantic-recorded
+          finding: SF-1
+        condition: handled
+        handled_by: finding disposition SF-1 (event 93)
+      risk_floor:
+        section: risk_floor
+        version: 1
+        sha256: f4eac0df6ff7caef532f69960aeccee8abc500a7b8be8cf897d2fc18d33be741
+        approval_sha256: 86936548040dde5d9706740480dd70ec50f75339609aee6abdbbd28af5fc641a
+        confirmed_by: shane
+      checkpoint_floor:
+        stage: checkpoint
+        floor: normal
+        known: true
+        unknown: []
+        under_declared: []
+        matches:
+          releases/_next/tests-never-write-usage-log.md:
+          - description-and-evidence
+          tests/conftest.py:
+          - description-and-evidence
+          tests/live/test_live_eval.py:
+          - description-and-evidence
+          tests/unit/test_agent_loop.py:
+          - description-and-evidence
+          tests/unit/test_live_tier.py:
+          - description-and-evidence
+          tests/unit/test_run_cli.py:
+          - description-and-evidence
+          tests/unit/test_usage_log_guard.py:
+          - description-and-evidence
+        implied: []
+        declared: []
+        assessed:
+        - releases/_next/tests-never-write-usage-log.md
+        - tests/conftest.py
+        - tests/live/test_live_eval.py
+        - tests/unit/test_agent_loop.py
+        - tests/unit/test_live_tier.py
+        - tests/unit/test_run_cli.py
+        - tests/unit/test_usage_log_guard.py
+  verified:
+    contract_version: 2
+    contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+    execution_cycle:
+      transition_event: 104
+      transition_sha256: 2a873c84272a57392c97ac8eef8e97af0e9ea231cf0e875e1789859715bd1b8e
+    candidate_sha256: 40761c739a556521ee5a880313431559ccfbef81a6dba2a97e2969a2fc715cb8
+    criteria:
+    - full-test-suite
+    - guard-module-passes
+    - guard-test-fails-on-base-tree
+    - live-tier-still-collects
+    - no-product-code-changed
+    - recording-tests-still-pass
+    - release-note-present-and-shaped
+    - usage-log-unchanged-by-suite
+    runs:
+    - V002
   commit_created: true
 acceptance:
   state: pending
