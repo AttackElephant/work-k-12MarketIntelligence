@@ -2240,7 +2240,7 @@ verification:
     carried_forward: []
   semantic_attempts: []
 effort:
-  controller_commands: 13
+  controller_commands: 14
   model_sessions_launched: 10
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
@@ -2521,9 +2521,30 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: open
+  status: remediating
   raised_at: '2026-10-07T22:43:59Z'
-  disposition: null
+  disposition:
+    kind: remediate
+    rationale: 'Remediate. The reviewer is right: the guard is installed by a session fixture after test
+      modules are imported, so a test that imports append_jsonl by name keeps the unguarded function and
+      could write to logs/usage/, which the request says must be stopped. No current test does this, but
+      the request covers any test, and the fix is small and inside the declared files (tests/conftest.py
+      and tests/unit/test_usage_log_guard.py).'
+    authorised_by: shane
+    at: '2026-10-07T22:47:02Z'
+    residual_risk: null
+    reference: null
+    author:
+      kind: model
+      name: claude-opus-5-5
+      provider: anthropic
+    authorisation:
+      kind: human-confirmation
+      decision_sha256: b49a2a7540d31f396790c3bbb9760e66ec0ce84138dc210fb46e467e88496188
+      evidence_sha256: d69d1f767d11cf0c63c95df0dd73acf5453a573f5b66f1f15abfd6ceab9ce8dc
+      confirmed_by: shane
+      label: human confirmation recorded; identity not independently enforced
+  dispositioned_at: '2026-10-07T22:47:02Z'
 improvements: []
 planning_review:
   rounds:
