@@ -3192,7 +3192,7 @@ verification:
       deadline_seconds: 600.0
       streaming: auto
 effort:
-  controller_commands: 20
+  controller_commands: 21
   model_sessions_launched: 14
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
@@ -3842,3 +3842,23 @@ contract_adequacy:
   passed: false
   artifact: reviews/001-contract-adequacy.json
   sha256: 62a1855cb9827f2760a8023cfa6e113a359306c9a2ea3b0281e335be819b6070
+write_back:
+- at: '2026-10-08T02:59:40Z'
+  choice: 'Write back C2 only: paid live smoke tests (pytest -m live) are tests under ADR-021, so they
+    record usage into a temporary directory and not into logs/usage/; their spend is not retained. The
+    live eval runner (python -m evals.live) is not a test and is unaffected: it reports cost in logs/eval/.
+    C1 is not written back: it concerns how the method''s dry run executes, not product behaviour.'
+  state: verified_sem
+  contract:
+    version: 2
+    sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+  author:
+    kind: model
+    name: claude-opus-5-5
+    provider: anthropic
+  authorisation:
+    kind: human-confirmation
+    decision_sha256: 3021645575e5eafadc10033ab83c7037cd6db39dc22cd4a5c813269c46cddf2f
+    evidence_sha256: f92baa28174681f5da32e45b84681ceb923a4fbea10bd98afd74304a2eafe0a5
+    confirmed_by: shane
+    label: human confirmation recorded; identity not independently enforced
