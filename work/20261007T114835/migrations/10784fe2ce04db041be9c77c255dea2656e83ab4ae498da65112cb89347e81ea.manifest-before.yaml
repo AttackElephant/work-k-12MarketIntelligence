@@ -2,14 +2,14 @@ id: 20261007T114835
 created: '2026-10-07T11:48:35Z'
 method:
   id: coding-harness
-  version: 0.24.0
-  commit: aba95c20d95f478c8b9d344aecf970a35b842580
-  bound_at: '2026-10-08T02:54:35Z'
-  bound_by: shane
-  release: &id001
+  version: 0.23.0
+  commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
+  bound_at: '2026-10-07T11:48:35Z'
+  bound_by: shane@Mimir.local
+  release:
     state: released
-    tag: coding-harness/v0.24.0
-    checkout_commit: aba95c20d95f478c8b9d344aecf970a35b842580
+    tag: coding-harness/v0.23.0
+    checkout_commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
   history:
   - commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
     version: 0.23.0
@@ -20,97 +20,6 @@ method:
       state: released
       tag: coding-harness/v0.23.0
       checkout_commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
-  - commit: aba95c20d95f478c8b9d344aecf970a35b842580
-    version: 0.24.0
-    bound_at: '2026-10-08T02:54:35Z'
-    bound_by: shane
-    operation: migrate.apply
-    migration_record_sha256: 10784fe2ce04db041be9c77c255dea2656e83ab4ae498da65112cb89347e81ea
-    record_path: migrations/10784fe2ce04db041be9c77c255dea2656e83ab4ae498da65112cb89347e81ea.json
-    previous_commit: 7d246d4e581326e13e97a5eb65a0b8952c9d0927
-    previous_version: 0.23.0
-    previous_schema: 0.9.0
-    schema: 0.9.0
-    reason: Move the item to coding-harness 0.24.0, which fixes the recheck schema defect (IDEA-164, IDEA-165)
-      that refused two passing rechecks of SF-1. Same major version; every evidence item is retained and
-      the item stays checkpointed.
-    authority: shane
-    author:
-      kind: model
-      name: claude-opus-5-5
-      provider: anthropic
-    authorisation:
-      confirmed_by: shane
-      decision_sha256: 457c213df294a6e8428989142ca359f578b861dbedde2b1e4cb554e91ad8849e
-      evidence_sha256: 0a29ce0e99ced0243296feb395811d3b5ae7671ecd208f3d8c668d9ebf5842a2
-      kind: human-confirmation
-      label: human confirmation recorded; identity not independently enforced
-    compatibility:
-      assessment: conditional
-      known: true
-      note: 'same MAJOR (0): the common rules apply'
-      pair:
-      - 0.23.0
-      - 0.24.0
-      plan_adoptions: []
-      relation: same-major
-      work_packages:
-        contract_version: 2
-        representation: implicit-single
-    dispositions:
-      decide: []
-      invalidate: []
-      regenerate: []
-      retain:
-      - attempts:1
-      - attempts:10
-      - attempts:11
-      - attempts:12
-      - attempts:13
-      - attempts:2
-      - attempts:3
-      - attempts:4
-      - attempts:5
-      - attempts:6
-      - attempts:7
-      - attempts:8
-      - attempts:9
-      - candidate:current
-      - checkpoints:1
-      - checkpoints:2
-      - concerns:C1
-      - concerns:C2
-      - continuations:C001
-      - contract:v1
-      - contract:v2
-      - declared_scope:current
-      - definitions:k-12Harness:docs/decisions.md
-      - definitions:k-12Harness:docs/reviews/2026-10-poc-review/01_orientation.md
-      - definitions:k-12Harness:docs/reviews/2026-10-poc-review/05_measurements.md
-      - deterministic_runs:V001
-      - deterministic_runs:V002
-      - findings:SF-1
-      - plan:A1
-      - request:A0
-      - risk:current
-      - semantic_reviews:S1
-    decisions:
-    - by: shane
-      disposition: retain
-      evidence: findings:SF-1
-    reference_exceptions: []
-    obligations: []
-    from_state: checkpointed
-    resulting_state: checkpointed
-    resume:
-    - --apply
-    - --confirm
-    - 10784fe2ce04db041be9c77c255dea2656e83ab4ae498da65112cb89347e81ea
-    event_seq: 129
-    event_sha256: 10f7696fd4996714a29e73e8227547bad4bb4f1bc55a80ac930054983358c146
-    transition_n: 14
-    status: applied
-    release: *id001
 artifact_schema_version: 0.9.0
 origin: null
 request: '# Request
@@ -1180,23 +1089,6 @@ transitions:
         - tests/unit/test_live_tier.py
         - tests/unit/test_run_cli.py
         - tests/unit/test_usage_log_guard.py
-- at: '2026-10-08T02:54:35Z'
-  transition: M1
-  event: migrate
-  from: checkpointed
-  to: checkpointed
-  by: shane
-  reason: Move the item to coding-harness 0.24.0, which fixes the recheck schema defect (IDEA-164, IDEA-165)
-    that refused two passing rechecks of SF-1. Same major version; every evidence item is retained and
-    the item stays checkpointed.
-  guards:
-  - guard: evidence_dispositions
-    evidence: retain=32, invalidate=0, regenerate=0, decide=0
-  - guard: resulting_state
-    evidence: every supporting evidence item is retained
-  migration_record_sha256: 10784fe2ce04db041be9c77c255dea2656e83ab4ae498da65112cb89347e81ea
-  event_seq: 129
-  obligations: []
 size_estimate:
   files: 7
   scale: small
@@ -3072,7 +2964,7 @@ verification:
       deadline_seconds: 600.0
       streaming: auto
 effort:
-  controller_commands: 19
+  controller_commands: 18
   model_sessions_launched: 13
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
