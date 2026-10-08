@@ -189,7 +189,7 @@ request: '# Request
   Any change to what the product records in normal use. Any change to the usage record format.'
 narrative: null
 class: null
-state: checkpointed
+state: verified_sem
 parent: null
 children: []
 transitions:
@@ -1197,6 +1197,24 @@ transitions:
   migration_record_sha256: 10784fe2ce04db041be9c77c255dea2656e83ab4ae498da65112cb89347e81ea
   event_seq: 129
   obligations: []
+- at: '2026-10-08T02:55:14Z'
+  transition: T11
+  event: review-ready
+  from: checkpointed
+  to: verified_sem
+  by: shane@Mimir.local
+  reason: semantic review is an obligation; semantic review outcome 'pass'; semantic review S2 binds contract
+    v2, candidate 69b8a2f2d33b and this execution cycle; no open migration obligations
+  reason_source: derived
+  guards:
+  - guard: obligations_include_semantic
+    evidence: semantic review is an obligation
+  - guard: semantic_review_recorded
+    evidence: semantic review outcome 'pass'
+  - guard: semantic_evidence_current
+    evidence: semantic review S2 binds contract v2, candidate 69b8a2f2d33b and this execution cycle
+  - guard: migration_obligations_satisfied
+    evidence: no open migration obligations
 size_estimate:
   files: 7
   scale: small
@@ -1801,6 +1819,15 @@ artifacts:
   sha256: 8b001f587b8175105ec192f05456988090093e3f3ddaa6c01a9e8dc0be36c8e6
   created_at: '2026-10-07T22:43:59Z'
   produced_by_attempt: 10
+- status: current
+  supersedes: null
+  id: A12
+  type: semantic_review
+  path: verification/002-semantic-review.json
+  version: 2
+  sha256: 2775e62d009d40e21e2230c99f998b782699ee4d911b3c63567d0d4ed318f411
+  created_at: '2026-10-08T02:55:12Z'
+  produced_by_attempt: 14
 attempts:
 - attempt: 1
   role: planner
@@ -2610,6 +2637,36 @@ attempts:
   context_bytes: 15332
   covers:
   - SF-1
+- attempt: 14
+  role: verifier
+  state: semantic-verification
+  status: closed
+  opened_at: '2026-10-08T02:54:55Z'
+  semantic_round: 2
+  semantic_kind: recheck
+  provider: openai
+  model: gpt-5.6-sol
+  transport: codex
+  selector: role:verifier
+  context_window: 400000
+  billing: subscription
+  model_class: frontier
+  last_verified: '2026-09-08'
+  timeout_seconds: 360.0
+  deadline_seconds: 600.0
+  streaming: auto
+  exit_code: 0
+  closed_at: '2026-10-08T02:55:12Z'
+  transport_attempts: 1
+  usage:
+    input_tokens: 17621
+    cached_input_tokens: 0
+    cache_write_input_tokens: 0
+    output_tokens: 224
+    reasoning_output_tokens: 53
+  context_bytes: 15332
+  covers:
+  - SF-1
 continuations:
 - id: C001
   path: continuation/C001/receipt.json
@@ -3016,6 +3073,69 @@ verification:
     findings:
     - SF-1
     carried_forward: []
+  - id: S2
+    at: '2026-10-08T02:55:12Z'
+    work_item: 20261007T114835
+    work_package: null
+    round: 2
+    kind: recheck
+    covers:
+    - SF-1
+    classification: pass
+    outcome: pass
+    binding:
+      contract_version: 2
+      contract_sha256: 80c1d934d7855a465978ba6ee201b493e04b0b0cca9969638a6c2f44ed5b5460
+      execution_cycle:
+        transition_event: 104
+        transition_sha256: 2a873c84272a57392c97ac8eef8e97af0e9ea231cf0e875e1789859715bd1b8e
+      candidate_sha256: 69b8a2f2d33bf61d31f4865d799f0a5f7d1820c81badf29bdcdc32997ba1c439
+      verified_candidate_sha256: 40761c739a556521ee5a880313431559ccfbef81a6dba2a97e2969a2fc715cb8
+      checkpoint_at: '2026-10-07T22:52:20Z'
+      checkpoint_commits:
+      - repo: work-store
+        commit: a1aaf09a0c1d4947a5ea896f779bdfec2221e4ec
+      - repo: k-12Harness
+        commit: 8b2d90387e49776a6d534c32105d36fb60da62de
+      work_package: null
+      request_sha256: 0635a9619faeccce450c54c42c5d073239af10b11b76591c2bad30d9191286e0
+    verifier:
+      provider: openai
+      model: gpt-5.6-sol
+      transport: codex
+      selector: role:verifier
+      context_window: 400000
+      billing: subscription
+      model_class: frontier
+      last_verified: '2026-09-08'
+      timeout_seconds: 360.0
+      deadline_seconds: 600.0
+      streaming: auto
+      role: verifier
+      attempt: 14
+      independent_of_executor: true
+      independence_basis: a different provider/model from the executor
+      executor_route:
+        provider: anthropic
+        model: claude-sonnet-5-5
+        tier: T0
+        attempt: 11
+      independence_authorised_by: null
+    artifact: verification/002-semantic-review.json
+    artifact_id: A12
+    sha256: 2775e62d009d40e21e2230c99f998b782699ee4d911b3c63567d0d4ed318f411
+    summary: SF-1 is resolved. The guard is now installed during conftest import, before test-module collection,
+      and the added purpose-written test verifies that a module-level from-import cannot bypass it.
+    resolutions:
+      SF-1:
+        state: resolved
+        rationale: tests/conftest.py now calls _install_usage_log_guard() at import time and assigns the
+          guarded callable to _usage.append_jsonl before test modules are collected, while pytest_unconfigure
+          restores _ORIGINAL_APPEND_JSONL. tests/unit/test_usage_log_guard.py now captures append_jsonl
+          with a module-level from-import and proves that an unredirected call raises pytest.fail.Exception,
+          names REAL in the failure, and leaves the real directory snapshot unchanged.
+    findings: []
+    carried_forward: []
   semantic_attempts:
   - round: 2
     kind: recheck
@@ -3072,8 +3192,8 @@ verification:
       deadline_seconds: 600.0
       streaming: auto
 effort:
-  controller_commands: 19
-  model_sessions_launched: 13
+  controller_commands: 20
+  model_sessions_launched: 14
 checkpoints:
 - at: '2026-10-07T22:43:23Z'
   message: 'tests: stop the test suite writing to logs/usage/ (work item 20261007T114835)'
@@ -3610,7 +3730,7 @@ findings:
   work_package: null
   regression: false
   carried_into: null
-  status: remediating
+  status: dispositioned
   raised_at: '2026-10-07T22:43:59Z'
   disposition:
     kind: remediate
@@ -3634,6 +3754,14 @@ findings:
       confirmed_by: shane
       label: human confirmation recorded; identity not independently enforced
   dispositioned_at: '2026-10-07T22:47:02Z'
+  remediation:
+    round: 2
+    state: resolved
+    rationale: tests/conftest.py now calls _install_usage_log_guard() at import time and assigns the guarded
+      callable to _usage.append_jsonl before test modules are collected, while pytest_unconfigure restores
+      _ORIGINAL_APPEND_JSONL. tests/unit/test_usage_log_guard.py now captures append_jsonl with a module-level
+      from-import and proves that an unredirected call raises pytest.fail.Exception, names REAL in the
+      failure, and leaves the real directory snapshot unchanged.
 improvements: []
 planning_review:
   rounds:

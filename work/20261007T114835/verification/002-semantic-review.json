@@ -1,0 +1,17 @@
+{
+  "classification": "pass",
+  "covers": [
+    "SF-1"
+  ],
+  "findings": [],
+  "kind": "recheck",
+  "resolutions": {
+    "SF-1": {
+      "rationale": "tests/conftest.py now calls _install_usage_log_guard() at import time and assigns the guarded callable to _usage.append_jsonl before test modules are collected, while pytest_unconfigure restores _ORIGINAL_APPEND_JSONL. tests/unit/test_usage_log_guard.py now captures append_jsonl with a module-level from-import and proves that an unredirected call raises pytest.fail.Exception, names REAL in the failure, and leaves the real directory snapshot unchanged.",
+      "state": "resolved"
+    }
+  },
+  "review": "S2",
+  "round": 2,
+  "summary": "SF-1 is resolved. The guard is now installed during conftest import, before test-module collection, and the added purpose-written test verifies that a module-level from-import cannot bypass it."
+}
